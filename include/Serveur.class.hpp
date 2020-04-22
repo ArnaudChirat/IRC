@@ -4,12 +4,7 @@
 #include <string>
 #include <forward_list>
 #include <netinet/in.h>
-
-struct Socket
-{
-	int sckt;
-	sockaddr_in addr;
-};
+#include "Utility.hpp"
 
 class Serveur
 {
