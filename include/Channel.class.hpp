@@ -1,7 +1,7 @@
 #ifndef CHANNEL_CLASS_HPP
 #define CHANNEL_CLASS_HPP
-#include <forward_list>
-#include "Utility.hpp"
+#include <list>
+#include "Client.class.hpp"
 #include <string>
 
 #define STANDART 0
@@ -10,16 +10,19 @@
 class Channel
 {
 public:
-
     Channel(void);
     // Channel(** replace parameters **);
     Channel(Channel const &instance);
     Channel &operator=(Channel const &rhs);
     ~Channel(void);
-    void addClient(Socket const &client);
-    void removeClient(Socket const &client);
+    void addClient(Client const &client);
+    void removeClient(Client const &client);
     Channel &setName(std::string const &name);
     std::string getName() const;
+    void sendMessage(std::string &message);
+    void recvMessage(std::string &message);
+    void setClientPrivilege(unsigned int privilige);
+    void getClientPrivilege(Client const &client) const;
 
 private:
     // TODO state pattern à implementer
@@ -27,28 +30,27 @@ private:
     unsigned int _type;
     unsigned int _modes;
     std::string _name;
-    std::forward_list<Socket> _clients;
+    std::list<Client> _clients;
 };
 
-namespace ChannelUtility {
-    enum Mode {
-        ANONYMOUS = 1,
-        INVITE_ONLY = 1 << 1,
-        MODERATED = 1 << 2,
-        NO_MESSAGE = 1 << 3,
-        QUIET = 1 << 4,
-        PRIVATE = 1 << 5,
-        SECRET = 1 << 6,
-        REOP = 1 << 7,
-        TOPIC = 1 << 8,
-        KEY = 1 << 9,
-        USER_LIMIT = 1 << 10,
-        BAN_MASK = 1 << 11,
-        EXCEPTION_MASK = 1 << 12,
-        INVITATION_MASK = 1 << 13
-    };
-}
- 
+enum ChannelMode
+{
+    ANONYMOUS = 1,
+    INVITE_ONLY = 1 << 1,
+    MODERATED = 1 << 2,
+    NO_MESSAGE = 1 << 3,
+    QUIET = 1 << 4,
+    PRIVATE = 1 << 5,
+    SECRET = 1 << 6,
+    REOP = 1 << 7,
+    TOPIC = 1 << 8,
+    KEY = 1 << 9,
+    USER_LIMIT = 1 << 10,
+    BAN_MASK = 1 << 11,
+    EXCEPTION_MASK = 1 << 12,
+    INVITATION_MASK = 1 << 13
+};
+
 
 
 #endif
