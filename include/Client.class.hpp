@@ -9,6 +9,7 @@ class Client
 		Client(Client const &instance);
 		Client &operator=(Client const &rhs);
 		~Client(void);
+        void recvMessage(std::string message);
 
 	private:
         std::string _name;

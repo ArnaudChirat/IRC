@@ -20,9 +20,10 @@ public:
     Channel &setName(std::string const &name);
     std::string getName() const;
     void sendMessage(std::string &message);
-    void recvMessage(std::string &message);
     void setClientPrivilege(unsigned int privilige);
     void getClientPrivilege(Client const &client) const;
+    void setMode(unsigned int mode);
+    void getMode() const;
 
 private:
     // TODO state pattern à implementer
