@@ -1,13 +1,15 @@
 
 #include "Serveur.class.hpp"
+#include "SocketManager.class.hpp"
 #include <exception>
 #include <iostream>
 int         main() {
 
     try
     {
-        Serveur serveur;
-        serveur.launchServeur(6667);
+        Serveur serveur(6667);
+        SocketManager manager(&serveur);
+        manager.route();
     }
     catch(const std::exception& e)
     {

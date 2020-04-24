@@ -2,29 +2,23 @@
 #define SERVEUR_HPP
 #include <sys/socket.h>
 #include <string>
-#include <forward_list>
+#include <list>
 #include <netinet/in.h>
 #include "Utility.hpp"
-
-class Serveur
+#include "Socket.class.hpp"
+#include "Client.class.hpp"
+class Serveur : public Socket
 {
 public:
-	Serveur(void);
-	Serveur(Serveur const &instance);
-	Serveur &operator=(Serveur const &rhs);
-	virtual ~Serveur(void);
-	void launchServeur(unsigned short port);
-
+	Serveur(unsigned short port);
+	Serveur(Serveur const &instance) = delete;
+	Serveur &operator=(Serveur const &rhs) = delete;
+	~Serveur(void);
+	Client *acceptNewClient();
 private:
-	std::forward_list<Socket> _sockets;
-	int _serveur_socket;
-	fd_set _readfds, _writefds, _errorfds;
-	int _max_fd;
-	void setFdSet();
-	std::string getAddress(const sockaddr_in &addr) const;
-	void acceptNewClient();
-	void createServeur(unsigned short port);
-	bool clientSocket(const std::string &socket_address, const int socket_port, std::forward_list<Socket>::iterator it) const;
+	Serveur(void);
+	// void recvMessage() const;
+	// void dispatchMessageToChannel();
+	// void sendMessageToClient();
 };
-
 #endif
