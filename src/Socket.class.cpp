@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <arpa/inet.h>
+#include <sys/types.h>
 
 Socket::Socket(void) : _socket(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)),
                        _addr()

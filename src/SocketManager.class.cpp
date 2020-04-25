@@ -5,6 +5,7 @@
 #include <cerrno>
 #include <stdexcept>
 #include <iostream>
+#include <unistd.h>
 SocketManager::SocketManager(void)
 {
     return;
@@ -12,6 +13,9 @@ SocketManager::SocketManager(void)
 
 SocketManager::SocketManager(Socket *serveur)
 {
+    sockaddr_in  std_addr;
+    Socket *std_in = new Socket(STDIN_FILENO, std_addr);
+    this->addSocket(std_in);
     this->addSocket(serveur);
     return;
 }
@@ -58,7 +62,6 @@ void SocketManager::route()
                 const std::string socket_address = (*it)->getAddr();
                 const unsigned short socket_port = ntohs((*it)->getPort());
                 const int sckt = (*it)->getSocket();
-
                 bool has_error = false;
                 if (FD_ISSET(sckt, &_errorfds))
                 {
@@ -67,10 +70,15 @@ void SocketManager::route()
                 }
                 else if (FD_ISSET(sckt, &_readfds))
                 {
-                    if(Serveur *serveur = dynamic_cast<Serveur*>(*it))
+                    if (Serveur *serveur = dynamic_cast<Serveur *>(*it))
                         this->addSocket(serveur->acceptNewClient());
-                    if(Client *client = dynamic_cast<Client*>(*it))
+                    if (Client *client = dynamic_cast<Client *>(*it))
                         has_error = client->recvMessage();
+                    if (sckt == STDIN_FILENO) {
+                        std::string in;
+                        std::getline(std::cin, in);
+                        std::cout << in << std::endl;
+                    }
                 }
                 if (has_error)
                 {
