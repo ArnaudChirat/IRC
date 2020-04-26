@@ -51,3 +51,7 @@ Client *Serveur::acceptNewClient()
 }
 
 
+void Serveur::handle(SocketManagerInterface &dispatcher)
+{
+    dispatcher.dispatch(*this);
+}

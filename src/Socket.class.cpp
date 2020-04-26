@@ -50,7 +50,19 @@ Socket &Socket::setAddr(sockaddr_in const &addr)
     return (*this);
 }
 
-unsigned int    Socket::getPort() const
+unsigned int Socket::getPort() const
 {
     return ntohs(this->_addr.sin_port);
+}
+
+void Socket::readStdin()
+{
+    std::string in;
+    std::getline(std::cin, in);
+    std::cout << in << std::endl;
+}
+
+void Socket::handle(SocketManagerInterface &dispatcher)
+{
+    dispatcher.dispatch(*this);
 }

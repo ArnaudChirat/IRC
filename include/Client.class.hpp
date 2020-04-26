@@ -1,8 +1,8 @@
 #ifndef CLIENT_CLASS_HPP
 #define CLIENT_CLASS_HPP
 #include <string>
-#include "Socket.class.hpp"
 #include <netinet/in.h>
+#include "Socket.class.hpp"
 class Client : public Socket
 {
 public:
@@ -11,6 +11,7 @@ public:
     Client &operator=(Client const &rhs);
     ~Client(void);
     bool recvMessage();
+	void handle(SocketManagerInterface &dispatcher);
 
 private:
     Client(void);

@@ -13,7 +13,7 @@ SocketManager::SocketManager(void)
 
 SocketManager::SocketManager(Socket *serveur)
 {
-    sockaddr_in  std_addr;
+    sockaddr_in std_addr;
     Socket *std_in = new Socket(STDIN_FILENO, std_addr);
     this->addSocket(std_in);
     this->addSocket(serveur);
@@ -62,25 +62,26 @@ void SocketManager::route()
                 const std::string socket_address = (*it)->getAddr();
                 const unsigned short socket_port = ntohs((*it)->getPort());
                 const int sckt = (*it)->getSocket();
-                bool has_error = false;
+                _hasError = false;
                 if (FD_ISSET(sckt, &_errorfds))
                 {
                     std::cout << "Erreur" << std::endl;
-                    has_error = true;
+                    _hasError = true;
                 }
                 else if (FD_ISSET(sckt, &_readfds))
                 {
-                    if (Serveur *serveur = dynamic_cast<Serveur *>(*it))
-                        this->addSocket(serveur->acceptNewClient());
-                    if (Client *client = dynamic_cast<Client *>(*it))
-                        has_error = client->recvMessage();
-                    if (sckt == STDIN_FILENO) {
-                        std::string in;
-                        std::getline(std::cin, in);
-                        std::cout << in << std::endl;
-                    }
+                    (*it)->handle(*this);
+                    // if (Serveur *serveur = dynamic_cast<Serveur *>(*it))
+                    //     this->addSocket(serveur->acceptNewClient());
+                    // if (Client *client = dynamic_cast<Client *>(*it))
+                    //     has_error = client->recvMessage();
+                    // if (sckt == STDIN_FILENO) {
+                    //     std::string in;
+                    //     std::getline(std::cin, in);
+                    //     std::cout << in << std::endl;
+                    // }
                 }
-                if (has_error)
+                if (_hasError)
                 {
                     std::cout << "Deconnexion de [" << socket_address << ":" << socket_port << "]" << std::endl;
                     this->_sockets.erase(it);
@@ -90,3 +91,16 @@ void SocketManager::route()
         }
     }
 }
+
+void SocketManager::dispatch(Serveur &serveur)
+{
+    this->addSocket(serveur.acceptNewClient());
+}
+void SocketManager::dispatch(Client &client)
+{
+    _hasError = client.recvMessage();
+}
+void SocketManager::dispatch(Socket &socket)
+{
+    socket.readStdin();
+};

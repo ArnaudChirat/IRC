@@ -43,3 +43,8 @@ bool Client::recvMessage() {
     }
     return (false);
 }
+
+void Client::handle(SocketManagerInterface &dispatcher)
+{
+    dispatcher.dispatch(*this);
+}
