@@ -1,4 +1,5 @@
 #include "Client.class.hpp"
+#include "IRCMessage.class.hpp"
 #include <iostream>
 Client::Client(void)
 {
@@ -31,6 +32,8 @@ bool Client::recvMessage() {
     else
     {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
+        std::string message(buffer);
+        IRCMessage IRCMessage(message);
         // if (FD_ISSET(it->sckt, &writefds))
         // {
         //     ret = send(it->sckt, buffer, ret, 0);
