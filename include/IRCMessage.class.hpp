@@ -2,7 +2,8 @@
 #define IRCIRCMessage_CLASS_HPP
 #include <string>
 #include <vector>
-// La représentation BNF de ceci est :
+#include <unordered_map>
+// Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
 // command    =  1*letter / 3digit
@@ -51,40 +52,6 @@
 // hexdigit   =  digit / "A" / "B" / "C" / "D" / "E" / "F"
 // special    =  %x5B-60 / %x7B-7D
 //                 ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
-class IRCMessage
-{
-public:
-    static const std::string special;
-    static const std::string shortname;
-    static const std::string hostname;
-    static const std::string hostaddr;
-    static const std::string host;
-    static const std::string nickname;
-    static const std::string user;
-    static const std::string prefix;
-    static const std::string message;
-    IRCMessage(std::string &message);
-    // IRCMessage(IRCMessage const &instance);
-    // IRCMessage &operator=(IRCMessage const &rhs);
-    ~IRCMessage(void);
-    void splitIRCMessage(std::string &message);
-    IRCMessage &setPrefix(std::string const &prefix);
-    IRCMessage &setCommand(std::string const &command);
-    IRCMessage &setParameters(std::string const &paramaters);
-    IRCMessage &setTrail(std::string const &trail);
-
-    // std::string getPrefix() const;
-    // std::string getCommand() const;
-    // const std::vector<std::string> &getParameters() const;
-
-private:
-    IRCMessage(void);
-    std::string _prefix;
-    std::string _command;
-    std::vector<std::string> _paramaters;
-    std::string _trail;
-    unsigned int _type;
-};
 
 enum IRCMessageType
 {
@@ -137,5 +104,50 @@ enum IRCMessageType
     IRCMessage_TYPE_MASK = 0XFF00,
     IRCMessage_DETAIL_MASK = 0X00FF,
 };
+class IRCMessage
+{
+public:
+    IRCMessage(std::string &message);
+    // IRCMessage(IRCMessage const &instance);
+    // IRCMessage &operator=(IRCMessage const &rhs);
+    ~IRCMessage(void);
+    void splitIRCMessage(std::string &message);
+    IRCMessage &setPrefix(std::string const &prefix);
+    IRCMessage &setCommand(std::string const &command);
+    IRCMessage &setParameters(std::string const &paramaters);
+    IRCMessage &setTrail(std::string const &trail);
+
+    std::string getMessage() const;
+    // std::string getPrefix() const;
+    // std::string getCommand() const;
+    // std::string getTrail() const;
+    // const std::vector<std::string> &getParameters() const;
+
+    static const std::string special;
+    static const std::string shortname;
+    static const std::string hostname;
+    static const std::string hostaddr;
+    static const std::string host;
+    static const std::string nickname;
+    static const std::string user;
+    static const std::string prefix;
+    static const std::string message;
+    static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
+private:
+    IRCMessage(void);
+    std::string _prefix;
+    std::string _command;
+    std::vector<std::string> _paramaters;
+    std::string _trail;
+    unsigned int _type;
+};
+
+
+std::ostream& operator<<(std::ostream& os, const IRCMessage &message);
+
+
+
+
+
 
 #endif
