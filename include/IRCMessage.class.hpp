@@ -133,6 +133,7 @@ public:
     static const std::string prefix;
     static const std::string message;
     static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
+
 private:
     IRCMessage(void);
     std::string _prefix;
@@ -142,12 +143,6 @@ private:
     unsigned int _type;
 };
 
-
-std::ostream& operator<<(std::ostream& os, const IRCMessage &message);
-
-
-
-
-
+std::ostream &operator<<(std::ostream &os, const IRCMessage &message);
 
 #endif
