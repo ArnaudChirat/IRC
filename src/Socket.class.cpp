@@ -57,7 +57,7 @@ unsigned int Socket::getPort() const
 
 void Socket::readStdin()
 {
-    std::string in;
+std::string in;
     std::getline(std::cin, in);
     std::cout << in << std::endl;
 }

@@ -33,6 +33,8 @@ bool Client::recvMessage() {
     {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
         std::string message(buffer);
+        //Todo couper les buffers par CR
+        message.erase(message.end() - 1);
         IRCMessage IRCMessage(message);
         // if (FD_ISSET(it->sckt, &writefds))
         // {

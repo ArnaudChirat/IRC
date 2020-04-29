@@ -54,14 +54,24 @@
 class IRCMessage
 {
 public:
+    static const std::string special;
+    static const std::string shortname;
+    static const std::string hostname;
+    static const std::string hostaddr;
+    static const std::string host;
+    static const std::string nickname;
+    static const std::string user;
+    static const std::string prefix;
+    static const std::string message;
     IRCMessage(std::string &message);
     // IRCMessage(IRCMessage const &instance);
     // IRCMessage &operator=(IRCMessage const &rhs);
     ~IRCMessage(void);
     void splitIRCMessage(std::string &message);
-    IRCMessage &setPrefix(std::string &prefix);
-    // IRCMessage &setCommand(std::string &command);
-    // IRCMessage &setParameters(std::string &paramaters);
+    IRCMessage &setPrefix(std::string const &prefix);
+    IRCMessage &setCommand(std::string const &command);
+    IRCMessage &setParameters(std::string const &paramaters);
+    IRCMessage &setTrail(std::string const &trail);
 
     // std::string getPrefix() const;
     // std::string getCommand() const;
@@ -72,6 +82,7 @@ private:
     std::string _prefix;
     std::string _command;
     std::vector<std::string> _paramaters;
+    std::string _trail;
     unsigned int _type;
 };
 

@@ -18,6 +18,7 @@ Serveur::Serveur(void)
 Serveur::Serveur(unsigned short port)
 {
     int sck = this->getSocket();
+    int option = 1;
     sockaddr_in server;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_family = AF_INET;
@@ -27,7 +28,9 @@ Serveur::Serveur(unsigned short port)
         throw std::runtime_error(std::strerror(errno));
     if (listen(sck, SOMAXCONN) == -1)
         throw std::runtime_error(std::strerror(errno));
-}
+    if (setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
+        throw std::runtime_error(std::strerror(errno));
+}   
 
 Serveur::~Serveur(void)
 {
