@@ -40,6 +40,8 @@ void Socket::checkSocket() const
 
 std::string Socket::getAddr() const
 {
+    if (this->getPort() == 0)
+        return "NONE";
     char buff[INET6_ADDRSTRLEN];
     return inet_ntop(this->_addr.sin_family, &(this->_addr.sin_addr), buff, INET6_ADDRSTRLEN);
 }

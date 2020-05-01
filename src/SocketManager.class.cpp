@@ -11,12 +11,12 @@ SocketManager::SocketManager(void)
     return;
 }
 
-SocketManager::SocketManager(Socket *serveur)
+SocketManager::SocketManager(Serveur &serveur, Socket &std_in)
 {
-    sockaddr_in std_addr;
-    Socket *std_in = new Socket(STDIN_FILENO, std_addr);
-    this->addSocket(std_in);
-    this->addSocket(serveur);
+    // sockaddr_in std_addr;
+    // Socket *std_in = new Socket(STDIN_FILENO, std_addr);
+    this->addSocket(&std_in);
+    this->addSocket(&serveur);
     return;
 }
 
@@ -59,8 +59,9 @@ void SocketManager::route()
             auto it = this->_sockets.begin();
             while (it != this->_sockets.end())
             {
+                
                 const std::string socket_address = (*it)->getAddr();
-                const unsigned short socket_port = ntohs((*it)->getPort());
+                const unsigned short socket_port = (*it)->getPort();
                 const int sckt = (*it)->getSocket();
                 _hasError = false;
                 if (FD_ISSET(sckt, &_errorfds))
@@ -71,15 +72,6 @@ void SocketManager::route()
                 else if (FD_ISSET(sckt, &_readfds))
                 {
                     (*it)->handle(*this);
-                    // if (Serveur *serveur = dynamic_cast<Serveur *>(*it))
-                    //     this->addSocket(serveur->acceptNewClient());
-                    // if (Client *client = dynamic_cast<Client *>(*it))
-                    //     has_error = client->recvMessage();
-                    // if (sckt == STDIN_FILENO) {
-                    //     std::string in;
-                    //     std::getline(std::cin, in);
-                    //     std::cout << in << std::endl;
-                    // }
                 }
                 if (_hasError)
                 {

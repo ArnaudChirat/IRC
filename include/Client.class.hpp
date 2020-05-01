@@ -3,6 +3,7 @@
 #include <string>
 #include <netinet/in.h>
 #include "Socket.class.hpp"
+#include "IClientState.class.hpp"
 class Client : public Socket
 {
 public:
@@ -12,10 +13,15 @@ public:
     ~Client(void);
     bool recvMessage();
 	void handle(SocketManagerInterface &dispatcher);
-
+    std::string getNick() const;
+    std::string getUser() const;
+    Client &setState(IClientState *state);
 private:
     Client(void);
+    IClientState *_state;
     unsigned int _privilege;
+    std::string _nick;
+    std::string _user;
 };
 
 enum ClientPrivilige

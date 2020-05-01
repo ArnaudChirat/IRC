@@ -8,8 +8,7 @@
 class SocketManager : public SocketManagerInterface
 {
 public:
-    SocketManager(void);
-    SocketManager(Socket *serveur);
+    SocketManager(Serveur &serveur, Socket &std_in);
     SocketManager(SocketManager const &instance) = delete;
     SocketManager &operator=(SocketManager const &rhs) = delete;
     virtual ~SocketManager(void);
@@ -18,8 +17,9 @@ public:
     void dispatch(Client &client);
     void dispatch(Socket &socket);
 private:
-    void addSocket(Socket *);
-    std::list<Socket *> _sockets;
+    SocketManager(void);
+    void addSocket(Socket *socket);
+    std::list<std::unique_ptr<Socket>> _sockets;
     fd_set _readfds, _writefds, _errorfds;
     int _max_fd;
     void setFdSet();
