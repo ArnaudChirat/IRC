@@ -47,7 +47,7 @@ Client *Serveur::acceptNewClient()
     {
         Client *newClient = new Client(newSocket, addr);
         std::cout << "Connexion de #" << newClient->getSocket() << " from " << newClient->getAddr().c_str() << ":" << newClient->getPort() << std::endl;
-        send(newSocket, "Tu es connecté\n", 16, 0);
+        // send(newSocket, "Tu es connecté\n", 16, 0);
         return newClient;
     }
     return (NULL);

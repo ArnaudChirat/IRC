@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Utility.hpp"
 #include "ClientConnecting.class.hpp"
+#include <time.h>
 Client::Client(void)
 {
     return;

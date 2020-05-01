@@ -16,6 +16,7 @@ public:
     std::string getNick() const;
     std::string getUser() const;
     Client &setState(IClientState *state);
+
 private:
     Client(void);
     IClientState *_state;
