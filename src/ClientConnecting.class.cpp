@@ -4,6 +4,7 @@
 ClientConnecting::ClientConnecting(Client *context) : _context(context)
 {
     std::cout << "Doit me connecte (User et Nick commande)" << std::endl;
+    //TODO mettre aun timer avec thread
     return;
 }
 
