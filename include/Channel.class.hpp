@@ -3,7 +3,6 @@
 #include <list>
 #include "Client.class.hpp"
 #include <string>
-
 #define STANDART 0
 #define SAFE 1
 
@@ -15,11 +14,8 @@ public:
     Channel(Channel const &instance);
     Channel &operator=(Channel const &rhs);
     ~Channel(void);
-    void addClient(Client const &client);
-    void removeClient(Client const &client);
-    Channel &setName(std::string const &name);
-    std::string getName() const;
-    void sendMessage(std::string &message);
+    void addClient(Communicator *client);
+    void removeClient(Communicator const &client);
     void setClientPrivilege(unsigned int privilige);
     void getClientPrivilege(Client const &client) const;
     void setMode(unsigned int mode);
@@ -30,7 +26,6 @@ private:
     // Statut *statut;
     unsigned int _type;
     unsigned int _modes;
-    std::string _name;
     std::list<Client> _clients;
 };
 

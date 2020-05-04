@@ -1,19 +1,28 @@
 #ifndef CLIENT_CLASS_HPP
-# define CLIENT_CLASS_HPP
+#define CLIENT_CLASS_HPP
 #include <string>
-class Client
+#include <netinet/in.h>
+#include "Socket.class.hpp"
+#include "IClientState.class.hpp"
+class Client : public Socket
 {
-	public:
-		Client(void);
-		// Client(** replace parameters **);
-		Client(Client const &instance);
-		Client &operator=(Client const &rhs);
-		~Client(void);
-        void recvMessage(std::string message);
+public:
+    Client(int const socket, sockaddr_in const &addr);
+    Client(Client const &instance);
+    Client &operator=(Client const &rhs);
+    ~Client(void);
+    bool recvMessage();
+	void handle(SocketManagerInterface &dispatcher);
+    std::string getNick() const;
+    std::string getUser() const;
+    Client &setState(IClientState *state);
 
-	private:
-        std::string _name;
-        unsigned int _privilege;
+private:
+    Client(void);
+    IClientState *_state;
+    unsigned int _privilege;
+    std::string _nick;
+    std::string _user;
 };
 
 enum ClientPrivilige

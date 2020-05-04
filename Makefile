@@ -4,7 +4,7 @@ CFLAGS= -Wall -Wextra -Werror -std=c++11 -Iinclude/
 LDFLAGS=
 EXEC=server
 VPATH = src
-SRC=main.cpp Serveur.class.cpp Utility.cpp
+SRC=main.cpp Serveur.class.cpp Utility.cpp Client.class.cpp Socket.class.cpp SocketManager.class.cpp IRCMessage.class.cpp ClientConnecting.class.cpp ClientConnected.class.cpp
 OBJ=$(addprefix obj_irc/, $(SRC:.cpp=.o))
 
 all: $(EXEC)

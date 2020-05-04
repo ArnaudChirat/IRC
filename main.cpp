@@ -1,19 +1,24 @@
 
 #include "Serveur.class.hpp"
+#include "SocketManager.class.hpp"
 #include <exception>
 #include <iostream>
-int         main() {
+#include <unistd.h>
+int main()
+{
 
     try
     {
-        Serveur serveur;
-        serveur.launchServeur(6667);
+        Serveur serveur(6667);
+        sockaddr_in std_addr;
+        Socket std_in(STDIN_FILENO, std_addr);
+        SocketManager manager(serveur, std_in);
+        manager.route();
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }
-    
 
     return (0);
 }
