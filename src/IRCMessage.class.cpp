@@ -10,7 +10,7 @@ const std::string IRCMessage::shortname("(?:[[:alnum:]][[:alnum:]-]*[[:alnum:]]*
 const std::string IRCMessage::hostname("(" + shortname + "(?:\\." + shortname + ")*" + ")");
 const std::string IRCMessage::hostaddr("((?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?:\\d{1,3}\\.){3}\\d{1,3})");
 const std::string IRCMessage::host("(?:" + hostaddr + "|" + hostname + ")");
-const std::string IRCMessage::nickname("([[:alpha:]" + special + "][[:alnum:]-" + special + "]{1,8})");
+const std::string IRCMessage::nickname("([[:alpha:]" + special + "][[:alnum:]-" + special + "]{0,8})");
 const std::string IRCMessage::user("([^\\x00\\x0A\\x0D\\x20\\x40]+)");
 const std::string IRCMessage::prefix("^:(" + nickname + "(?:(?:!" + user + ")?@" + host + "?)|(?:" + hostname + "))");
 const std::string IRCMessage::message("^\\s*(:[^ \n:]* )?([A-Za-z0-9]*)([^\n:]*)?(:.*)?");
@@ -46,7 +46,7 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     if (res != IRCMessage::IRCCommands.end())
     {
         this->_command = res->first;
-        this->_type = res->second;
+        this->type = res->second;
     }
     return (*this);
 }
@@ -103,3 +103,7 @@ void IRCMessage::splitIRCMessage(std::string &message)
     if (res)
         setPrefix(cm[1]).setCommand(cm[2]).setParameters(cm[3]).setTrail(cm[4]);
 }
+
+const std::vector<std::string> &IRCMessage::getParameters() const {
+    return (this->_paramaters);
+};

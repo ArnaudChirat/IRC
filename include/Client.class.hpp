@@ -15,6 +15,8 @@ public:
 	void handle(SocketManagerInterface &dispatcher);
     std::string getNick() const;
     std::string getUser() const;
+    Client &setUser(std::string const &user);
+    Client &setNick(std::string const &nick);
     Client &setState(IClientState *state);
 
 private:

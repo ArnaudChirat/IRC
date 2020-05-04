@@ -9,7 +9,7 @@ class ClientConnected : public IClientState
 		// ClientConnected(ClientConnected const &instance);
 		// ClientConnected &operator=(ClientConnected const &rhs);
 		~ClientConnected(void);
-        void handle();
+        void handle(IRCMessage const &message);
 	private:
 		ClientConnected(void);
         Client *_context;

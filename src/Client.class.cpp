@@ -4,6 +4,7 @@
 #include "Utility.hpp"
 #include "ClientConnecting.class.hpp"
 #include <time.h>
+#include <regex>
 Client::Client(void)
 {
     return;
@@ -41,7 +42,7 @@ bool Client::recvMessage() {
         message.erase(message.size() - 1);
         IRCMessage IRCMessage(message);
         std::cout << IRCMessage << std::endl;
-        this->_state->handle();
+        this->_state->handle(IRCMessage);
     }
     return (false);
 }
@@ -62,5 +63,22 @@ std::string Client::getUser() const {
 Client &Client::setState(IClientState *state)
 {
     this->_state = state;
+    return (*this);
+}
+
+Client &Client::setUser(std::string const &user)
+{
+    std::regex e (IRCMessage::user.c_str());
+    if (std::regex_match(user, e))
+        this->_user = user;
+    return (*this);
+}
+
+Client &Client::setNick(std::string const &nick)
+{
+    //todo set error in nick
+    std::regex e (IRCMessage::nickname.c_str());
+    if (std::regex_match(nick, e))
+        this->_nick = nick;
     return (*this);
 }

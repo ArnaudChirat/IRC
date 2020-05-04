@@ -12,7 +12,8 @@ ClientConnected::~ClientConnected(void)
     return;
 }
 
-void ClientConnected::handle()
+void ClientConnected::handle(IRCMessage const &message)
 {
+    (void)message;
     std::cout << "Handle du conecté" << std::endl;
 }

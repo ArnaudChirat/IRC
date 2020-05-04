@@ -121,7 +121,7 @@ public:
     // std::string getPrefix() const;
     // std::string getCommand() const;
     // std::string getTrail() const;
-    // const std::vector<std::string> &getParameters() const;
+    const std::vector<std::string> &getParameters() const;
 
     static const std::string special;
     static const std::string shortname;
@@ -133,14 +133,13 @@ public:
     static const std::string prefix;
     static const std::string message;
     static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
-
+    unsigned int type;
 private:
     IRCMessage(void);
     std::string _prefix;
     std::string _command;
     std::vector<std::string> _paramaters;
     std::string _trail;
-    unsigned int _type;
 };
 
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message);

@@ -13,10 +13,17 @@ ClientConnecting::~ClientConnecting(void)
     return;
 }
 
-void ClientConnecting::handle()
+void ClientConnecting::handle(IRCMessage const &message)
 {
-    if (!this->_context->getNick().empty() && !this->_context->getUser().empty())
+    if (!this->_context->getNick().empty() && !this->_context->getUser().empty()) {
+        //TODO envoyer message quand connecte
         this->_context->setState(new ClientConnected(this->_context));
-    else
+    }
+    else {
         std::cout << "je suis toujours entrain d'etre connecté" << std::endl;
+        if (message.type == IRCMessageType::NICK)
+            this->_context->setNick(message.getParameters()[0]);
+        if (message.type == IRCMessageType::USER)
+            this->_context->setUser(message.getParameters()[0]);
+    }
 }
