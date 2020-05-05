@@ -143,5 +143,5 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message);
-
+std::ostream &operator<<(std::ostream &os, const IRCMessageType &type);
 #endif

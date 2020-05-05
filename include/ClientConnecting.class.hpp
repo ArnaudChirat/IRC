@@ -2,6 +2,7 @@
 # define CLIENTCONNECTING_CLASS_HPP
 #include "IClientState.class.hpp"
 #include "Client.class.hpp"
+#include <stack>
 class ClientConnecting : public IClientState
 {
 	public:
@@ -13,6 +14,7 @@ class ClientConnecting : public IClientState
 	private:
 		ClientConnecting(void);
         Client *_context;
+        std::stack<IRCMessageType> _ConnectingCommands;
 };
 
 #endif
