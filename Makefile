@@ -1,6 +1,6 @@
 
 CC=clang++
-CFLAGS= -Wall -Wextra -Werror -std=c++11 -Iinclude/
+CFLAGS= -Wall -Wextra -Werror -std=c++11 -g -Iinclude/
 LDFLAGS=
 EXEC=server
 VPATH = src

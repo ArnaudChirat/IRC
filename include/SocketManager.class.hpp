@@ -2,6 +2,7 @@
 #define SOCKETMANAGER_CLASS_HPP
 #include <list>
 #include <sys/socket.h>
+#include <memory>
 #include "Socket.class.hpp"
 #include "Client.class.hpp"
 #include "Serveur.class.hpp"
@@ -21,6 +22,7 @@ private:
     void addSocket(Socket *socket);
     std::list<std::unique_ptr<Socket>> _sockets;
     fd_set _readfds, _writefds, _errorfds;
+    bool _running;
     int _max_fd;
     void setFdSet();
     bool _hasError;
