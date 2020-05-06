@@ -4,7 +4,9 @@ CFLAGS= -Wall -Wextra -Werror -std=c++11 -g -Iinclude/
 LDFLAGS=
 EXEC=server
 VPATH = src
-SRC=main.cpp Serveur.class.cpp Utility.cpp Client.class.cpp Socket.class.cpp SocketManager.class.cpp IRCMessage.class.cpp ClientConnecting.class.cpp ClientConnected.class.cpp
+SRC=main.cpp SocketServeur.class.cpp Utility.cpp SocketClient.class.cpp\
+	Socket.class.cpp SocketManager.class.cpp IRCMessage.class.cpp\
+	MessageMediator.class.cpp Client.class.cpp User.class.cpp ClientFactory.class.cpp
 OBJ=$(addprefix obj_irc/, $(SRC:.cpp=.o))
 
 all: $(EXEC)
@@ -19,7 +21,7 @@ obj_irc/%.o: %.cpp
 .PHONY: clean fclean
 
 clean:
-	@rm -rf $(OBJ)
+	@rm -rf obj_irc
 	@rmdir obj_irc 2> /dev/null || true
 
 fclean: clean

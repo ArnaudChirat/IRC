@@ -1,6 +1,4 @@
 #include "SocketManager.class.hpp"
-#include "Serveur.class.hpp"
-#include "Client.class.hpp"
 #include <sys/select.h>
 #include <cerrno>
 #include <cstring>
@@ -12,7 +10,7 @@ SocketManager::SocketManager(void)
     return;
 }
 
-SocketManager::SocketManager(Serveur &serveur, Socket &std_in) : _running(true)
+SocketManager::SocketManager(SocketServeur &serveur, Socket &std_in) : _running(true)
 {
     // sockaddr_in std_addr;
     // Socket *std_in = new Socket(STDIN_FILENO, std_addr);
@@ -98,13 +96,13 @@ void SocketManager::route()
         close(socket->getSocket());
 }
 
-void SocketManager::dispatch(Serveur &serveur)
+void SocketManager::dispatch(SocketServeur &serveur)
 {
     this->addSocket(serveur.acceptNewClient());
 }
-void SocketManager::dispatch(Client &client)
+void SocketManager::dispatch(SocketClient &client)
 {
-    _hasError = client.recvMessage();
+    _hasError = client.recvMessage(this->_message_mediator);
 }
 void SocketManager::dispatch(Socket &socket)
 {

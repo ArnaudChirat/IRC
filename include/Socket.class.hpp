@@ -2,14 +2,14 @@
 #define SOCKET_CLASS_HPP
 #include <netinet/in.h>
 #include <string>
-class Serveur;
-class Client;
+class SocketServeur;
+class SocketClient;
 class Socket;
 class SocketManagerInterface
 {
 public:
-    virtual void dispatch(Serveur &serveur) = 0;
-    virtual void dispatch(Client &client) = 0;
+    virtual void dispatch(SocketServeur &serveur) = 0;
+    virtual void dispatch(SocketClient &client) = 0;
     virtual void dispatch(Socket &socket) = 0;
 };
 class Socket

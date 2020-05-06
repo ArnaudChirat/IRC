@@ -82,11 +82,7 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-std::ostream &operator<<(std::ostream &os, const IRCMessage &message)
-{
-    os << message.getMessage();
-    return os;
-}
+
 /*
 regex pattern split message :
 cm[0] = full message
@@ -107,3 +103,26 @@ void IRCMessage::splitIRCMessage(std::string &message)
 const std::vector<std::string> &IRCMessage::getParameters() const {
     return (this->_paramaters);
 };
+
+std::ostream &operator<<(std::ostream &os, const IRCMessage &message)
+{
+    os << message.getMessage();
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const IRCMessageType &type)
+{
+    switch (type)
+    {
+    case IRCMessageType::NICK:
+        os << "NICK COMMAND";
+        break;
+    case IRCMessageType::USER:
+        os << "USER COMMAND";
+        break;
+    default:
+        os << "UNKNOW";
+        break;
+    }
+    return os;
+}

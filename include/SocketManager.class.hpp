@@ -4,18 +4,19 @@
 #include <sys/socket.h>
 #include <memory>
 #include "Socket.class.hpp"
-#include "Client.class.hpp"
-#include "Serveur.class.hpp"
+#include "SocketClient.class.hpp"
+#include "SocketServeur.class.hpp"
+#include "MessageMediator.class.hpp"
 class SocketManager : public SocketManagerInterface
 {
 public:
-    SocketManager(Serveur &serveur, Socket &std_in);
+    SocketManager(SocketServeur &serveur, Socket &std_in);
     SocketManager(SocketManager const &instance) = delete;
     SocketManager &operator=(SocketManager const &rhs) = delete;
     virtual ~SocketManager(void);
     void route();
-    void dispatch(Serveur &serveur);
-    void dispatch(Client &client);
+    void dispatch(SocketServeur &serveur);
+    void dispatch(SocketClient &client);
     void dispatch(Socket &socket);
 private:
     SocketManager(void);
@@ -26,6 +27,7 @@ private:
     int _max_fd;
     void setFdSet();
     bool _hasError;
+    MessageMediator _message_mediator;
 };
 
 #endif
