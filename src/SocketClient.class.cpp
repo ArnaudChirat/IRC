@@ -39,8 +39,8 @@ bool SocketClient::recvMessage(MessageMediator &message_mediator) {
         //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
         IRCMessage IRCMessage(message);
-        std::cout << IRCMessage << std::endl;
-        
+        message_mediator.handleMessage(message, this);
+
     }
     return (false);
 }

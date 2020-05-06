@@ -3,6 +3,7 @@
 #include <string>
 #include <netinet/in.h>
 #include "Socket.class.hpp"
+class MessageMediator;
 #include "MessageMediator.class.hpp"
 class SocketClient : public Socket
 {

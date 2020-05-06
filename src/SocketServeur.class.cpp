@@ -24,11 +24,11 @@ SocketServeur::SocketServeur(unsigned short port)
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
     this->setAddr(server);
+    if (setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
+        throw std::runtime_error(std::strerror(errno));
     if (bind(sck, reinterpret_cast<sockaddr *>(&server), sizeof(server)) == -1)
         throw std::runtime_error(std::strerror(errno));
     if (listen(sck, SOMAXCONN) == -1)
-        throw std::runtime_error(std::strerror(errno));
-    if (setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
         throw std::runtime_error(std::strerror(errno));
 }   
 
