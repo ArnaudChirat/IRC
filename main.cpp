@@ -1,5 +1,5 @@
 
-#include "Serveur.class.hpp"
+#include "SocketServeur.class.hpp"
 #include "SocketManager.class.hpp"
 #include <exception>
 #include <iostream>
@@ -9,7 +9,7 @@ int main()
 
     try
     {
-        Serveur serveur(6667);
+        SocketServeur serveur(6667);
         sockaddr_in std_addr;
         Socket std_in(STDIN_FILENO, std_addr);
         SocketManager manager(serveur, std_in);

@@ -1,4 +1,4 @@
-#include "Serveur.class.hpp"
+#include "SocketServeur.class.hpp"
 #include "Utility.hpp"
 #include <stdexcept>
 #include <netdb.h>
@@ -10,12 +10,12 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 
-Serveur::Serveur(void)
+SocketServeur::SocketServeur(void)
 {
     return;
 }
 
-Serveur::Serveur(unsigned short port)
+SocketServeur::SocketServeur(unsigned short port)
 {
     int sck = this->getSocket();
     int option = 1;
@@ -32,12 +32,12 @@ Serveur::Serveur(unsigned short port)
         throw std::runtime_error(std::strerror(errno));
 }   
 
-Serveur::~Serveur(void)
+SocketServeur::~SocketServeur(void)
 {
   return ;
 }
 
-Client *Serveur::acceptNewClient()
+SocketClient *SocketServeur::acceptNewClient()
 {
     sockaddr_in addr = {};
     socklen_t len = sizeof(addr);
@@ -45,7 +45,7 @@ Client *Serveur::acceptNewClient()
     int newSocket = accept(sck, reinterpret_cast<sockaddr *>(&addr), &len);
     if (newSocket != -1)
     {
-        Client *newClient = new Client(newSocket, addr);
+        SocketClient *newClient = new SocketClient(newSocket, addr);
         std::cout << "Acceptation de #" << newClient->getSocket() << " from " << newClient->getAddr().c_str() << ":" << newClient->getPort() << std::endl;
         // send(newSocket, "Tu es connecté\n", 16, 0);
         return newClient;
@@ -54,7 +54,7 @@ Client *Serveur::acceptNewClient()
 }
 
 
-void Serveur::handle(SocketManagerInterface &dispatcher)
+void SocketServeur::handle(SocketManagerInterface &dispatcher)
 {
     dispatcher.dispatch(*this);
 }
