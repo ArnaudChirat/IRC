@@ -18,7 +18,7 @@ SocketClient::~SocketClient(void)
 {
 }
 
-bool SocketClient::recvMessage() {
+bool SocketClient::recvMessage(MessageMediator &message_mediator) {
     char buffer[BUFF_MSG] = {0};
     int sckt = this->getSocket();
     int ret = recv(sckt, buffer, BUFF_MSG, 0);
@@ -36,10 +36,11 @@ bool SocketClient::recvMessage() {
     {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
         std::string message(buffer);
-        //Todo couper les buffers par CR-LF
+        //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
         IRCMessage IRCMessage(message);
         std::cout << IRCMessage << std::endl;
+        
     }
     return (false);
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <netinet/in.h>
 #include "Socket.class.hpp"
+#include "MessageMediator.class.hpp"
 class SocketClient : public Socket
 {
 public:
@@ -10,7 +11,7 @@ public:
     SocketClient(SocketClient const &instance);
     SocketClient &operator=(SocketClient const &rhs);
     ~SocketClient(void);
-    bool recvMessage();
+    bool recvMessage(MessageMediator &message_mediator);
 	void handle(SocketManagerInterface &dispatcher);
 
 private:

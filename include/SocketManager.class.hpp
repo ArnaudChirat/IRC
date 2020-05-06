@@ -5,6 +5,7 @@
 #include "Socket.class.hpp"
 #include "SocketClient.class.hpp"
 #include "SocketServeur.class.hpp"
+#include "MessageMediator.class.hpp"
 class SocketManager : public SocketManagerInterface
 {
 public:
@@ -24,6 +25,7 @@ private:
     int _max_fd;
     void setFdSet();
     bool _hasError;
+    MessageMediator _message_mediator;
 };
 
 #endif

@@ -88,7 +88,7 @@ void SocketManager::dispatch(SocketServeur &serveur)
 }
 void SocketManager::dispatch(SocketClient &client)
 {
-    _hasError = client.recvMessage();
+    _hasError = client.recvMessage(this->_message_mediator);
 }
 void SocketManager::dispatch(Socket &socket)
 {
