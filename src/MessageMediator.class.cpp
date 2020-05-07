@@ -1,6 +1,6 @@
 #include "MessageMediator.class.hpp"
 #include <iostream>
-#include "ClientFactory.class.hpp"
+#include "IRCServer.class.hpp"
 MessageMediator::MessageMediator(void)
 {
     return;
@@ -23,8 +23,11 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
 {
     if (message.type == IRCMessageType::NICK)
     {
-        Client *new_client = ClientFactory::createClient(ClientFactory::USER, socket);
-        new_client->setName(message.getParameters()[0]);
-        std::cout << new_client->getName() << std::endl;
+        Client *client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.getParameters()[0]);
+        if (client)
+            std::cout << "Client created :" << client->getName() << std::endl;
+        else
+            std::cout << "Client already exist" << std::endl;
+        
     }
 }

@@ -9,7 +9,7 @@ public:
     // MessageMediator(MessageMediator const &instance);
     // MessageMediator &operator=(MessageMediator const &rhs);
     ~MessageMediator(void);
-    bool handleMessage(IRCMessage const &message, SocketClient *socket) const;
+    bool handleMessage(IRCMessage const &message, SocketClient *client) const;
 
 private:
     void createClient(IRCMessage const &message, SocketClient *socket) const;

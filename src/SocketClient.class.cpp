@@ -4,6 +4,7 @@
 #include "Utility.hpp"
 #include <time.h>
 #include <regex>
+#include "IRCServer.class.hpp"
 SocketClient::SocketClient(void)
 {
     return;
@@ -18,7 +19,7 @@ SocketClient::~SocketClient(void)
 {
 }
 
-bool SocketClient::recvMessage(MessageMediator &message_mediator) {
+bool SocketClient::recvMessage() {
     char buffer[BUFF_MSG] = {0};
     int sckt = this->getSocket();
     int ret = recv(sckt, buffer, BUFF_MSG, 0);
@@ -38,9 +39,8 @@ bool SocketClient::recvMessage(MessageMediator &message_mediator) {
         std::string message(buffer);
         //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
-        IRCMessage IRCMessage(message);
-        message_mediator.handleMessage(message, this);
-
+        IRCMessage IRC_message(message);
+        IRCServer::_message_mediator.handleMessage(IRC_message, this);
     }
     return (false);
 }
