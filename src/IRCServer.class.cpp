@@ -20,9 +20,11 @@ IRCServer::~IRCServer(void)
 
 void IRCServer::run()
 {
+    std::cout << "Starting server: hit return to shutdown" << std::endl;
     while (1)
     {
-        IRCServer::_socket_manager.route();
+        if (!IRCServer::_socket_manager.route())
+            break;;
     }
 }
 

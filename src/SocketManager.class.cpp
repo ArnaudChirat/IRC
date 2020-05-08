@@ -1,6 +1,7 @@
 #include "SocketManager.class.hpp"
 #include <sys/select.h>
 #include <cerrno>
+#include <cstring>
 #include <stdexcept>
 #include <iostream>
 #include <unistd.h>
@@ -17,6 +18,7 @@ SocketManager::SocketManager(void)
 //     this->addSocket(&serveur);
 //     return;
 // }
+
 
 SocketManager::~SocketManager(void)
 {
@@ -44,17 +46,26 @@ void SocketManager::setFdSet()
     }
 }
 
-void SocketManager::route()
+bool SocketManager::route()
 {
     this->setFdSet();
     int selectRes = select(_max_fd + 1, &_readfds, &_writefds, &_errorfds, NULL);
     if (selectRes == -1)
         throw std::runtime_error(std::strerror(errno));
+    else if (FD_ISSET(0, &_readfds))
+        {
+            char c = getchar();
+            if (c == '\n')
+            {
+                std::cout << "Shutting down server" << std::endl;
+                return (false);
+            }
+        }
     else if (selectRes > 0)
     {
         auto it = this->_sockets.begin();
         while (it != this->_sockets.end())
-        {
+        {  
             const std::string socket_address = (*it)->getAddr();
             const unsigned short socket_port = (*it)->getPort();
             const int sckt = (*it)->getSocket();
@@ -76,6 +87,7 @@ void SocketManager::route()
             ++it;
         }
     }
+    return (true);
 }
 
 void SocketManager::dispatch(SocketServeur &serveur)
