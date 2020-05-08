@@ -21,7 +21,7 @@ const std::unordered_map<std::string, IRCMessageType> IRCMessage::IRCCommands{
     {"USER", IRCMessageType::USER},
 };
 
-IRCMessage::IRCMessage(std::string &message)
+IRCMessage::IRCMessage(std::string &message) : _is_valid(false)
 {
     this->splitIRCMessage(message);
 }
@@ -47,6 +47,7 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     {
         this->_command = res->first;
         this->type = res->second;
+        this->_is_valid = true;
     }
     return (*this);
 }
@@ -82,6 +83,10 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
+bool IRCMessage::isValid() const
+{
+    return (this->_is_valid);
+}
 
 /*
 regex pattern split message :

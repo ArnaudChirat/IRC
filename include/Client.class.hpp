@@ -9,15 +9,15 @@ public:
     virtual ~Client(void);
     virtual Client &setName(std::string const &name) = 0;
     std::string getName() const;
+    SocketClient *_socket_client;
     enum class Status
     {
         CONNECTING,
         CONNECTED,
         DISCONNECTED
     };
-protected:
-    SocketClient *_socket_client;
     Status status;
+protected:
     std::string _name;
 private:
     Client(void);

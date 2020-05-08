@@ -118,6 +118,7 @@ public:
     IRCMessage &setTrail(std::string const &trail);
 
     std::string getMessage() const;
+    bool isValid() const;
     // std::string getPrefix() const;
     // std::string getCommand() const;
     // std::string getTrail() const;
@@ -133,9 +134,10 @@ public:
     static const std::string prefix;
     static const std::string message;
     static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
-    unsigned int type;
+    IRCMessageType type;
 private:
     IRCMessage(void);
+    bool    _is_valid;
     std::string _prefix;
     std::string _command;
     std::vector<std::string> _paramaters;
