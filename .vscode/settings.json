@@ -67,6 +67,16 @@
         "memory_resource": "cpp",
         "stack": "cpp",
         "__tree": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "clocale": "cpp",
+        "condition_variable": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "fstream": "cpp",
+        "shared_mutex": "cpp",
+        "set": "cpp",
+        "iomanip": "cpp"
     }
 }

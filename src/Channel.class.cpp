@@ -1,8 +1,8 @@
 #include "Channel.class.hpp"
-#include "CommunicatorMediator.class.hpp"
+// #include "CommunicatorMediator.class.hpp"
 
 
-Channel::Channel() : Communicator(CommunicatorType::CHANNEL){}
+// Channel::Channel() : Communicator(CommunicatorType::CHANNEL){}
 
 // Channel::Channel(Channel const &instance) {
     

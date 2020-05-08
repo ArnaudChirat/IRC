@@ -15,7 +15,7 @@ public:
 	SocketServeur &operator=(SocketServeur const &rhs) = delete;
 	~SocketServeur(void);
 	SocketClient *acceptNewClient();
-	void handle(SocketManagerInterface &dispatcher);
+	void handle(SocketManagerInterface &dispatcher, type);
 private:
 	SocketServeur(void);
 	// void recvMessage() const;

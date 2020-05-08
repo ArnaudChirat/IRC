@@ -1,13 +1,15 @@
+#include "IRCServer.class.hpp"
 #include "MessageMediator.class.hpp"
+#include "ReplyManager.class.hpp"
 #include <iostream>
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 MessageMediator::MessageMediator(void)
 {
-    this->_commands.insert({IRCMessageType::NICK, &MessageMediator::createClient});
-    this->_commands.insert({IRCMessageType::SERVICE, &MessageMediator::createClient});
-    this->_commands.insert({IRCMessageType::USER, &MessageMediator::userCommand});
-    this->_commands.insert({IRCMessageType::QUIT, &MessageMediator::quitCommand});
+    this->_commands.insert({IRCMessage::NICK, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::SERVICE, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::USER, &MessageMediator::userCommand});
+    this->_commands.insert({IRCMessage::QUIT, &MessageMediator::quitCommand});
     return;
 }
 
@@ -23,7 +25,7 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     // std::cout << (this->_commands.at(message.type)) << std::endl;
     (this->*_commands[message.type])(message, socket);
     std::cout << "size of Client manager fter command : " << IRCServer::_client_manager.getSize() << std::endl;
-    // if ((message.type & IRCMessageType::IRCMessage_TYPE_MASK) == IRCMessageType::CONNECTION_REGISTRATION)
+    // if ((message.type ::IRCMessage_TYPE_MASK) =::CONNECTION_REGISTRATION)
     //     this->createClient(message, socket);
     return (true);
 }
@@ -32,7 +34,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
 {
     Client *client = NULL;
     User   *user = NULL;
-    if (message.type == IRCMessageType::NICK)
+    if (message.type == IRCMessage::NICK)
     {
         user = static_cast<User*>(IRCServer::_client_manager.getClient(socket));
         if (!user)
@@ -64,4 +66,9 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
     IRCServer::_client_manager.deleteClient(socket, ClientManager::USER);
     IRCServer::_socket_manager.deleteSocket(socket);
     std::cout << "someone has quit" << (message.getParameters().empty() ?  "" : message.getParameters()[0])  << std::endl;
+}
+
+bool    MessageMediator::sendReply(std::string const & msg, Client * client) const{
+    client->getSocketClient()->appendToBuffer(msg);
+    return true;
 }

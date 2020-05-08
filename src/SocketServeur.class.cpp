@@ -54,7 +54,8 @@ SocketClient *SocketServeur::acceptNewClient()
 }
 
 
-void SocketServeur::handle(SocketManagerInterface &dispatcher)
+void    SocketServeur::handle(SocketManagerInterface &dispatcher, type t)
 {
-    dispatcher.dispatch(*this);
+    if (t == READ)
+        dispatcher.dispatch(*this);
 }

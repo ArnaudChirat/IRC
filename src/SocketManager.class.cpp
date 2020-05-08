@@ -1,4 +1,5 @@
 #include "SocketManager.class.hpp"
+#include "Socket.class.hpp"
 #include <sys/select.h>
 #include <cerrno>
 #include <cstring>
@@ -88,7 +89,11 @@ bool SocketManager::route()
             }
             else if (FD_ISSET(sckt, &_readfds))
             {
-                (*it)->handle(*this);
+            (*it)->handle(*this, Socket::READ);
+            }
+            if (FD_ISSET(sckt, &_writefds))
+            {
+                (*it)->handle(*this, Socket::WRITE);
             }
             if (_hasError)
             {
@@ -113,3 +118,7 @@ void SocketManager::dispatch(Socket &socket)
 {
     socket.readStdin();
 };
+
+void  SocketManager::writeToSocket(SocketClient &client) const{
+    client.sendMessage();
+}

@@ -11,7 +11,7 @@ User::User(User const &instance) : Client(instance._socket_client), _oper(instan
     this->setName(instance._name);
     return;
 }
-User &User::operator=(User const &rhs)
+User & User::operator=(User const &rhs)
 {
     if (&rhs != this) {
         this->setName(rhs._name);
@@ -26,7 +26,7 @@ User::~User(void)
     return;
 }
 
-User &User::setName(std::string const &name)
+User & User::setName(std::string const &name)
 {
     std::regex e(IRCMessage::nickname.c_str());
     if (std::regex_match(name, e))
@@ -34,7 +34,7 @@ User &User::setName(std::string const &name)
     return (*this);
 }
 
-User &User::setUser(std::string const &user)
+User & User::setUser(std::string const &user)
 {
     std::regex e(IRCMessage::user.c_str());
     if (std::regex_match(user, e))
@@ -42,7 +42,7 @@ User &User::setUser(std::string const &user)
     return (*this);
 }
 
-User &User::setOper(bool const oper)
+User & User::setOper(bool const oper)
 {
     //TODO set decorator for operator user
     this->_oper = oper;

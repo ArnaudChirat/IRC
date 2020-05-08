@@ -3,12 +3,31 @@
 #include <list>
 #include "User.class.hpp"
 #include <string>
-#define STANDART 0
+#define STANDARD 0
 #define SAFE 1
 
 class Channel
 {
 public:
+
+    enum ChannelMode
+    {
+        ANONYMOUS = 0x01,
+        INVITE_ONLY,
+        MODERATED,
+        NO_MESSAGE,
+        QUIET,
+        PRIVATE,
+        SECRET,
+        REOP,
+        TOPIC,
+        KEY,
+        USER_LIMIT,
+        BAN_MASK,
+        EXCEPTION_MASK,
+        INVITATION_MAS3,
+    };
+    
     Channel(void);
     // Channel(** replace parameters **);
     Channel(Channel const &instance);
@@ -24,28 +43,12 @@ public:
 private:
     // TODO state pattern à implementer
     // Statut *statut;
+    std::string  _name;
     unsigned int _type;
     unsigned int _modes;
     std::list<User> _members;
 };
 
-enum ChannelMode
-{
-    ANONYMOUS = 1,
-    INVITE_ONLY = 1 << 1,
-    MODERATED = 1 << 2,
-    NO_MESSAGE = 1 << 3,
-    QUIET = 1 << 4,
-    PRIVATE = 1 << 5,
-    SECRET = 1 << 6,
-    REOP = 1 << 7,
-    TOPIC = 1 << 8,
-    KEY = 1 << 9,
-    USER_LIMIT = 1 << 10,
-    BAN_MASK = 1 << 11,
-    EXCEPTION_MASK = 1 << 12,
-    INVITATION_MASK = 1 << 13
-};
 
 
 

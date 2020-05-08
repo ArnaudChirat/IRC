@@ -10,11 +10,14 @@ public:
     SocketClient(SocketClient const &instance);
     SocketClient &operator=(SocketClient const &rhs);
     ~SocketClient(void);
+    void appendToBuffer(std::string const & msg);
     bool recvMessage();
-	void handle(SocketManagerInterface &dispatcher);
+    bool sendMessage();
+	void handle(SocketManagerInterface &dispatcher, type);
 
 private:
     SocketClient(void);
+    std::string     _buffer;
 };
 
 enum SocketClientPrivilige

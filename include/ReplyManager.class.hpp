@@ -1,17 +1,15 @@
-#ifndef REPLYFACTORYCLASS_HPP
-#define REPLYFACTORYCLASS_HPP
-#include <vector>
+#ifndef REPLYMANAGER_HPP
+#define REPLYMANAGER_HPP
 #include <string>
 
-class ReplyFactory
+#include "Client.class.hpp"
+#include "Channel.class.hpp"
+
+class ReplyManager
 {
 public:
 
-    static std::string ConnectionReplyMessage(int const x, std::vector<std::string>);
-    static std::string CommandReplyMessage(int const x, std::vector<std::string>);
-    static std::string ErrorReplyMessage(int const x, std::vector<std::string>);
-
-    enum class ConnectionEnum
+    enum ConnectionEnum
     {
         RPL_WELCOME = 1,
         RPL_YOURHOST,
@@ -20,7 +18,7 @@ public:
         RPL_BOUNCE,
     };
 
-    enum class CommandEnum
+    enum CommandEnum
     {
         RPL_TRACELINK = 200,
         RPL_TRACECONNECTING,
@@ -103,7 +101,7 @@ public:
         RPL_NOUSERS,
     };
 
-    enum class ErrorEnum
+    enum ErrorEnum
     {
         ERR_NOSUCHNICK = 401,
         ERR_NOSUCHSERVER,
@@ -159,6 +157,34 @@ public:
         ERR_UMODEUNKNOWNFLAG = 501,
         ERR_USERSDONTMATCH,
     };
+
+    typedef struct s_clientInfo {
+        std::string     nick;
+        std::string     user;
+        std::string     host;
+
+    }               t_clientInfo;
+
+    typedef struct s_channelInfo {
+        std::string     name;
+
+    }               t_channelInfo;
+
+    typedef struct s_serverInfo {
+        std::string     name;
+
+    }               t_serverInfo;
+
+    static t_serverInfo serverInfo;
+
+    std::string connectionReplyMessage(ConnectionEnum, t_clientInfo);
+    std::string commandReplyMessage(CommandEnum, std::vector<std::string>);
+    std::string errorReplyMessage(ErrorEnum, t_clientInfo, t_channelInfo);
+
+    bool connectionReply(Client * client, ConnectionEnum x);
+    bool errorReply(Client *, Channel *, ErrorEnum x);
+
+
 
 };
 

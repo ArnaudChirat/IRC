@@ -12,3 +12,8 @@ Client::~Client(void) {
 std::string Client::getName() const {
     return (this->_name);
 }
+
+SocketClient * Client::getSocketClient(void) const{
+    return this->_socket_client;
+}
+

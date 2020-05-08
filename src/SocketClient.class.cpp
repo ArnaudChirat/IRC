@@ -19,10 +19,16 @@ SocketClient::~SocketClient(void)
 {
 }
 
+void    SocketClient::appendToBuffer(std::string const & msg){
+    this->_buffer += msg;
+}
+
+
 bool SocketClient::recvMessage() {
     char buffer[BUFF_MSG] = {0};
     int sckt = this->getSocket();
-    int ret = recv(sckt, buffer, BUFF_MSG, 0);
+    int ret = recv(sckt, buffer, BUFF_MSG - 1, 0);
+    buffer[BUFF_MSG - 1] = '\0';
     if (ret == 0)
     {
         std::cout << "Connexion terminee" << std::endl;
@@ -34,7 +40,7 @@ bool SocketClient::recvMessage() {
         std::cout << "Erreur reception : " << std::strerror(errno) << std::endl;
         return (true);
     }
-    else
+    else if (ret > 1)
     {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
         std::string message(buffer);
@@ -47,8 +53,23 @@ bool SocketClient::recvMessage() {
     return (false);
 }
 
-void SocketClient::handle(SocketManagerInterface &dispatcher)
+void SocketClient::handle(SocketManagerInterface &dispatcher, type t)
 {
-    dispatcher.dispatch(*this);
+    if (t == READ)
+        dispatcher.dispatch(*this);
+    if (t == WRITE)
+        dispatcher.writeToSocket(*this);
+}
+
+bool    SocketClient::sendMessage(){
+    int sentBytes;
+    while (this->_buffer.size()){
+        if ((sentBytes = send(this->getSocket(), this->_buffer.c_str(), this->_buffer.size(), 0)) == -1){
+            throw std::runtime_error(std::strerror(errno));
+            return false;
+        }
+        this->_buffer.erase(0, sentBytes);
+    }
+    return true;
 }
 

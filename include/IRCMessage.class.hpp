@@ -53,60 +53,62 @@
 // special    =  %x5B-60 / %x7B-7D
 //                 ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
 
-enum IRCMessageType
-{
-    CONNECTION_REGISTRATION = 0x000,
-    PASS,
-    NICK,
-    USER,
-    OPER,
-    USER_MODE,
-    SERVICE,
-    QUIT,
-    SQUIT,
-    CHANNEL_OPERATION = 0x100,
-    JOIN,
-    PART,
-    CHANNEL_MODE,
-    TOPIC,
-    NAMES,
-    LIST,
-    INVITE,
-    KICK,
-    SENDING_IRCMessage = 0x200,
-    PRIVMSG,
-    NOTICE,
-    SERVER_QUERY = 0x300,
-    MOTD,
-    LUSERS,
-    VERSION,
-    STATS,
-    LINKS,
-    TIME,
-    CONNECT,
-    TRACE,
-    ADMIN,
-    INFO,
-    SERVICE_QUERY = 0x400,
-    SERVLIST,
-    SQUERY,
-    USER_QUERY = 0x500,
-    WHO,
-    WHOIS,
-    WHOWAS,
-    MISCELLANEOUS_IRCMessage = 0x600,
-    KILL,
-    PING,
-    PONG,
-    ERROR,
-    // OPTIONAL = 0x200
-
-    IRCMessage_TYPE_MASK = 0XFF00,
-    IRCMessage_DETAIL_MASK = 0X00FF,
-};
 class IRCMessage
 {
 public:
+
+    enum IRCMessageType
+    {
+        CONNECTION_REGISTRATION = 0x000,
+        PASS,
+        NICK,
+        USER,
+        OPER,
+        USER_MODE,
+        SERVICE,
+        QUIT,
+        SQUIT,
+        CHANNEL_OPERATION = 0x100,
+        JOIN,
+        PART,
+        CHANNEL_MODE,
+        TOPIC,
+        NAMES,
+        LIST,
+        INVITE,
+        KICK,
+        SENDING_IRCMessage = 0x200,
+        PRIVMSG,
+        NOTICE,
+        SERVER_QUERY = 0x300,
+        MOTD,
+        LUSERS,
+        VERSION,
+        STATS,
+        LINKS,
+        TIME,
+        CONNECT,
+        TRACE,
+        ADMIN,
+        INFO,
+        SERVICE_QUERY = 0x400,
+        SERVLIST,
+        SQUERY,
+        USER_QUERY = 0x500,
+        WHO,
+        WHOIS,
+        WHOWAS,
+        MISCELLANEOUS_IRCMessage = 0x600,
+        KILL,
+        PING,
+        PONG,
+        ERROR,
+        // OPTIONAL = 0x200
+
+        IRCMessage_TYPE_MASK = 0XFF00,
+        IRCMessage_DETAIL_MASK = 0X00FF,
+    };
+
     IRCMessage(std::string &message);
     // IRCMessage(IRCMessage const &instance);
     // IRCMessage &operator=(IRCMessage const &rhs);
@@ -145,5 +147,5 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message);
-std::ostream &operator<<(std::ostream &os, const IRCMessageType &type);
+std::ostream &operator<<(std::ostream &os, const IRCMessage::IRCMessageType &type);
 #endif

@@ -65,7 +65,8 @@ std::string in;
     std::cout << in << std::endl;
 }
 
-void Socket::handle(SocketManagerInterface &dispatcher)
+void Socket::handle(SocketManagerInterface &dispatcher, type t)
 {
-    dispatcher.dispatch(*this);
+    if (t == READ)
+        dispatcher.dispatch(*this);
 }

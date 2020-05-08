@@ -1,4 +1,5 @@
 #include "ClientManager.class.hpp"
+#include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include <iostream>
 ClientManager::ClientManager(void)
@@ -30,15 +31,18 @@ void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice
 Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = NULL;
-    if (checkName(choice, name))
-        return (NULL);
     if (choice == ClientChoice::USER)
         client = new User(socket);
+    client->setName(name);
+    if (checkName(choice, name)){
+        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        delete client; 
+        return (NULL);
+    }
     // if (choice == ClientChoice::SERVER)
     //     client = new Server(socket_client);
     // if (choice == ClientChoice::SERVICE)
     //     client = new Service(socket_client);
-    client->setName(name);
     return (client);
 }
 
@@ -61,11 +65,16 @@ bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
     Client *client = this->getClient(socket);
     if (!client)
         return (false);
-    if (checkName(ClientChoice::USER, nick))
+    if (checkName(USER, nick)){
+        std::string oldNick = client->getName();
+        client->setName(nick);
+        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        client->setName(oldNick);
         return (false);
-    this->_names_used.erase(Key(ClientChoice::USER,client->getName()));
+    }
+    this->_names_used.erase(Key(USER,client->getName()));
     client->setName(nick);
-    this->_names_used.insert(Key(ClientChoice::USER, nick));
+    this->_names_used.insert(Key(USER, nick));
     return (true);
 };
 
@@ -79,6 +88,8 @@ bool    ClientManager::setUser(std::string const &username, SocketClient *socket
     if (user->getUser().empty())
         return (false);
     client->status = Client::Status::CONNECTED;
+    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_WELCOME);
+    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_YOURHOST);
     return (true);
 };
 

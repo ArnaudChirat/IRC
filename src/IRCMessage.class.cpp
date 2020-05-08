@@ -15,7 +15,7 @@ const std::string IRCMessage::user("([^\\x00\\x0A\\x0D\\x20\\x40]+)");
 const std::string IRCMessage::prefix("^:(" + nickname + "(?:(?:!" + user + ")?@" + host + "?)|(?:" + hostname + "))");
 const std::string IRCMessage::message("^\\s*(:[^ \n:]* )?([A-Za-z0-9]*)([^\n:]*)?(:.*)?");
 
-const std::unordered_map<std::string, IRCMessageType> IRCMessage::IRCCommands{
+const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IRCCommands{
     {"PASS", IRCMessageType::PASS},
     {"NICK", IRCMessageType::NICK},
     {"USER", IRCMessageType::USER},
@@ -116,14 +116,14 @@ std::ostream &operator<<(std::ostream &os, const IRCMessage &message)
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const IRCMessageType &type)
+std::ostream &operator<<(std::ostream &os, const IRCMessage::IRCMessageType &type)
 {
     switch (type)
     {
-    case IRCMessageType::NICK:
+    case IRCMessage::IRCMessageType::NICK:
         os << "NICK COMMAND";
         break;
-    case IRCMessageType::USER:
+    case IRCMessage::IRCMessageType::USER:
         os << "USER COMMAND";
         break;
     default:

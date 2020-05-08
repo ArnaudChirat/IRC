@@ -16,9 +16,10 @@ public:
     SocketManager &operator=(SocketManager const &rhs);
     virtual ~SocketManager(void);
     bool route();
-    void dispatch(SocketServeur &serveur);
-    void dispatch(SocketClient &client);
-    void dispatch(Socket &socket);
+    virtual void dispatch(SocketServeur &serveur);
+    virtual void dispatch(SocketClient &client);
+    virtual void dispatch(Socket &socket);
+    virtual void writeToSocket(SocketClient &) const;
     void addSocket(Socket *socket);
     void deleteSocket(Socket *socket);
 private:
@@ -29,7 +30,6 @@ private:
     int _max_fd;
     void setFdSet();
     bool _hasError;
-    MessageMediator _message_mediator;
 };
 
 #endif
