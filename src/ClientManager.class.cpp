@@ -65,6 +65,18 @@ Client *ClientManager::getClient(SocketClient *socket_client)
     return (NULL);
 }
 
+ClientManager::pos ClientManager::getClientPosition(SocketClient *socket_client)
+{
+    ClientManager::pos it = this->_clients.begin();
+    for (; it != this->_clients.end(); ++it)
+    {
+        Client *client = it->get();
+        if (client->_socket_client == socket_client)
+            return (it);
+    }
+    return (it);
+}
+
 bool    ClientManager::setUser(std::string const &username, SocketClient *socket_client)
 {
     Client *client = this->getClient(socket_client);
@@ -77,3 +89,15 @@ bool    ClientManager::setUser(std::string const &username, SocketClient *socket
     client->status = Client::Status::CONNECTED;
     return (true);
 };
+
+void ClientManager::deleteClient(SocketClient *client)
+{
+    ClientManager::pos pos = this->getClientPosition(client);
+    if (pos != this->_clients.end())
+        this->_clients.erase(pos);
+}
+
+int ClientManager::getSize() const
+{
+    return (this->_clients.size());
+}

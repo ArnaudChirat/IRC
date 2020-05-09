@@ -16,6 +16,7 @@ private:
     typedef void (MessageMediator::*Command)(IRCMessage const &, SocketClient *) const;
     void userCommand(IRCMessage const &message, SocketClient *socket) const;
     void createClient(IRCMessage const &message, SocketClient *socket) const;
+    void quitCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessageType, Command> _commands;
 };
 

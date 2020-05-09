@@ -1,7 +1,7 @@
 #ifndef CHANNEL_CLASS_HPP
 #define CHANNEL_CLASS_HPP
 #include <list>
-#include "Client.class.hpp"
+#include "User.class.hpp"
 #include <string>
 #define STANDART 0
 #define SAFE 1
@@ -14,10 +14,10 @@ public:
     Channel(Channel const &instance);
     Channel &operator=(Channel const &rhs);
     ~Channel(void);
-    void addClient(Communicator *client);
-    void removeClient(Communicator const &client);
-    void setClientPrivilege(unsigned int privilige);
-    void getClientPrivilege(Client const &client) const;
+    void addUser(User const &user);
+    void removeClient(User const &user);
+    void setClientPrivilege(unsigned int privilige, User const &user);
+    void getClientPrivilege(User const &user) const;
     void setMode(unsigned int mode);
     void getMode() const;
 
@@ -26,7 +26,7 @@ private:
     // Statut *statut;
     unsigned int _type;
     unsigned int _modes;
-    std::list<Client> _clients;
+    std::list<User> _members;
 };
 
 enum ChannelMode

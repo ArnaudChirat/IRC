@@ -27,6 +27,17 @@ void SocketManager::addSocket(Socket *socket)
     this->_sockets.emplace_back(socket);
 }
 
+void SocketManager::deleteSocket(Socket *socket)
+{
+    SocketManager::pos it = this->_sockets.begin();
+    for (; it != this->_sockets.end(); ++it)
+    {
+        Socket *tmp_socket = it->get();
+        if (tmp_socket == socket)
+            this->_sockets.erase(it);
+    }
+}
+
 void SocketManager::setFdSet()
 {
     FD_ZERO(&_readfds);

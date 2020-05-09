@@ -19,7 +19,9 @@ public:
     void dispatch(SocketClient &client);
     void dispatch(Socket &socket);
     void addSocket(Socket *socket);
+    void deleteSocket(Socket *socket);
 private:
+    typedef std::list<std::unique_ptr<Socket>>::iterator pos;
     std::list<std::unique_ptr<Socket>> _sockets;
     fd_set _readfds, _writefds, _errorfds;
     int _max_fd;
