@@ -1,6 +1,6 @@
 
 CC=clang++
-CFLAGS= -Wall -Wextra -Werror -std=c++11 -Iinclude/
+CFLAGS= -Wall -Wextra -Werror -std=c++11 -g -Iinclude/
 LDFLAGS=
 EXEC=server
 VPATH = src
@@ -22,7 +22,7 @@ obj_irc/%.o: %.cpp
 .PHONY: clean fclean
 
 clean:
-	@rm -rf $(OBJ)
+	@rm -rf obj_irc
 	@rmdir obj_irc 2> /dev/null || true
 
 fclean: clean
