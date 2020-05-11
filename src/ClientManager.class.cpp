@@ -11,27 +11,29 @@ ClientManager::~ClientManager(void)
     return;
 }
 
-Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket_client, std::string const &name)
+Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
-    Client *client = this->createClient(choice, socket_client, name);
+    Client *client = this->createClient(choice, socket, name);
     if (client == NULL)
         return (NULL);
-    this->addClient(client);
+    this->addClient(socket, client, choice);
     return (client);
 }
 
-void ClientManager::addClient(Client *client)
+void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice choice)
 {
-    this->_clients.emplace_back(client);
+    // this->_clients.emplace_back(client);
+    this->_names_used.insert(Key(choice, client->getName()));
+    this->_clients.insert(std::pair<SocketClient*, Client*>(socket, client));
 }
 
-Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name)
+Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = NULL;
-    if (!checkName(choice, name))
+    if (checkName(choice, name))
         return (NULL);
     if (choice == ClientChoice::USER)
-        client = new User(socket_client);
+        client = new User(socket);
     // if (choice == ClientChoice::SERVER)
     //     client = new Server(socket_client);
     // if (choice == ClientChoice::SERVICE)
@@ -40,42 +42,32 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket_cl
     return (client);
 }
 
-bool ClientManager::checkName(ClientChoice type, std::string const &name)
+//Check if name already in use, return true if name already exist 
+bool ClientManager::checkName(ClientChoice choice, std::string const &name)
 {
-    for (auto it = this->_clients.begin(); it != this->_clients.end(); ++it)
-    {
-        if (type == ClientChoice::USER && dynamic_cast<User*>(it->get()) && (*it)->getName() == name)
-            return (false);
-        // if (type == ClientChoice::SERVER && dynamic_cast<Server*>(it->get()) && (*it)->getName() == name)
-        //     return (false);
-        // if (type == ClientChoice::SERVICE && dynamic_cast<Service*>(it->get()) && (*it)->getName() == name)
-        //     return (false);
-    }
+    auto it = this->_names_used.find(Key(choice, name));
+    if (it == this->_names_used.end())
+        return (false);
     return (true);
 }
 
-Client *ClientManager::getClient(SocketClient *socket_client)
+Client *ClientManager::getClient(SocketClient *socket)
 {
-    for (auto it = this->_clients.begin(); it != this->_clients.end(); ++it)
-    {
-        Client *client = it->get();
-        if (client->_socket_client == socket_client)
-            return client;
-    }
-    return (NULL);
+    return (this->_clients.find(socket)->second);
 }
 
-ClientManager::pos ClientManager::getClientPosition(SocketClient *socket_client)
+bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
 {
-    ClientManager::pos it = this->_clients.begin();
-    for (; it != this->_clients.end(); ++it)
-    {
-        Client *client = it->get();
-        if (client->_socket_client == socket_client)
-            return (it);
-    }
-    return (it);
-}
+    Client *client = this->getClient(socket);
+    if (!client)
+        return (false);
+    if (checkName(ClientChoice::USER, nick))
+        return (false);
+    this->_names_used.erase(Key(ClientChoice::USER,client->getName()));
+    client->setName(nick);
+    this->_names_used.insert(Key(ClientChoice::USER, nick));
+    return (true);
+};
 
 bool    ClientManager::setUser(std::string const &username, SocketClient *socket_client)
 {
@@ -90,14 +82,18 @@ bool    ClientManager::setUser(std::string const &username, SocketClient *socket
     return (true);
 };
 
-void ClientManager::deleteClient(SocketClient *client)
+void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
 {
-    ClientManager::pos pos = this->getClientPosition(client);
-    if (pos != this->_clients.end())
-        this->_clients.erase(pos);
+    Client *client = this->getClient(socket);
+    if (!client)
+        return;
+    Key key(choice, client->getName());
+    this->_names_used.erase(key);
+    this->_clients.erase(socket);
+    delete client;
 }
 
 int ClientManager::getSize() const
 {
-    return (this->_clients.size());
+    return (this->_names_used.size());
 }

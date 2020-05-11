@@ -38,12 +38,16 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         if (!user)
             client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.getParameters()[0]);
         else
-            user->setName(message.getParameters()[0]);
+        {
+            IRCServer::_client_manager.setNick(message.getParameters()[0], socket);
+        }
     }
     if (client)
         std::cout << "User created : " << client->getName() << std::endl;
-    else
+    else if(user)
         std::cout << "User already exist nickname is : " << user->getName() << std::endl;
+    else
+        std::cout << "Nick name already use : " << message.getParameters()[0] << std::endl;
 }
 
 void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socket) const
@@ -57,7 +61,7 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
 void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socket) const
 {
     std::cout << "quit command" << std::endl;
-    IRCServer::_client_manager.deleteClient(socket);
+    IRCServer::_client_manager.deleteClient(socket, ClientManager::USER);
     IRCServer::_socket_manager.deleteSocket(socket);
     std::cout << "someone has quit" << (message.getParameters().empty() ?  "" : message.getParameters()[0])  << std::endl;
 }
