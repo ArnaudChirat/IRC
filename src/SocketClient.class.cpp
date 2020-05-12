@@ -66,10 +66,10 @@ bool    SocketClient::sendMessage(){
     while (this->_buffer.size()){
         if ((sentBytes = send(this->getSocket(), this->_buffer.c_str(), this->_buffer.size(), 0)) == -1){
             throw std::runtime_error(std::strerror(errno));
-            return false;
+            return true;
         }
         this->_buffer.erase(0, sentBytes);
     }
-    return true;
+    return false;
 }
 

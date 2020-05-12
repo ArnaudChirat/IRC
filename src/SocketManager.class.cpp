@@ -87,13 +87,12 @@ bool SocketManager::route()
                 std::cout << "Erreur" << std::endl;
                 _hasError = true;
             }
-            else if (FD_ISSET(sckt, &_readfds))
+            else 
             {
-            (*it)->handle(*this, Socket::READ);
-            }
-            if (FD_ISSET(sckt, &_writefds))
-            {
-                (*it)->handle(*this, Socket::WRITE);
+                if (FD_ISSET(sckt, &_readfds))
+                    (*it)->handle(*this, Socket::READ);
+                else if (FD_ISSET(sckt, &_writefds))
+                    (*it)->handle(*this, Socket::WRITE);
             }
             if (_hasError)
             {
