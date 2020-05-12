@@ -43,7 +43,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.getParameters()[0]);
         else
         {
-            IRCServer::_client_manager.setNick(message.getParameters()[0], socket);
+            IRCServer::_client_manager.setNick(message.getParameters()[0], *user);
         }
     }
     if (message.type == IRCMessage::SERVICE)
@@ -53,7 +53,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             client = IRCServer::_client_manager.createAddClient(ClientManager::SERVICE, socket, message.getParameters()[0]);
         else
         {
-            IRCServer::_client_manager.setService(message.getParameters()[0], socket);
+            IRCServer::_client_manager.setService(message.getParameters()[0], *service);
         }
     }
     if (client)

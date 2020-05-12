@@ -25,33 +25,34 @@ Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket
 void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice choice)
 {
     // this->_clients.emplace_back(client);
-    this->_names_used.insert(Key(choice, client->getName()));
-    this->_clients.insert(std::pair<SocketClient*, Client*>(socket, client));
+    (void)choice;
+    // this->_names_used.insert(Key(choice, client->getName()));
+    this->_clients.insert(std::pair<SocketClient *, Client *>(socket, client));
 }
 
 Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = NULL;
-    std::string real_name(name);
+    bool not_error = true;
     if (choice == ClientChoice::USER)
+    {
         client = new User(socket);
+        not_error = setNick(name, *client);
+    }
     if (choice == ClientChoice::SERVICE)
     {
         client = new Service(socket);
-        real_name += IRCServer::name;
+        not_error = setService(name, *client);
     }
-    client->setName(real_name);
-    if (checkName(choice, real_name)){
-        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
-        delete client; 
+    if (!not_error)
+    {
+        delete client;
         return (NULL);
     }
-    // if (choice == ClientChoice::SERVICE)
-    //     client = new Service(socket_client);
     return (client);
 }
 
-//Check if name already in use, return true if name already exist 
+//Check if name already in use, return true if name already exist
 bool ClientManager::checkName(ClientChoice choice, std::string const &name)
 {
     auto it = this->_names_used.find(Key(choice, name));
@@ -65,46 +66,47 @@ Client *ClientManager::getClient(SocketClient *socket)
     return (this->_clients.find(socket)->second);
 }
 
-bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
+bool ClientManager::setNick(std::string const &nick, Client &client)
 {
-    Client *client = this->getClient(socket);
-    if (!client)
-        return (false);
-    if (checkName(USER, nick)){
-        std::string oldNick = client->getName();
-        client->setName(nick);
-        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
-        client->setName(oldNick);
+    if (checkName(USER, nick))
+    {
+        std::string oldNick = client.getName();
+        client.setName(nick);
+        IRCServer::_reply_manager.errorReply(&client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        client.setName(oldNick);
         return (false);
     }
-    this->_names_used.erase(Key(USER,client->getName()));
-    client->setName(nick);
+    this->_names_used.erase(Key(USER, client.getName()));
+    client.setName(nick);
     this->_names_used.insert(Key(USER, nick));
     return (true);
 };
 
-bool    ClientManager::setService(std::string const &nick, SocketClient *socket)
+bool ClientManager::setService(std::string const &nick, Client &client)
 {
-    Client *client = this->getClient(socket);
     std::string real_name(nick + IRCServer::name);
-    if (!client)
-        return (false);
-    if (checkName(SERVICE, real_name)){
-        IRCServer::_reply_manager.errorReply(NULL, NULL, ReplyManager::ERR_ALREADYREGISTRED);
+    if (checkName(SERVICE, real_name))
+    {
+        std::string old_service = client.getName();
+        client.setName(real_name);
+        IRCServer::_reply_manager.errorReply(&client, NULL, ReplyManager::ERR_ALREADYREGISTRED);
+        client.setName(old_service);
         return (false);
     }
-    this->_names_used.erase(Key(USER,client->getName()));
-    client->setName(nick);
-    this->_names_used.insert(Key(USER, real_name));
+    this->_names_used.erase(Key(SERVICE, client.getName()));
+    client.setName(real_name);
+    this->_names_used.insert(Key(SERVICE, real_name));
+    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_WELCOME);
+    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_YOURHOST);
     return (true);
 };
 
-bool    ClientManager::setUser(std::string const &username, SocketClient *socket_client)
+bool ClientManager::setUser(std::string const &username, SocketClient *socket_client)
 {
     Client *client = this->getClient(socket_client);
     if (!client || client->getName().empty())
         return (false);
-    User *user = static_cast<User*>(client);
+    User *user = static_cast<User *>(client);
     user->setUser(username);
     if (user->getUser().empty())
         return (false);
@@ -121,10 +123,10 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
         return;
     if (choice == ClientChoice::ALL)
     {
-        if (dynamic_cast<User*>(client))
-        choice = ClientManager::USER;
-    if (dynamic_cast<Service*>(client))
-        choice = ClientManager::SERVICE;
+        if (dynamic_cast<User *>(client))
+            choice = ClientManager::USER;
+        if (dynamic_cast<Service *>(client))
+            choice = ClientManager::SERVICE;
     }
     Key key(choice, client->getName());
     this->_names_used.erase(key);
