@@ -31,7 +31,7 @@ void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice
 Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = NULL;
-    if (choice == ClientChoice::USER)
+    if (choice == USER)
         client = new User(socket);
     client->setName(name);
     if (checkName(choice, name)){
@@ -39,9 +39,9 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         delete client; 
         return (NULL);
     }
-    // if (choice == ClientChoice::SERVER)
+    // if (choice == SERVER)
     //     client = new Server(socket_client);
-    // if (choice == ClientChoice::SERVICE)
+    // if (choice == SERVICE)
     //     client = new Service(socket_client);
     return (client);
 }

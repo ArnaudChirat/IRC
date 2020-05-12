@@ -10,6 +10,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::SERVICE, &MessageMediator::createClient});
     this->_commands.insert({IRCMessage::USER, &MessageMediator::userCommand});
     this->_commands.insert({IRCMessage::QUIT, &MessageMediator::quitCommand});
+    this->_commands.insert({IRCMessage::JOIN, &MessageMediator::joinCommand});
     return;
 }
 
@@ -66,6 +67,16 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
     IRCServer::_client_manager.deleteClient(socket, ClientManager::USER);
     IRCServer::_socket_manager.deleteSocket(socket);
     std::cout << "someone has quit" << (message.getParameters().empty() ?  "" : message.getParameters()[0])  << std::endl;
+}
+
+void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    Client * user = IRCServer::_client_manager.getClient(socket);
+    std::cout << "join command" << std::endl;
+    if (IRCServer::_channel_manager.verify(message, user))
+        IRCServer::_channel_manager.handleJoinChannel(message, user);
+    IRCServer::_channel_manager.displayChannels();
+    
 }
 
 bool    MessageMediator::sendReply(std::string const & msg, Client * client) const{

@@ -4,6 +4,8 @@
 #include "MessageMediator.class.hpp"
 #include "ClientManager.class.hpp"
 #include "ReplyManager.class.hpp"
+#include "ChannelManager.class.hpp"
+
 class IRCServer
 {
 public:
@@ -20,6 +22,7 @@ public:
     static MessageMediator _message_mediator;
     static ClientManager _client_manager;
     static ReplyManager _reply_manager;
+    static ChannelManager _channel_manager;
 };
 
 #endif

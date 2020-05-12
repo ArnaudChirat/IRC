@@ -16,10 +16,11 @@ const std::string IRCMessage::prefix("^:(" + nickname + "(?:(?:!" + user + ")?@
 const std::string IRCMessage::message("^\\s*(:[^ \n:]* )?([A-Za-z0-9]*)([^\n:]*)?(:.*)?");
 
 const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IRCCommands{
-    {"PASS", IRCMessageType::PASS},
-    {"NICK", IRCMessageType::NICK},
-    {"USER", IRCMessageType::USER},
-    {"QUIT", IRCMessageType::QUIT},
+    {"PASS", PASS},
+    {"NICK", NICK},
+    {"USER", USER},
+    {"QUIT", QUIT},
+    {"JOIN", JOIN},
 };
 
 IRCMessage::IRCMessage(std::string &message) : _is_valid(false)

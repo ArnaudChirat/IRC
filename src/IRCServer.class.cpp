@@ -2,10 +2,11 @@
 #include <unistd.h>
 #include <iostream>
 
-SocketManager IRCServer::_socket_manager = SocketManager();
-MessageMediator IRCServer::_message_mediator = MessageMediator();
-ClientManager IRCServer::_client_manager = ClientManager();
-ReplyManager IRCServer::_reply_manager = ReplyManager();
+SocketManager IRCServer::_socket_manager;
+MessageMediator IRCServer::_message_mediator;
+ClientManager IRCServer::_client_manager;
+ReplyManager IRCServer::_reply_manager; 
+ChannelManager IRCServer::_channel_manager;
 
 std::string const IRCServer::name = std::string("GvannAchir IRC");
 
