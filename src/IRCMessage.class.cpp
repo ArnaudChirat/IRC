@@ -20,6 +20,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"NICK", IRCMessageType::NICK},
     {"USER", IRCMessageType::USER},
     {"QUIT", IRCMessageType::QUIT},
+    {"SERVICE", IRCMessageType::SERVICE},
 };
 
 IRCMessage::IRCMessage(std::string &message) : _is_valid(false)

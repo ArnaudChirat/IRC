@@ -1,6 +1,7 @@
 #include "ClientManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
+#include "Service.class.hpp"
 #include <iostream>
 ClientManager::ClientManager(void)
 {
@@ -31,16 +32,20 @@ void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice
 Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = NULL;
+    std::string real_name(name);
     if (choice == ClientChoice::USER)
         client = new User(socket);
-    client->setName(name);
-    if (checkName(choice, name)){
+    if (choice == ClientChoice::SERVICE)
+    {
+        client = new Service(socket);
+        real_name += IRCServer::name;
+    }
+    client->setName(real_name);
+    if (checkName(choice, real_name)){
         IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
         delete client; 
         return (NULL);
     }
-    // if (choice == ClientChoice::SERVER)
-    //     client = new Server(socket_client);
     // if (choice == ClientChoice::SERVICE)
     //     client = new Service(socket_client);
     return (client);
@@ -78,6 +83,22 @@ bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
     return (true);
 };
 
+bool    ClientManager::setService(std::string const &nick, SocketClient *socket)
+{
+    Client *client = this->getClient(socket);
+    std::string real_name(nick + IRCServer::name);
+    if (!client)
+        return (false);
+    if (checkName(SERVICE, real_name)){
+        IRCServer::_reply_manager.errorReply(NULL, NULL, ReplyManager::ERR_ALREADYREGISTRED);
+        return (false);
+    }
+    this->_names_used.erase(Key(USER,client->getName()));
+    client->setName(nick);
+    this->_names_used.insert(Key(USER, real_name));
+    return (true);
+};
+
 bool    ClientManager::setUser(std::string const &username, SocketClient *socket_client)
 {
     Client *client = this->getClient(socket_client);
@@ -98,6 +119,13 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
     Client *client = this->getClient(socket);
     if (!client)
         return;
+    if (choice == ClientChoice::ALL)
+    {
+        if (dynamic_cast<User*>(client))
+        choice = ClientManager::USER;
+    if (dynamic_cast<Service*>(client))
+        choice = ClientManager::SERVICE;
+    }
     Key key(choice, client->getName());
     this->_names_used.erase(key);
     this->_clients.erase(socket);

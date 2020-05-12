@@ -11,7 +11,8 @@ public:
     {
         USER,
         SERVER,
-        SERVICE
+        SERVICE,
+        ALL
     };
     ClientManager(void);
     ClientManager(ClientManager const &instance);
@@ -21,6 +22,7 @@ public:
     Client *createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     bool setUser(std::string const &username, SocketClient *socket_client);
     bool setNick(std::string const &nick, SocketClient *socket_client);
+    bool setService(std::string const &nick, SocketClient *socket_client);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     int getSize() const;
