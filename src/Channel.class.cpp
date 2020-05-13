@@ -1,33 +1,24 @@
 #include "Channel.class.hpp"
-// #include "CommunicatorMediator.class.hpp"
 
 
-// Channel::Channel() : Communicator(CommunicatorType::CHANNEL){}
+Channel::Channel(void) {}
 
-// Channel::Channel(Channel const &instance) {
-    
-// }
+Channel::Channel(std::string const & name): _name(name) {}
 
-// Channel &Channel::operator=(Channel const &rhs) {
-    
-// }
+Channel::~Channel(void) {}
 
-// Channel::~Channel(void) {
-    
-// }
+std::string     Channel::getName(void) const{
+    return this->_name;
+}
 
-// void Channel::addClient(Socket const &client) {
-    
-// }
+std::unordered_map<std::string, User*>     Channel::getMembers(void) const{
+    return this->_members;
+}
 
-// void Channel::removeClient(Socket const &client) {
-    
-// }
 
-// Channel &Channel::setName(std::string const &name) {
-    
-// }
-
-// std::string Channel::getName() const {
-    
-// }
+void    Channel::addMember(Client * user){
+    std::string name = user->getName();
+    auto it = this->_members.find(name);
+    if (it == this->_members.end())
+        this->_members.insert({name, static_cast<User*>(user)});
+}

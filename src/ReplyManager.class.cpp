@@ -48,7 +48,8 @@ bool     ReplyManager::connectionReply(Client * client, ConnectionEnum x){
     ReplyManager::t_clientInfo clientInfo = {};
     if (client) {
         clientInfo.nick = client->getName();
-        clientInfo.user = "tata";
+        if (User *user = dynamic_cast<User*>(client))
+            clientInfo.user = user->getUser();
         clientInfo.host = client->getSocketClient()->getAddr();
     }
     IRCServer::_message_mediator.sendReply(connectionReplyMessage(x, clientInfo), client);

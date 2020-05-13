@@ -36,6 +36,7 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
     bool not_error = true;
     if (choice == ClientChoice::USER)
     {
+    if (choice == USER)
         client = new User(socket);
         not_error = setNick(name, *static_cast<User*>(client));
     }

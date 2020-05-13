@@ -20,6 +20,7 @@ private:
     void userCommand(IRCMessage const &message, SocketClient *socket) const;
     void createClient(IRCMessage const &message, SocketClient *socket) const;
     void quitCommand(IRCMessage const &message, SocketClient *socket) const;
+    void joinCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessage::IRCMessageType, Command> _commands;
 };
 
