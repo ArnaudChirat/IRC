@@ -55,7 +55,8 @@ void    ChannelManager::displayChannels(void) const{
     std::cout << "Elements in channel list : " << std::endl; 
     for(auto it = this->_channels.begin(); it != this->_channels.end(); ++it){
         std::cout << it->first << std::endl;
-        for (auto itcli = it->second->getMembers().begin(); itcli != it->second->getMembers().end(); ++itcli)
-            std::cout << "   " << itcli->first << std::endl;
+        std::unordered_map<std::string, User*> members = it->second->getMembers();
+        for (auto itcli = members.begin(); itcli != members.end(); ++itcli)
+            std::cout << "   " << (*itcli).first << std::endl;
     }
 }

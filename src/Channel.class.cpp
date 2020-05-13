@@ -1,6 +1,5 @@
 #include "Channel.class.hpp"
 
-
 Channel::Channel(void) {}
 
 Channel::Channel(std::string const & name): _name(name) {}
