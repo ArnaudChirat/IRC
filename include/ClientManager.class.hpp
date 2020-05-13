@@ -2,6 +2,8 @@
 #define CLIENTMANAGER_CLASS_HPP
 #include "Client.class.hpp"
 #include "Socket.class.hpp"
+#include "Service.class.hpp"
+#include "User.class.hpp"
 #include <set>
 #include <map>
 class ClientManager
@@ -20,9 +22,9 @@ public:
     ~ClientManager(void);
     Client *createAddClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     Client *createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
-    bool setUser(std::string const &username, SocketClient *socket_client);
-    bool setNick(std::string const &nick, Client &client);
-    bool setService(std::string const &nick, Client &client);
+    bool setUser(std::string const &username, User &client);
+    bool setNick(std::string const &nick, User &client);
+    bool setService(std::string const &nick, Service &client);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     int getSize() const;

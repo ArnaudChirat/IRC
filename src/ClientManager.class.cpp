@@ -37,12 +37,12 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
     if (choice == ClientChoice::USER)
     {
         client = new User(socket);
-        not_error = setNick(name, *client);
+        not_error = setNick(name, *static_cast<User*>(client));
     }
     if (choice == ClientChoice::SERVICE)
     {
         client = new Service(socket);
-        not_error = setService(name, *client);
+        not_error = setService(name, *static_cast<Service*>(client));
     }
     if (!not_error)
     {
@@ -66,7 +66,7 @@ Client *ClientManager::getClient(SocketClient *socket)
     return (this->_clients.find(socket)->second);
 }
 
-bool ClientManager::setNick(std::string const &nick, Client &client)
+bool ClientManager::setNick(std::string const &nick, User &client)
 {
     if (checkName(USER, nick))
     {
@@ -82,7 +82,7 @@ bool ClientManager::setNick(std::string const &nick, Client &client)
     return (true);
 };
 
-bool ClientManager::setService(std::string const &nick, Client &client)
+bool ClientManager::setService(std::string const &nick, Service &client)
 {
     std::string real_name(nick + IRCServer::name);
     if (checkName(SERVICE, real_name))
@@ -101,18 +101,16 @@ bool ClientManager::setService(std::string const &nick, Client &client)
     return (true);
 };
 
-bool ClientManager::setUser(std::string const &username, SocketClient *socket_client)
+bool ClientManager::setUser(std::string const &username, User &client)
 {
-    Client *client = this->getClient(socket_client);
-    if (!client || client->getName().empty())
+    if (client.getName().empty())
         return (false);
-    User *user = static_cast<User *>(client);
-    user->setUser(username);
-    if (user->getUser().empty())
+    client.setUser(username);
+    if (client.getUser().empty())
         return (false);
-    client->status = Client::Status::CONNECTED;
-    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_WELCOME);
-    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_YOURHOST);
+    client.status = Client::Status::CONNECTED;
+    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_WELCOME);
+    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_YOURHOST);
     return (true);
 };
 
