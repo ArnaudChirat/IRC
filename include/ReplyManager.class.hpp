@@ -4,6 +4,7 @@
 
 #include "Client.class.hpp"
 #include "Channel.class.hpp"
+#include "IRCMessage.class.hpp"
 
 class ReplyManager
 {
@@ -175,14 +176,19 @@ public:
 
     }               t_serverInfo;
 
+    typedef struct s_msgInfo {
+        std::string     cmd;
+
+    }               t_msgInfo;
+
     static t_serverInfo serverInfo;
 
     std::string connectionReplyMessage(ConnectionEnum, t_clientInfo);
     std::string commandReplyMessage(CommandEnum, std::vector<std::string>);
-    std::string errorReplyMessage(ErrorEnum, t_clientInfo, t_channelInfo);
+    std::string errorReplyMessage(ErrorEnum, t_msgInfo, t_clientInfo, t_channelInfo);
 
     bool connectionReply(Client * client, ConnectionEnum x);
-    bool errorReply(Client *, Channel *, ErrorEnum x);
+    bool errorReply(IRCMessage *, Client *, Channel *, ErrorEnum x);
 
 
 

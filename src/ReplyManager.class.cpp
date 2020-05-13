@@ -26,7 +26,8 @@ std::string     ReplyManager::connectionReplyMessage(ConnectionEnum x, ReplyMana
     
 // }
 
-std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_clientInfo client,
+std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_msgInfo msg,
+                                                ReplyManager::t_clientInfo client,
                                                 ReplyManager::t_channelInfo channel){
     
         
@@ -36,6 +37,8 @@ std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_cli
     std::unordered_map<int, std::string> errorReply = {
         {ERR_NONICKNAMEGIVEN, ":No nickname given\n"},
         {ERR_NICKNAMEINUSE, client.nick + " :Nickname is already in use\n"},
+        {ERR_NEEDMOREPARAMS, client.nick + ' ' + msg.cmd + " :Not enough parameters\n"},
+        {ERR_NOSUCHCHANNEL, channel.name + " :No such channel\n"},
     };
     (void)channel;
 
@@ -54,24 +57,28 @@ bool     ReplyManager::connectionReply(Client * client, ConnectionEnum x){
     return true;
 }
 
-bool     ReplyManager::errorReply(Client * client, Channel * channel, ErrorEnum x){ 
+bool     ReplyManager::errorReply(IRCMessage * msg, Client * client, Channel * channel, ErrorEnum x){ 
 
+    ReplyManager::t_msgInfo msgInfo = {};
     ReplyManager::t_clientInfo clientInfo = {};
     ReplyManager::t_channelInfo channelInfo = {};
+    if (msg) {
+        msgInfo.cmd = msg->getCommand();
+    }
     if (client) {
         clientInfo.nick = client->getName();
         clientInfo.user = "getter user de client";
         clientInfo.host = client->getSocketClient()->getAddr();
     }
     if (channel) {
-        channelInfo.name = "getter de channel name";
+        channelInfo.name = channel->getName();
     }
 
     // A voir pour les messages à envoyer à toutes les personnes d'un channel...?
     // Envoyer client, channel, puis un flag 1 = client, 2 = channel... et le message
     //mediator gère la transmission?
 
-    IRCServer::_message_mediator.sendReply(errorReplyMessage(x, clientInfo, channelInfo), client);
+    IRCServer::_message_mediator.sendReply(errorReplyMessage(x, msgInfo, clientInfo, channelInfo), client);
     return true;
 }   
 

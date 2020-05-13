@@ -44,10 +44,12 @@ private:
     
     std::unordered_map<std::string, Channel*> _channels;
 
-    std::vector<std::string>  _splitParam(std::string const &, char const &) const;
-    bool    _verify(IRCMessage const &, Client *) const;
-    Channel *    _createChannel(std::string const &, std::vector<std::string> const &) const;
-    void    _addChannel(std::string const &, Channel * channel);
+    std::vector<std::string>  _splitParam(std::string const &, std::string const &) const;
+    bool    _verify(std::string) const;
+    Channel *    _createChannel(std::string const &) const;
+    void    _addChannel(std::string const &, Channel *);
+    void    _createAddChannel(std::string, Client *);
+
 
     
 

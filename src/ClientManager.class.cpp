@@ -35,7 +35,7 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         client = new User(socket);
     client->setName(name);
     if (checkName(choice, name)){
-        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        IRCServer::_reply_manager.errorReply(NULL, client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
         delete client; 
         return (NULL);
     }
@@ -68,7 +68,7 @@ bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
     if (checkName(USER, nick)){
         std::string oldNick = client->getName();
         client->setName(nick);
-        IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        IRCServer::_reply_manager.errorReply(NULL, client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
         client->setName(oldNick);
         return (false);
     }

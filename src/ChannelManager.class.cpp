@@ -11,48 +11,66 @@ size_t  ChannelManager::getSize(void) const{
     return this->_channels.size();
 }
 
-std::vector<std::string>  ChannelManager::_splitParam(std::string const & param, char const & delimiter) const{
+void    ChannelManager::handleJoinChannel(IRCMessage const & msg, Client * user) {
+    if (!msg.getParameters().size()){
+        // on fait une copie pour garder la const_ness du message initial
+        IRCMessage  msgCopy = msg;
+        IRCServer::_reply_manager.errorReply(&msgCopy, user, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+        return;
+    }
+    std::vector<std::string>  names;
+    std::vector<std::string>  keys;
+    names = _splitParam(msg.getParameters().at(0), ", ");
+    keys = (msg.getParameters().size() > 1 ? _splitParam(msg.getParameters().at(1), ", ") : keys);
+    // verify keys?
+    for (auto itName = names.begin(); itName != names.end(); ++itName)
+        _createAddChannel(*itName, user);
+}
+
+std::vector<std::string>  ChannelManager::_splitParam(std::string const & param, std::string const & delimiters) const{
     size_t idx = 0;
     size_t foundIdx = 0;
     std::vector<std::string> splitParams;
     while (idx < param.size()){
-        if ((foundIdx = param.find(delimiter)) != std::string::npos){
-            splitParams.
+        if ((foundIdx = param.find_first_of(delimiters, idx)) == std::string::npos){
+            splitParams.push_back(param.substr(idx));
+            break;
+        }
+        else {
+            splitParams.push_back(param.substr(idx, foundIdx - idx));
+            idx = foundIdx + 1;
         }
     }
+    return splitParams;
 }
 
-void    ChannelManager::handleJoinChannel(IRCMessage const & msg, Client * user) {
-    if (!msg.getParameters().size()){
-        IRCServer::_reply_manager.errorReply(user, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+void    ChannelManager::_createAddChannel(std::string name, Client * user) {
+    if (!_verify(name)){
+        Channel *   errorChannel = new Channel(name);
+        IRCServer::_reply_manager.errorReply(NULL, user, errorChannel, ReplyManager::ERR_NOSUCHCHANNEL);
+        delete errorChannel;
+        return;
     }
-    // decoupage des noms de channels et keys dans des vector names et keys
-    std::vector<std::string>  names = _splitParam(msg.getParameters().at(0), ',');
-    std::vector<std::string>  keys = (msg.getParameters().size() > 1 ? _splitParam(msg.getParameters().at(1), ',') : 0);
-    // verify names. and keys? => erroreplies
-    std::string channelName = msg.getParameters().at(0);
-    auto it = this->_channels.find(channelName);
+    auto it = this->_channels.find(name);
     if (it == this->_channels.end()){
-        Channel * channel = this->_createChannel(channelName, msg.getParameters());
-        this->_addChannel(channelName, channel);
+        Channel * channel = this->_createChannel(name);
+        this->_addChannel(name, channel);
         channel->addMember(user);
     }
     else
         it->second->addMember(user);
 }
 
-bool    ChannelManager::_verify(IRCMessage const & msg, Client * user) const {
-    
-    std::string::const_iterator it = msg.getParameters().at(0).begin();
-    if (*it == '#' | *it == '&' | *it == '+' | *it == '!')
+bool    ChannelManager::_verify(std::string name) const {
+    char c = name.at(0);
+    if (c == '#' | c == '&' | c == '+' | c == '!')
         return true;
     // A compléter        
     return false;
 }
 
-Channel *    ChannelManager::_createChannel(std::string const & name, std::vector<std::string> const & params) const{
+Channel *    ChannelManager::_createChannel(std::string const & name) const{
     Channel *   newChannel = new Channel(name);
-    (void)params;
     //Ici on pourra set tous les params qui seraient donnés avec le JOIN (modes...) -> a voir si 
     // ca se fait avec le Join à la creation
     return newChannel;
