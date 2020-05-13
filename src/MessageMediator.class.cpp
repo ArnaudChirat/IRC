@@ -73,8 +73,9 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
 {
     Client * user = IRCServer::_client_manager.getClient(socket);
     std::cout << "join command" << std::endl;
-    if (IRCServer::_channel_manager.verify(message, user))
-        IRCServer::_channel_manager.handleJoinChannel(message, user);
+    // if (IRCServer::_channel_manager.verify(message, user))
+    IRCServer::_channel_manager.handleJoinChannel(message, user);
+    // dispay channels à virer asap
     IRCServer::_channel_manager.displayChannels();
     
 }

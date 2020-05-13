@@ -11,21 +11,25 @@ size_t  ChannelManager::getSize(void) const{
     return this->_channels.size();
 }
 
-
-bool    ChannelManager::verify(IRCMessage const & msg, Client * user) const {
-    if (!msg.getParameters().size()){
-        IRCServer::_reply_manager.errorReply(user, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+std::vector<std::string>  ChannelManager::_splitParam(std::string const & param, char const & delimiter) const{
+    size_t idx = 0;
+    size_t foundIdx = 0;
+    std::vector<std::string> splitParams;
+    while (idx < param.size()){
+        if ((foundIdx = param.find(delimiter)) != std::string::npos){
+            splitParams.
+        }
     }
-    else {
-        std::string::const_iterator it = msg.getParameters().at(0).begin();
-        if (*it == '#' | *it == '&' | *it == '+' | *it == '!')
-            return true;
-        // A compléter        
-    }
-    return false;
 }
 
 void    ChannelManager::handleJoinChannel(IRCMessage const & msg, Client * user) {
+    if (!msg.getParameters().size()){
+        IRCServer::_reply_manager.errorReply(user, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+    }
+    // decoupage des noms de channels et keys dans des vector names et keys
+    std::vector<std::string>  names = _splitParam(msg.getParameters().at(0), ',');
+    std::vector<std::string>  keys = (msg.getParameters().size() > 1 ? _splitParam(msg.getParameters().at(1), ',') : 0);
+    // verify names. and keys? => erroreplies
     std::string channelName = msg.getParameters().at(0);
     auto it = this->_channels.find(channelName);
     if (it == this->_channels.end()){
@@ -35,6 +39,15 @@ void    ChannelManager::handleJoinChannel(IRCMessage const & msg, Client * user)
     }
     else
         it->second->addMember(user);
+}
+
+bool    ChannelManager::_verify(IRCMessage const & msg, Client * user) const {
+    
+    std::string::const_iterator it = msg.getParameters().at(0).begin();
+    if (*it == '#' | *it == '&' | *it == '+' | *it == '!')
+        return true;
+    // A compléter        
+    return false;
 }
 
 Channel *    ChannelManager::_createChannel(std::string const & name, std::vector<std::string> const & params) const{
