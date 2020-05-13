@@ -13,6 +13,7 @@ public:
     User & setUser(std::string const &user);
     User & setOper(bool const oper);
     std::string getUser() const;
+    virtual std::string getName() const;
     bool        getOper() const;
 private:
     User(void);

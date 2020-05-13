@@ -35,6 +35,7 @@ public:
     size_t  getSize(void) const;
     void    handleJoinChannel(IRCMessage const &, Client *);
 
+    // pour debug. A virer asap
     void    displayChannels(void) const;
 
 
@@ -49,9 +50,12 @@ private:
     Channel *    _createChannel(std::string const &) const;
     void    _addChannel(std::string const &, Channel *);
     void    _createAddChannel(std::string, Client *);
+<<<<<<< HEAD
 
 
     
+=======
+>>>>>>> JOIN channel - split names okay
 
 };
 

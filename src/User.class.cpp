@@ -54,6 +54,11 @@ std::string User::getUser() const
     return (this->_user);
 }
 
+std::string User::getName() const
+{
+    return (this->_name);
+}
+
 bool User::getOper() const
 {
     return (this->_oper);

@@ -56,6 +56,9 @@ void    ChannelManager::_createAddChannel(std::string name, Client * user) {
         Channel * channel = this->_createChannel(name);
         this->_addChannel(name, channel);
         channel->addMember(user);
+        IRCServer::_reply_manager.commandReply(user, channel, ReplyManager::RPL_WELCOMECHAN);
+        IRCServer::_reply_manager.commandReply(user, channel, ReplyManager::RPL_NAMREPLY);
+        IRCServer::_reply_manager.commandReply(user, channel, ReplyManager::RPL_ENDOFNAMES);
     }
     else
         it->second->addMember(user);
