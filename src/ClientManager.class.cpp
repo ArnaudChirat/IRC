@@ -1,6 +1,7 @@
 #include "ClientManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
+#include "Utility.hpp"
 #include <iostream>
 ClientManager::ClientManager(void)
 {
@@ -35,6 +36,13 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         client = new User(socket);
     client->setName(name);
     if (checkName(choice, name)){
+        //exemple de structure parameter crée avec un client
+        Utility::Parameters parameters = Utility::Parameters_from_client(*client);
+        std::cout << "Parameters ----> " << parameters.name << " : " << parameters.channel << std::endl;
+        // sinon peut être utilisé comme ceci
+        Utility::Parameters parametre_2 = {.user="Super"};
+        std::cout << "Parameters 2 ----> " << parametre_2.user << " : " << parametre_2.channel << std::endl;
+
         IRCServer::_reply_manager.errorReply(client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
         delete client; 
         return (NULL);

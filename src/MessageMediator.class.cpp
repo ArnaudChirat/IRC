@@ -39,10 +39,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     {
         user = static_cast<User*>(IRCServer::_client_manager.getClient(socket));
         if (!user)
-            client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.getParameters()[0]);
+            client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.parameters_struct.nickname);
         else
         {
-            IRCServer::_client_manager.setNick(message.getParameters()[0], socket);
+            IRCServer::_client_manager.setNick(message.parameters_struct.nickname, socket);
         }
     }
     if (client)
@@ -50,12 +50,12 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     else if(user)
         std::cout << "User already exist nickname is : " << user->getName() << std::endl;
     else
-        std::cout << "Nick name already use : " << message.getParameters()[0] << std::endl;
+        std::cout << "Nick name already use : " << message.parameters_struct.nickname << std::endl;
 }
 
 void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    if (!IRCServer::_client_manager.setUser(message.getParameters()[0], socket))
+    if (!IRCServer::_client_manager.setUser(message.parameters_struct.user, socket))
         std::cout << "Nick not set or socket doesnt exist" << std::endl;
     else
         std::cout << "Client Connected" << std::endl;
@@ -66,7 +66,7 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
     std::cout << "quit command" << std::endl;
     IRCServer::_client_manager.deleteClient(socket, ClientManager::USER);
     IRCServer::_socket_manager.deleteSocket(socket);
-    std::cout << "someone has quit" << (message.getParameters().empty() ?  "" : message.getParameters()[0])  << std::endl;
+    std::cout << "someone has quit" << message.parameters_struct.quit_message  << std::endl;
 }
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const

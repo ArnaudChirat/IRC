@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "Utility.hpp"
 // Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
@@ -120,7 +121,7 @@ public:
     IRCMessage &setTrail(std::string const &trail);
 
     std::string getMessage() const;
-    bool isValid() const;
+    bool isValid();
     // std::string getPrefix() const;
     // std::string getCommand() const;
     // std::string getTrail() const;
@@ -137,6 +138,7 @@ public:
     static const std::string message;
     static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
     IRCMessageType type;
+    Utility::Parameters parameters_struct;
 private:
     IRCMessage(void);
     bool    _is_valid;

@@ -61,6 +61,7 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     std::istream_iterator<std::string> end;
     std::vector<std::string> vstrings(begin, end);
     this->_paramaters = vstrings;
+    
     return (*this);
 }
 
@@ -85,9 +86,22 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid() const
+bool IRCMessage::isValid()
 {
-    return (this->_is_valid);
+    bool validation = false;
+    if (this->type == USER && _paramaters.size() >= 3)
+    {
+        parameters_struct.user = _paramaters[0];
+        parameters_struct.mode = std::stoi(_paramaters[1]);
+        parameters_struct.real_name = _trail;
+        validation = true;
+    }
+    else if (this->type == NICK && _paramaters.size() >= 1)
+    {
+        parameters_struct.nickname = _paramaters[0];
+        validation = true;
+    }
+    return (validation);
 }
 
 /*
