@@ -1,4 +1,5 @@
 #include "User.class.hpp"
+#include "Channel.class.hpp"
 #include "IRCMessage.class.hpp"
 #include <regex>
 User::User(SocketClient *socket_client) : Client(socket_client), _oper(false)
@@ -62,4 +63,17 @@ std::string User::getName() const
 bool User::getOper() const
 {
     return (this->_oper);
+}
+
+std::unordered_map<std::string, Channel*>  User::getChannels(void) const{
+    return this->_channelsJoined;
+}
+
+
+void User::addChannel(Channel * channel){
+    this->_channelsJoined.insert({channel->getName(), channel});
+}
+
+void User::deleteChannel(Channel * channel){
+    this->_channelsJoined.erase(channel->getName());
 }

@@ -25,12 +25,13 @@ std::string     ReplyManager::commandReplyMessage(CommandEnum x, ReplyManager::t
     oss << std::setfill('0') << std::setw(3) << x;
 
     std::unordered_map<int, std::string> commandReply = {
-        {RPL_WELCOMECHAN, "!~"+client.user+'@'+client.host+" JOIN :"+channel.name+"\n"},
-        {RPL_NAMREPLY, channel.type+" "+channel.name+" :"+channel.members+"\n"},
-        {RPL_ENDOFNAMES, channel.name+" :End of NAMES list\n"},
+        {RPL_WELCOMECHAN, ":"+client.nick+"!~"+client.user+'@'+client.host+" JOIN :"+channel.name+"\n"},
+        {RPL_NAMREPLY, oss.str()+' '+client.nick+' '+channel.type+" "+channel.name+" :"+channel.members+"\n"},
+        {RPL_ENDOFNAMES, oss.str()+' '+channel.name+" :End of NAMES list\n"},
+        {RPL_LEAVECHANN, ":"+client.nick+"!~"+client.user+'@'+client.host+" PART :"+channel.name+"\n"},
     };
 
-    return oss.str()+' '+client.nick+' '+commandReply.at(x);
+    return commandReply.at(x);
 }
 
 std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_msgInfo msg,

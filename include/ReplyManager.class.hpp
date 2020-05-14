@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Client.class.hpp"
+#include "User.class.hpp"
 #include "Channel.class.hpp"
 #include "IRCMessage.class.hpp"
 
@@ -73,6 +74,7 @@ public:
         RPL_WELCOMECHAN = 330,
         RPL_NOTOPIC,
         RPL_TOPIC,
+        RPL_LEAVECHANN,
         RPL_INVITING = 341,
         RPL_SUMMONING,
         RPL_INVITELIST = 346,
