@@ -1,6 +1,6 @@
 #include "IRCMessage.class.hpp"
 #include "IRCServer.class.hpp"
-#include "Utility.hpp"
+#include "ReplyManager.class.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -100,23 +100,23 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid()
+bool IRCMessage::isValid(SocketClient * socket)
 {
     bool validation = false;
     if (this->type == USER && _parameters.size() >= 3)
     {
-        parameters_struct.user = _parameters[0];
-        parameters_struct.mode = std::stoi(_parameters[1]);
-        parameters_struct.real_name = _trail;
+        params.user = _parameters[0];
+        params.mode = std::stoi(_parameters[1]);
+        params.real_name = _trail;
         validation = true;
     }
     else if (this->type == NICK && _parameters.size() >= 1)
     {
-        parameters_struct.nickname = _parameters[0];
+        params.nickname = _parameters[0];
         validation = true;
     }
-    // else
-        // IRCServer::_reply_manager.errorReply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS);
+    else if (!_parameters.size())
+        IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
 
     return (validation);
 }

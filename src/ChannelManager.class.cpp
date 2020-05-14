@@ -1,6 +1,7 @@
 #include "ChannelManager.class.hpp"
 #include "User.class.hpp"
 #include "IRCServer.class.hpp"
+#include "Utility.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -31,10 +32,13 @@ void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
     names = _splitParam(msg.getParameters().at(0), ", ");
     partMessage = (msg.getParameters().size() > 1 ? msg.getParameters()[1] : partMessage);
     for (auto it = names.begin(); it != names.end(); ++it){
-        if (!(channel = this->getChannel(*it)))
-            _errorNoChannelCreation(*it, user, ReplyManager::ERR_NOSUCHCHANNEL);
+        if (!(channel = this->getChannel(*it))){
+            Parameters param(*user);
+            param.channelName = *it;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
+        }
         else if (!(channel = user->getChannel(*it)))
-            IRCServer::_reply_manager.errorReply(NULL, static_cast<Client*>(user), channel, ReplyManager::ERR_NOTONCHANNEL);
+            IRCServer::_reply_manager->reply(Parameters(*user).paramChannel(*channel), ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
         else
             this->_leaveOneChann(user, channel);      
     }
@@ -59,7 +63,9 @@ std::vector<std::string>  ChannelManager::_splitParam(std::string const & param,
 
 void    ChannelManager::_createAddChannel(std::string name, User * user) {
     if (!_verify(name)){
-        _errorNoChannelCreation(name, user, ReplyManager::ERR_NOSUCHCHANNEL);
+        Parameters param(*user);
+        param.channelName = name;
+        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
         return;
     }
     auto it = this->_channels.find(name);
@@ -77,10 +83,10 @@ void    ChannelManager::_createAddChannel(std::string name, User * user) {
 }
 
 void    ChannelManager::_welcomeMessage(User * user, Channel * channel) const{
-    Client * client = static_cast<Client*>(user);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_WELCOMECHAN);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_NAMREPLY);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_ENDOFNAMES);
+    Parameters param = Parameters(*user).paramChannel(*channel);
+    _sendParamToAll(param, channel, ReplyManager::RPL_WELCOMECHAN);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_ENDOFNAMES, user->getSocketClient());
 }
 
 void    ChannelManager::_newMember(User * user, Channel * channel) {
@@ -116,15 +122,10 @@ void    ChannelManager::_leaveAllChann(User * user) const {
 }
 
 void    ChannelManager::_leaveOneChann(User * user, Channel * channel) const {
+    Parameters  param = Parameters(*user).paramChannel(*channel);
+    _sendParamToAll(param, channel, ReplyManager::RPL_LEAVECHANN);
     channel->deleteMember(user);
     user->deleteChannel(channel);
-    IRCServer::_reply_manager.commandReply(static_cast<Client*>(user), channel, ReplyManager::RPL_LEAVECHANN);
-}
-
-void    ChannelManager::_errorNoChannelCreation(std::string const & name, Client * client, ReplyManager::ErrorEnum x){
-        Channel *   errorChannel = new Channel(name);
-        IRCServer::_reply_manager.errorReply(NULL, client, errorChannel, x);
-        delete errorChannel;
 }
 
 size_t  ChannelManager::getSize(void) const{

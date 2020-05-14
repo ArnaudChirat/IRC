@@ -1,5 +1,6 @@
 #include "Utility.hpp"
 #include "IRCServer.class.hpp"
+#include "IRCMessage.class.hpp"
 
 Parameters::Parameters(void) {}
 
@@ -21,15 +22,17 @@ Parameters::Parameters(IRCMessage const & msg) {
 
 Parameters & Parameters::paramClient(Client const & client)
 {
-    this->clientName = client.getName();
+    this->name = client.getName();
+    this->host = client.getSocketClient()->getAddr();
     this->server = IRCServer::name;
     return *this;
 }
 
 Parameters & Parameters::paramUser(User const & user)
 {
-    this->clientName = user.getName();
+    this->nickname = user.getName();
     this->user = user.getUser();
+    this->host = user.getSocketClient()->getAddr();
     this->server = IRCServer::name;
     return *this;
 }
@@ -38,6 +41,7 @@ Parameters & Parameters::paramChannel(Channel const & channel)
 {
     this->channelName = channel.getName();
     this->channelMembers = channel.getMembersString();
+    this->channelType = "=";
     this->server = IRCServer::name;
     return *this;
 }

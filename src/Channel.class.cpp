@@ -1,6 +1,5 @@
 #include "User.class.hpp"
 #include "Channel.class.hpp"
-#include <ostringstream>
 
 Channel::Channel(void) {}
 
@@ -25,8 +24,8 @@ void    Channel::deleteMember(User * user){
 }
 
 std::string     Channel::getMembersString(void) const {
-    std::ostringstream  oss;
+    std::string  str;
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
-        oss << it->first << ' ';
-    return oss.str();
+        str += it->first + ' ';
+    return str;
 }

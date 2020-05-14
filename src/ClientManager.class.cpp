@@ -1,4 +1,5 @@
 #include "ClientManager.class.hpp"
+#include "ReplyManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Utility.hpp"
@@ -37,13 +38,8 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
     client->setName(name);
     if (checkName(choice, name)){
         //exemple de structure parameter crée avec un client
-        Utility::Parameters parameters = Utility::Parameters_from_client(*client);
-        std::cout << "Parameters ----> " << parameters.name << " : " << parameters.channel << std::endl;
-        // sinon peut être utilisé comme ceci
-        Utility::Parameters parametre_2 = {.user="Super"};
-        std::cout << "Parameters 2 ----> " << parametre_2.user << " : " << parametre_2.channel << std::endl;
-
-        IRCServer::_reply_manager.errorReply(NULL, client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        Parameters parameters(*client);
+        IRCServer::_reply_manager->reply(parameters, ReplyManager::ERR_NICKNAMEINUSE, socket);
         delete client; 
         return (NULL);
     }
@@ -77,10 +73,9 @@ bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)
     if (!client)
         return (false);
     if (checkName(USER, nick)){
-        std::string oldNick = client->getName();
-        client->setName(nick);
-        IRCServer::_reply_manager.errorReply(NULL, client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
-        client->setName(oldNick);
+        Parameters param = {};
+        param.nickname = nick;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NICKNAMEINUSE, socket);
         return (false);
     }
     this->_names_used.erase(Key(USER,client->getName()));
@@ -99,8 +94,9 @@ bool    ClientManager::setUser(std::string const &username, SocketClient *socket
     if (user->getUser().empty())
         return (false);
     client->status = Client::Status::CONNECTED;
-    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_WELCOME);
-    IRCServer::_reply_manager.connectionReply(client, ReplyManager::RPL_YOURHOST);
+    Parameters param(*user);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, socket_client);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, socket_client);
     return (true);
 };
 

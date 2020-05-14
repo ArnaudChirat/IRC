@@ -18,18 +18,11 @@ public:
     User & setOper(bool const oper);
     std::string getUser() const;
     std::unordered_map<std::string, Channel*>   getChannels(void) const;
-<<<<<<< HEAD
-=======
     Channel *   getChannel(std::string const &) const;
->>>>>>> JOIN 0 and PART
-    virtual std::string getName() const;
     bool        getOper() const;
     void addChannel(Channel*);
     void deleteChannel(Channel*);
-<<<<<<< HEAD
-=======
      
->>>>>>> JOIN 0 and PART
 private:
     User(void);
     bool    _oper;

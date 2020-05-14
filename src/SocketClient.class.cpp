@@ -1,5 +1,6 @@
 #include "SocketClient.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "MessageMediator.class.hpp"
 #include <iostream>
 #include "Utility.hpp"
 #include <time.h>
@@ -32,7 +33,7 @@ bool SocketClient::recvMessage() {
     if (ret == 0)
     {
         std::cout << "Connexion terminee" << std::endl;
-        IRCServer::_client_manager.deleteClient(this, ClientManager::ClientChoice::USER);
+        IRCServer::_client_manager->deleteClient(this, ClientManager::ClientChoice::USER);
         return (true);
     }
     else if (ret == -1)
@@ -47,8 +48,8 @@ bool SocketClient::recvMessage() {
         //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
         IRCMessage IRC_message(message, this);
-        if (IRC_message.isValid())
-            IRCServer::_message_mediator.handleMessage(IRC_message, this);
+        if (IRC_message.isValid(this))
+            IRCServer::_message_mediator->handleMessage(IRC_message, this);
     }
     return (false);
 }

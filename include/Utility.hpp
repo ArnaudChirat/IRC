@@ -3,11 +3,11 @@
 #include <netinet/in.h>
 #include "Client.class.hpp"
 #include "User.class.hpp"
-#include "IRCMessage.class.hpp"
 #include "Channel.class.hpp"
 #include <string>
 #define BUFF_MSG 512
 
+class IRCMessage;
 
 struct Parameters
     {
@@ -17,11 +17,13 @@ struct Parameters
         std::string real_name;
         std::string nickname;
         std::string password;
-        std::string clientName;
+        std::string name;
+        std::string host;
         std::string quit_message;
         std::string server;
         std::string comment;
         std::string channelName;
+        std::string channelType;
         std::string channelMembers;
         std::string key;
         std::string target;

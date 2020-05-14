@@ -57,10 +57,19 @@ private:
     void    _welcomeMessage(User * client, Channel * channel) const;
     void    _leaveAllChann(User * user) const;
     void    _leaveOneChann(User * user, Channel * channel) const;
-    void    _errorNoChannelCreation(std::string const &, Client *, ReplyManager::ErrorEnum);
+
+    template< typename T >
+    void    _sendParamToAll(Parameters const &, Channel *, T const &) const;
 
 
 
 };
+
+template <typename T>
+void     ChannelManager::_sendParamToAll(Parameters const & param, Channel * channel, T const & replyEnum) const
+{
+    for (auto it = channel->getMembers().begin(); it != channel->getMembers().end(); ++it)
+        IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+}
 
 #endif

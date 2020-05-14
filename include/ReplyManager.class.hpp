@@ -5,7 +5,9 @@
 #include "Client.class.hpp"
 #include "User.class.hpp"
 #include "Channel.class.hpp"
+#include "IRCServer.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "MessageMediator.class.hpp"
 #include "Utility.hpp"
 
 class ReplyManager
@@ -163,14 +165,22 @@ public:
         ERR_USERSDONTMATCH,
     };
 
-    std::string connectionReplyMessage(ConnectionEnum, Parameters const &);
-    std::string commandReplyMessage(CommandEnum, Parameters const &);
-    std::string errorReplyMessage(ErrorEnum, Parameters const &);
+    std::string replyMessage(ConnectionEnum, Parameters const &);
+    std::string replyMessage(CommandEnum, Parameters const &);
+    std::string replyMessage(ErrorEnum, Parameters const &);
 
-    bool connectionReply(Parameters const &, ConnectionEnum x);
-    bool errorReply(Parameters const &, ErrorEnum x);
-    bool commandReply(Parameters const &, CommandEnum x);
+    template< typename T >
+    bool reply(Parameters const &, T const &, SocketClient *);
 
 };
+
+template <typename T>
+bool     ReplyManager::reply(Parameters const & params, T const & enumType, SocketClient * socket){ 
+    
+    std::string reply = replyMessage(enumType, params);
+    IRCServer::_message_mediator->sendReply(reply, socket);
+    return true;
+}
+
 
 #endif

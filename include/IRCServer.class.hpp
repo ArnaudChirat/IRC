@@ -1,10 +1,13 @@
 #ifndef IRCSERVER_CLASS_HPP
 #define IRCSERVER_CLASS_HPP
-#include "SocketManager.class.hpp"
-#include "MessageMediator.class.hpp"
-#include "ClientManager.class.hpp"
-#include "ReplyManager.class.hpp"
-#include "ChannelManager.class.hpp"
+
+#include <string>
+
+class SocketManager;
+class MessageMediator;
+class ClientManager;
+class ReplyManager;
+class ChannelManager;
 
 class IRCServer
 {
@@ -18,11 +21,11 @@ public:
 
     void run();
     void stop();
-    static SocketManager _socket_manager;
-    static MessageMediator _message_mediator;
-    static ClientManager _client_manager;
-    static ReplyManager _reply_manager;
-    static ChannelManager _channel_manager;
+    static SocketManager * _socket_manager;
+    static MessageMediator * _message_mediator;
+    static ClientManager * _client_manager;
+    static ReplyManager * _reply_manager;
+    static ChannelManager * _channel_manager;
 };
 
 #endif
