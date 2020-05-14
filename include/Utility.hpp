@@ -2,6 +2,8 @@
 #define UTILITY_H
 #include <netinet/in.h>
 #include "Client.class.hpp"
+#include "User.class.hpp"
+#include "Channel.class.hpp"
 #include <string>
 #define BUFF_MSG 512
 namespace Utility 
@@ -17,18 +19,22 @@ namespace Utility
         std::string real_name;
         std::string nickname;
         std::string password;
-        std::string name;
+        std::string clientName;
         std::string quit_message;
         std::string server;
         std::string comment;
-        std::string channel;
+        std::string channelName;
+        std::string channelMembers;
         std::string key;
         std::string target;
         std::string msg_target;
         std::string text;
     };
 
-    Parameters Parameters_from_client(Client &);
+    Parameters parametersClient(Client const &);
+    Parameters parametersUser(User const &);
+    Parameters parametersChannel(Channel const &);
+    Parameters parametersUserChannel(User &, Channel const &);
     
 }
 #endif
