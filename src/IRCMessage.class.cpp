@@ -1,5 +1,6 @@
 #include "IRCMessage.class.hpp"
 #include "IRCServer.class.hpp"
+#include "Utility.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -114,8 +115,8 @@ bool IRCMessage::isValid()
         parameters_struct.nickname = _parameters[0];
         validation = true;
     }
-    else
-        IRCServer::_reply_manager.errorReply(this, clientError, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+    // else
+        // IRCServer::_reply_manager.errorReply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS);
 
     return (validation);
 }

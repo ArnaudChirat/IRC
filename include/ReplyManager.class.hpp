@@ -6,6 +6,7 @@
 #include "User.class.hpp"
 #include "Channel.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "Utility.hpp"
 
 class ReplyManager
 {
@@ -162,42 +163,13 @@ public:
         ERR_USERSDONTMATCH,
     };
 
-    typedef struct s_clientInfo {
-        std::string     nick;
-        std::string     user;
-        std::string     host;
+    std::string connectionReplyMessage(ConnectionEnum, Parameters const &);
+    std::string commandReplyMessage(CommandEnum, Parameters const &);
+    std::string errorReplyMessage(ErrorEnum, Parameters const &);
 
-    }               t_clientInfo;
-
-    typedef struct s_channelInfo {
-        std::string     name;
-        std::string     members;
-        std::string     type;
-
-    }               t_channelInfo;
-
-    typedef struct s_serverInfo {
-        std::string     name;
-
-    }               t_serverInfo;
-
-    typedef struct s_msgInfo {
-        std::string     cmd;
-
-    }               t_msgInfo;
-
-    static t_serverInfo serverInfo;
-
-    std::string connectionReplyMessage(ConnectionEnum, t_clientInfo);
-    std::string commandReplyMessage(CommandEnum, t_clientInfo, t_channelInfo);
-    std::string errorReplyMessage(ErrorEnum, t_msgInfo, t_clientInfo, t_channelInfo);
-
-    bool connectionReply(Client * client, ConnectionEnum x);
-    bool errorReply(IRCMessage *, Client *, Channel *, ErrorEnum x);
-    bool commandReply(Client * client, Channel * channel, CommandEnum x);
-    void    _buildMsgInfo(IRCMessage * msg, t_msgInfo & msgInfo);
-    void    _buildClientInfo(Client * client, t_clientInfo & clientInfo);
-    void    _buildChannelInfo(Channel * channel, t_channelInfo & channelInfo);
+    bool connectionReply(Parameters const &, ConnectionEnum x);
+    bool errorReply(Parameters const &, ErrorEnum x);
+    bool commandReply(Parameters const &, CommandEnum x);
 
 };
 

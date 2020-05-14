@@ -4,9 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-ReplyManager::t_serverInfo  ReplyManager::serverInfo = {.name = IRCServer::name};
-
-std::string     ReplyManager::connectionReplyMessage(ConnectionEnum x, ReplyManager::t_clientInfo client) {
+std::string     ReplyManager::connectionReplyMessage(ConnectionEnum x, Parameters const &) {
     
     std::ostringstream oss;
     oss << std::setfill('0') << std::setw(3) << x;
@@ -19,8 +17,7 @@ std::string     ReplyManager::connectionReplyMessage(ConnectionEnum x, ReplyMana
     return oss.str() + ' ' + connectionReply.at(x);
 }
 
-std::string     ReplyManager::commandReplyMessage(CommandEnum x, ReplyManager::t_clientInfo client,
-                                                ReplyManager::t_channelInfo channel){
+std::string     ReplyManager::commandReplyMessage(CommandEnum x, Parameters const &){
     std::ostringstream oss;
     oss << std::setfill('0') << std::setw(3) << x;
 
@@ -34,9 +31,7 @@ std::string     ReplyManager::commandReplyMessage(CommandEnum x, ReplyManager::t
     return commandReply.at(x);
 }
 
-std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_msgInfo msg,
-                                                ReplyManager::t_clientInfo client,
-                                                ReplyManager::t_channelInfo channel){
+std::string     ReplyManager::errorReplyMessage(ErrorEnum x, Parameters const &){
     
         
     std::ostringstream oss;
@@ -53,62 +48,23 @@ std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_msg
     return oss.str() + ' ' + errorReply.at(x);
 }
 
-bool     ReplyManager::connectionReply(Client * client, ConnectionEnum x){ 
-
-    ReplyManager::t_clientInfo clientInfo = {};
-    _buildClientInfo(client, clientInfo);
-    IRCServer::_message_mediator.sendReply(connectionReplyMessage(x, clientInfo), client);
+bool     ReplyManager::connectionReply(Parameters const &, ConnectionEnum x){ 
+    
+    std::string reply = commandReplyMessage(x, params);
+    IRCServer::_message_mediator.sendReply(reply, socket);
     return true;
 }
 
-bool     ReplyManager::commandReply(Client * client, Channel * channel, CommandEnum x){ 
+bool     ReplyManager::commandReply(Parameters const & params, CommandEnum x){ 
 
-    ReplyManager::t_msgInfo msgInfo = {};
-    ReplyManager::t_clientInfo clientInfo = {};
-    ReplyManager::t_channelInfo channelInfo = {};
-    _buildClientInfo(client, clientInfo);
-    _buildChannelInfo(channel, channelInfo);
-
-    IRCServer::_message_mediator.sendReply(commandReplyMessage(x, clientInfo, channelInfo), client);
+    std::string reply = commandReplyMessage(x, params);
+    IRCServer::_message_mediator.sendReply(reply, socket);
     return true;
 }   
 
-bool     ReplyManager::errorReply(IRCMessage * msg, Client * client, Channel * channel, ErrorEnum x){ 
+bool     ReplyManager::errorReply(Parameters const & params, ErrorEnum x){ 
 
-    ReplyManager::t_msgInfo msgInfo = {};
-    ReplyManager::t_clientInfo clientInfo = {};
-    ReplyManager::t_channelInfo channelInfo = {};
-    _buildClientInfo(client, clientInfo);
-    _buildChannelInfo(channel, channelInfo);
-    _buildMsgInfo(msg, msgInfo);
-
-    IRCServer::_message_mediator.sendReply(errorReplyMessage(x, msgInfo, clientInfo, channelInfo), client);
+    std::string reply = errorReplyMessage(x, params);
+    IRCServer::_message_mediator.sendReply(reply, socket);
     return true;
 }   
-
-void    ReplyManager::_buildMsgInfo(IRCMessage * msg, ReplyManager::t_msgInfo & msgInfo) {
-    if (msg) {
-        msgInfo.cmd = msg->getCommand();
-    }
-}
-
-void    ReplyManager::_buildClientInfo(Client * client, ReplyManager::t_clientInfo & clientInfo) {
-    if (client) {
-        clientInfo.nick = client->getName();
-        clientInfo.user = dynamic_cast<User*>(client)->getUser();
-        clientInfo.host = client->getSocketClient()->getAddr();
-    }
-}
-
-void    ReplyManager::_buildChannelInfo(Channel * channel, ReplyManager::t_channelInfo & channelInfo) {
-    if (channel) {
-        std::ostringstream  chanOSS;
-        std::unordered_map<std::string, User*> members = channel->getMembers();
-        for (auto it = members.begin(); it != members.end(); ++it)
-            chanOSS << it->first << ' ';
-
-        channelInfo.name = channel->getName();
-        channelInfo.members = chanOSS.str();
-        channelInfo.type = '='; //@ for secret and * for private
-    }
-}
