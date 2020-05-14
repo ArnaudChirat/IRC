@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <iomanip>
-
+#include <iostream>
 ReplyManager::t_serverInfo  ReplyManager::serverInfo = {.name = IRCServer::name};
 
 std::string     ReplyManager::connectionReplyMessage(ConnectionEnum x, ReplyManager::t_clientInfo client) {
@@ -29,6 +29,7 @@ std::string     ReplyManager::commandReplyMessage(CommandEnum x, ReplyManager::t
         {RPL_NAMREPLY, oss.str()+' '+client.nick+' '+channel.type+" "+channel.name+" :"+channel.members+"\n"},
         {RPL_ENDOFNAMES, oss.str()+' '+channel.name+" :End of NAMES list\n"},
         {RPL_LEAVECHANN, ":"+client.nick+"!~"+client.user+'@'+client.host+" PART :"+channel.name+"\n"},
+        {RPL_YOUREOPER, ":You are now an IRC operator\n"},
     };
 
     return commandReply.at(x);

@@ -6,6 +6,7 @@ class Client
 {
 public:
     Client(SocketClient *socket_client);
+    Client &operator=(Client const &rhs);
     virtual ~Client(void);
     virtual Client & setName(std::string const &name) = 0;
     SocketClient * getSocketClient(void) const;
@@ -20,7 +21,6 @@ public:
     Status status;
 protected:
     std::string _name;
-private:
     Client(void);
 };
 

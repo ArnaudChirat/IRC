@@ -22,6 +22,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"QUIT", IRCMessageType::QUIT},
     {"SERVICE", IRCMessageType::SERVICE},
     {"JOIN", IRCMessageType::JOIN},
+    {"OPER", IRCMessageType::OPER},
 };
 
 IRCMessage::IRCMessage(std::string &message) : _is_valid(false)
@@ -119,9 +120,20 @@ bool IRCMessage::isValid()
         parameters_struct.nickname = _parameters[0];
         validation = true;
     }
-    else if (this->type == QUIT)
+    else if (this->type == PASS && _parameters.size() >= 1)
     {
+        parameters_struct.password = _parameters[0];
         validation = true;
+    }
+    else if (this->type == OPER && _parameters.size() == 2)
+    {
+        parameters_struct.user = _parameters[0];
+        parameters_struct.password = _parameters[1];
+        validation = true;
+    }
+    else 
+    {
+        validation = _is_valid;
     }
     return (validation);
 }

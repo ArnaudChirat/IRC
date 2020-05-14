@@ -17,11 +17,20 @@ User &User::operator=(User const &rhs)
 {
     if (&rhs != this)
     {
-        this->setName(rhs._name);
-        this->setUser(rhs._user);
-        this->setOper(rhs._oper);
+        this->_channelsJoined = rhs._channelsJoined;
+        this->_hostname = rhs._hostname;
+        this->_oper = rhs._oper;
+        this->_user = rhs._user;
+        this->_mode = rhs._mode;
+        this->_real_name = rhs._real_name;
+        this->_password = rhs._password;
     }
     return (*this);
+}
+
+User::User(void)
+{
+    return;
 }
 
 User::~User(void)
@@ -128,4 +137,34 @@ void User::addChannel(Channel * channel){
 
 void User::deleteChannel(Channel * channel){
     this->_channelsJoined.erase(channel->getName());
+}
+
+User &User::setPassword(std::string const &pass)
+{
+    // todo hach password
+    this->_password = pass;
+    return (*this);
+}
+
+std::string User::getPassword() const
+{
+    return (this->_password);
+}
+
+
+Oper::Oper(User *user)
+{
+    this->_user = user;
+    return;
+}
+
+Oper::~Oper(void)
+{
+    delete _user;
+    return;
+}
+
+void Oper::testOper()
+{
+    std::cout << "ça marche ma gueule" << std::endl;
 }

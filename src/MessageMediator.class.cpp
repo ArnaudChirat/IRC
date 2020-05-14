@@ -13,6 +13,8 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::USER, &MessageMediator::userCommand});
     this->_commands.insert({IRCMessage::QUIT, &MessageMediator::quitCommand});
     this->_commands.insert({IRCMessage::JOIN, &MessageMediator::joinCommand});
+    this->_commands.insert({IRCMessage::PASS, &MessageMediator::passCommand});
+    this->_commands.insert({IRCMessage::OPER, &MessageMediator::operCommand});
     return;
 }
 
@@ -92,6 +94,35 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
     }
     
 }
+
+void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    User * user = static_cast<User*>(IRCServer::_client_manager.getClient(socket));
+    std::cout << "pass command" << std::endl;
+    // if (IRCServer::_channel_manager.verify(message, user))
+    if (user){
+        user->setPassword(message.parameters_struct.password);
+    }
+    
+}
+
+void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    User * user = static_cast<User*>(IRCServer::_client_manager.getClient(socket));
+    std::cout << "oper command" << std::endl;
+    // if (IRCServer::_channel_manager.verify(message, user))
+    if (user){
+        if (message.parameters_struct.password == user->getPassword() && message.parameters_struct.user == user->getUser())
+        {
+            user->addMode(User::o);
+            user = new Oper(user);
+            // static_cast<Oper*>(user)->testOper();
+            IRCServer::_reply_manager.commandReply(user, NULL, ReplyManager::RPL_YOUREOPER);
+        }
+    }
+    
+}
+
 
 bool    MessageMediator::sendReply(std::string const & msg, Client * client) const{
     client->getSocketClient()->appendToBuffer(msg);

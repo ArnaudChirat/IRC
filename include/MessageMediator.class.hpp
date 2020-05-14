@@ -21,6 +21,8 @@ private:
     void createClient(IRCMessage const &message, SocketClient *socket) const;
     void quitCommand(IRCMessage const &message, SocketClient *socket) const;
     void joinCommand(IRCMessage const &message, SocketClient *socket) const;
+    void passCommand(IRCMessage const &message, SocketClient *socket) const;
+    void operCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessage::IRCMessageType, Command> _commands;
 };
 
