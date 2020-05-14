@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 #include "Utility.hpp"
+#include "ClientManager.class.hpp"
+#include "Socket.class.hpp"
 // Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
@@ -110,7 +112,7 @@ public:
         IRCMessage_DETAIL_MASK = 0X00FF,
     };
 
-    IRCMessage(std::string &message);
+    IRCMessage(std::string &message, SocketClient * socket);
     IRCMessage(IRCMessage const &instance);
     IRCMessage &operator=(IRCMessage const &rhs);
     ~IRCMessage(void);
@@ -142,6 +144,7 @@ public:
 private:
     IRCMessage(void);
     bool    _is_valid;
+    SocketClient *  _socket;
     std::string _prefix;
     std::string _command;
     std::vector<std::string> _parameters;

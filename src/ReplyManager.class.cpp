@@ -43,10 +43,11 @@ std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_msg
     oss << std::setfill('0') << std::setw(3) << x;
 
     std::unordered_map<int, std::string> errorReply = {
-        {ERR_NONICKNAMEGIVEN, ":No nickname given\n"},
+        {ERR_NONICKNAMEGIVEN, msg.cmd+" :No nickname given\n"},
         {ERR_NICKNAMEINUSE, client.nick + " :Nickname is already in use\n"},
         {ERR_NEEDMOREPARAMS, client.nick + ' ' + msg.cmd + " :Not enough parameters\n"},
-        {ERR_NOSUCHCHANNEL, channel.name + " :No such channel\n"},
+        {ERR_NOSUCHCHANNEL, client.nick +' '+channel.name + " :No such channel\n"},
+        {ERR_NOTONCHANNEL, client.nick +' '+channel.name + " :You are not on that channel\n"},
     };
 
     return oss.str() + ' ' + errorReply.at(x);

@@ -11,6 +11,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::USER, &MessageMediator::userCommand});
     this->_commands.insert({IRCMessage::QUIT, &MessageMediator::quitCommand});
     this->_commands.insert({IRCMessage::JOIN, &MessageMediator::joinCommand});
+    this->_commands.insert({IRCMessage::PART, &MessageMediator::partCommand});
     return;
 }
 
@@ -71,15 +72,22 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    Client * user = IRCServer::_client_manager.getClient(socket);
+    Client * client = IRCServer::_client_manager.getClient(socket);
     std::cout << "join command" << std::endl;
-    // if (IRCServer::_channel_manager.verify(message, user))
-    if (user){
-        IRCServer::_channel_manager.handleJoinChannel(message, dynamic_cast<User*>(user));
+    // if (IRCServer::_channel_manager.verify(message, client))
+    if (client){
+        IRCServer::_channel_manager.handleJoinChannel(message, dynamic_cast<User*>(client));
     // dispay channels à virer asap
         IRCServer::_channel_manager.displayChannels();
     }
     
+}
+
+void    MessageMediator::partCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    Client * client = IRCServer::_client_manager.getClient(socket);
+    if (client)
+        IRCServer::_channel_manager.handlePartChannel(message, dynamic_cast<User*>(client));
 }
 
 bool    MessageMediator::sendReply(std::string const & msg, Client * client) const{

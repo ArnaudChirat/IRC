@@ -1,4 +1,5 @@
 #include "IRCMessage.class.hpp"
+#include "IRCServer.class.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -21,9 +22,10 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"USER", USER},
     {"QUIT", QUIT},
     {"JOIN", JOIN},
+    {"PART", PART},
 };
 
-IRCMessage::IRCMessage(std::string &message) : _is_valid(false)
+IRCMessage::IRCMessage(std::string &message, SocketClient * socket) : _is_valid(true), _socket(socket)
 {
     this->splitIRCMessage(message);
 }
@@ -62,7 +64,6 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     {
         this->_command = res->first;
         this->type = res->second;
-        this->_is_valid = true;
     }
     return (*this);
 }
@@ -74,6 +75,11 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     std::istream_iterator<std::string> end;
     std::vector<std::string> vstrings(begin, end);
     this->_parameters = vstrings;
+    if (vstrings.size() == 0){
+        Client * clientError = IRCServer::_client_manager.getClient(this->_socket);
+        IRCServer::_reply_manager.errorReply(this, clientError, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+        _is_valid = false;
+    }
     return (*this);
 }
 

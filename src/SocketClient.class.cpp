@@ -46,7 +46,7 @@ bool SocketClient::recvMessage() {
         std::string message(buffer);
         //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
-        IRCMessage IRC_message(message);
+        IRCMessage IRC_message(message, this);
         if (IRC_message.isValid())
             IRCServer::_message_mediator.handleMessage(IRC_message, this);
     }

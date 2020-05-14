@@ -65,7 +65,10 @@ bool ClientManager::checkName(ClientChoice choice, std::string const &name)
 
 Client *ClientManager::getClient(SocketClient *socket)
 {
-    return (this->_clients.find(socket)->second);
+    auto it = this->_clients.find(socket);
+    if (it != this->_clients.end())
+        return it->second;    
+    return NULL;
 }
 
 bool    ClientManager::setNick(std::string const &nick, SocketClient *socket)

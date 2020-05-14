@@ -77,3 +77,10 @@ void User::addChannel(Channel * channel){
 void User::deleteChannel(Channel * channel){
     this->_channelsJoined.erase(channel->getName());
 }
+
+Channel * User::getChannel(std::string const & name) const{
+    auto it = this->_channelsJoined.find(name);
+    if (it != this->_channelsJoined.end())
+        return it->second;    
+    return NULL;
+}
