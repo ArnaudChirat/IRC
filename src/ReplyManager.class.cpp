@@ -36,7 +36,9 @@ std::string     ReplyManager::errorReplyMessage(ErrorEnum x, ReplyManager::t_cli
     std::unordered_map<int, std::string> errorReply = {
         {ERR_NONICKNAMEGIVEN, ":No nickname given\n"},
         {ERR_NICKNAMEINUSE, client.nick + " :Nickname is already in use\n"},
-        {ERR_ALREADYREGISTRED, ":Unauthorized command (already registered)"},
+        {ERR_ALREADYREGISTRED, ":Unauthorized command (already registered)\n"},
+        {ERR_ERRONEUSNICKNAME, client.nick + " :Erroneous nickname\n"},
+        {ERR_NEEDMOREPARAMS, ":Not enough parameters\n"},
     };
     (void)channel;
 

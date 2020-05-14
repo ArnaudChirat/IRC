@@ -22,7 +22,7 @@ public:
     ~ClientManager(void);
     Client *createAddClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     Client *createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
-    bool setUser(std::string const &username, User &client);
+    bool setUser(std::string const &username, unsigned int mode, std::string real_name, User &client);
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
     void deleteClient(SocketClient *client, ClientChoice choice);

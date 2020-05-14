@@ -86,9 +86,16 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid() const
+bool IRCMessage::isValid()
 {
-    return (this->_is_valid);
+    bool validation = false;
+    if (this->type == IRCMessageType::NICK)
+        validation = this->getParameters().size() >= 1 ? true : false;
+    else if (this->type == IRCMessageType::SERVICE)
+        validation = this->getParameters().size() >= 1 ? true : false;
+    else if (this->type == IRCMessageType::USER)
+        validation = (this->getParameters().size() == 3 && !this->_trail.empty()) ? true : false;
+    return (validation);
 }
 
 /*

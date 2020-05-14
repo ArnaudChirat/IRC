@@ -120,7 +120,7 @@ public:
     IRCMessage &setTrail(std::string const &trail);
 
     std::string getMessage() const;
-    bool isValid() const;
+    bool isValid();
     // std::string getPrefix() const;
     // std::string getCommand() const;
     // std::string getTrail() const;

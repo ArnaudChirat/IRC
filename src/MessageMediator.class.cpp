@@ -2,6 +2,7 @@
 #include "MessageMediator.class.hpp"
 #include "ReplyManager.class.hpp"
 #include <iostream>
+#include <sstream>
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"
@@ -62,9 +63,14 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
 void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socket) const
 {
     User *user = static_cast<User *>(IRCServer::_client_manager.getClient(socket));
+    std::vector<std::string> parameters;
     if (user)
     {
-        IRCServer::_client_manager.setUser(message.getParameters()[0], *user);
+        parameters = message.getParameters();
+        std::stringstream mode(parameters[1]); 
+        unsigned int mode_nbr;
+        mode >> mode_nbr;
+        IRCServer::_client_manager.setUser(parameters[0], mode_nbr, parameters[3], *user);
     }
     else
         std::cout << "Nick not set or socket doesnt exist" << std::endl;

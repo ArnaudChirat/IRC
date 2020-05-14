@@ -49,6 +49,8 @@ bool SocketClient::recvMessage() {
         IRCMessage IRC_message(message);
         if (IRC_message.isValid())
             IRCServer::_message_mediator.handleMessage(IRC_message, this);
+        else
+            std::cout << "not enought params" << std::endl;
     }
     return (false);
 }
