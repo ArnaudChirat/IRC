@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "Utility.hpp"
 // Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
@@ -110,21 +111,21 @@ public:
     };
 
     IRCMessage(std::string &message);
-    // IRCMessage(IRCMessage const &instance);
-    // IRCMessage &operator=(IRCMessage const &rhs);
+    IRCMessage(IRCMessage const &instance);
+    IRCMessage &operator=(IRCMessage const &rhs);
     ~IRCMessage(void);
     void splitIRCMessage(std::string &message);
     IRCMessage &setPrefix(std::string const &prefix);
     IRCMessage &setCommand(std::string const &command);
-    IRCMessage &setParameters(std::string const &paramaters);
+    IRCMessage &setParameters(std::string const &parameters);
     IRCMessage &setTrail(std::string const &trail);
 
     std::string getMessage() const;
     bool isValid();
-    // std::string getPrefix() const;
-    // std::string getCommand() const;
-    // std::string getTrail() const;
-    const std::vector<std::string> &getParameters() const;
+    std::string getPrefix() const;
+    std::string getCommand() const;
+    std::string getTrail() const;
+    std::vector<std::string> getParameters() const;
 
     static const std::string special;
     static const std::string shortname;
@@ -137,12 +138,13 @@ public:
     static const std::string message;
     static const std::unordered_map<std::string, IRCMessageType> IRCCommands;
     IRCMessageType type;
+    Utility::Parameters parameters_struct;
 private:
     IRCMessage(void);
     bool    _is_valid;
     std::string _prefix;
     std::string _command;
-    std::vector<std::string> _paramaters;
+    std::vector<std::string> _parameters;
     std::string _trail;
 };
 

@@ -42,22 +42,24 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     {
         user = static_cast<User *>(IRCServer::_client_manager.getClient(socket));
         if (!user)
-            client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.getParameters()[0]);
+            client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.parameters_struct.nickname);
         else
-        {
-            IRCServer::_client_manager.setNick(message.getParameters()[0], *user);
-        }
+            IRCServer::_client_manager.setNick(message.parameters_struct.nickname, *user);
     }
     if (message.type == IRCMessage::SERVICE)
     {
         service = static_cast<Service *>(IRCServer::_client_manager.getClient(socket));
         if (!service)
-            client = IRCServer::_client_manager.createAddClient(ClientManager::SERVICE, socket, message.getParameters()[0]);
+            client = IRCServer::_client_manager.createAddClient(ClientManager::USER, socket, message.parameters_struct.nickname);
         else
-        {
-            IRCServer::_client_manager.setService(message.getParameters()[0], *service);
-        }
+            IRCServer::_client_manager.setService(message.parameters_struct.nickname, *service);
     }
+    if (client)
+        std::cout << "User created : " << client->getName() << std::endl;
+    else if(user)
+        std::cout << "User already exist nickname is : " << user->getName() << std::endl;
+    else
+        std::cout << "Nick name already use : " << message.parameters_struct.nickname << std::endl;
 }
 
 void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socket) const
@@ -65,13 +67,7 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
     User *user = static_cast<User *>(IRCServer::_client_manager.getClient(socket));
     std::vector<std::string> parameters;
     if (user)
-    {
-        parameters = message.getParameters();
-        std::stringstream mode(parameters[1]); 
-        unsigned int mode_nbr;
-        mode >> mode_nbr;
-        IRCServer::_client_manager.setUser(parameters[0], mode_nbr, parameters[3], *user);
-    }
+        IRCServer::_client_manager.setUser(message.parameters_struct.user, message.parameters_struct.mode, message.getTrail(), *user);
     else
         std::cout << "Nick not set or socket doesnt exist" << std::endl;
 }
@@ -81,16 +77,19 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
     std::cout << "quit command" << std::endl;
     IRCServer::_client_manager.deleteClient(socket, ClientManager::ClientChoice::ALL);
     IRCServer::_socket_manager.deleteSocket(socket);
-    std::cout << "someone has quit" << (message.getParameters().empty() ? "" : message.getParameters()[0]) << std::endl;
+    std::cout << "someone has quit" << message.parameters_struct.quit_message  << std::endl;
 }
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const
 {
     Client * user = IRCServer::_client_manager.getClient(socket);
     std::cout << "join command" << std::endl;
-    if (IRCServer::_channel_manager.verify(message, user))
-        IRCServer::_channel_manager.handleJoinChannel(message, user);
-    IRCServer::_channel_manager.displayChannels();
+    // if (IRCServer::_channel_manager.verify(message, user))
+    if (user){
+        IRCServer::_channel_manager.handleJoinChannel(message, dynamic_cast<User*>(user));
+    // dispay channels à virer asap
+        IRCServer::_channel_manager.displayChannels();
+    }
     
 }
 

@@ -1,11 +1,12 @@
 #ifndef CHANNEL_CLASS_HPP
 #define CHANNEL_CLASS_HPP
 #include <list>
-#include "User.class.hpp"
 #include <string>
 #include <unordered_map>
 #define STANDARD 0
 #define SAFE 1
+
+class User;
 
 class Channel
 {
@@ -17,7 +18,8 @@ public:
     ~Channel(void);
 
     std::string getName(void) const;
-    void    addMember(Client *);
+    void    addMember(User *);
+    void    deleteMember(User *);
     std::unordered_map<std::string, User*>     getMembers(void) const;
     // void addUser(User const &user);
     // void removeClient(User const &user);

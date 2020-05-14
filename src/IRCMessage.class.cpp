@@ -29,6 +29,19 @@ IRCMessage::IRCMessage(std::string &message) : _is_valid(false)
     this->splitIRCMessage(message);
 }
 
+IRCMessage::IRCMessage(IRCMessage const &instance)
+{
+    *this = instance;
+}
+
+IRCMessage &    IRCMessage::operator=(IRCMessage const & rhs){
+    this->_prefix = rhs.getPrefix();
+    this->_command = rhs.getCommand();
+    this->_parameters = rhs.getParameters();
+    this->_trail = rhs.getTrail();
+    return *this;
+}
+
 IRCMessage::~IRCMessage(void)
 {
     return;
@@ -61,7 +74,7 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     std::istream_iterator<std::string> begin(ss);
     std::istream_iterator<std::string> end;
     std::vector<std::string> vstrings(begin, end);
-    this->_paramaters = vstrings;
+    this->_parameters = vstrings;
     return (*this);
 }
 
@@ -77,8 +90,8 @@ std::string IRCMessage::getMessage() const
     std::string message;
     message += "Prefix : " + (this->_prefix.empty() ? "EMPTY" : this->_prefix) + "\n";
     message += "Command : " + (this->_command.empty() ? "EMPTY" : this->_command) + "\n";
-    message += "Parameters :" + (this->_paramaters.empty() ? "EMPTY" : std::string("")) + "\n";
-    for (std::string const &part : this->_paramaters)
+    message += "Parameters :" + (this->_parameters.empty() ? "EMPTY" : std::string("")) + "\n";
+    for (std::string const &part : this->_parameters)
     {
         message += "\t- " + part + "\n";
     }
@@ -89,12 +102,27 @@ std::string IRCMessage::getMessage() const
 bool IRCMessage::isValid()
 {
     bool validation = false;
-    if (this->type == IRCMessageType::NICK)
-        validation = this->getParameters().size() >= 1 ? true : false;
-    else if (this->type == IRCMessageType::SERVICE)
-        validation = this->getParameters().size() >= 1 ? true : false;
-    else if (this->type == IRCMessageType::USER)
-        validation = (this->getParameters().size() == 3 && !this->_trail.empty()) ? true : false;
+    if (this->type == SERVICE && _parameters.size() >= 1)
+    {
+        parameters_struct.nickname = _parameters[0];
+        validation = true;
+    }
+    else if (this->type == USER && _parameters.size() >= 3)
+    {
+        parameters_struct.user = _parameters[0];
+        parameters_struct.mode = std::stoi(_parameters[1]);
+        parameters_struct.real_name = _trail;
+        validation = true;
+    }
+    else if (this->type == NICK && _parameters.size() >= 1)
+    {
+        parameters_struct.nickname = _parameters[0];
+        validation = true;
+    }
+    else if (this->type == QUIT)
+    {
+        validation = true;
+    }
     return (validation);
 }
 
@@ -115,8 +143,20 @@ void IRCMessage::splitIRCMessage(std::string &message)
         setPrefix(cm[1]).setCommand(cm[2]).setParameters(cm[3]).setTrail(cm[4]);
 }
 
-const std::vector<std::string> &IRCMessage::getParameters() const {
-    return (this->_paramaters);
+std::string     IRCMessage::getCommand() const{
+    return this->_command;
+}
+
+std::string  IRCMessage::getPrefix() const{
+    return this->_prefix;
+}
+
+std::string     IRCMessage::getTrail() const{
+    return this->_trail;
+}
+
+std::vector<std::string>  IRCMessage::getParameters() const {
+    return (this->_parameters);
 };
 
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message)

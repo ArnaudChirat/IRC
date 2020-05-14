@@ -2,6 +2,10 @@
 #define USER_CLASS_HPP
 #include "Client.class.hpp"
 #include <stack>
+#include <unordered_map>
+
+class Channel;
+
 class User : public Client
 {
 public:
@@ -28,9 +32,12 @@ public:
     User & addMode(unsigned int mode);
     User & delMode(unsigned int mode);
     std::string getUser() const;
+    std::unordered_map<std::string, Channel*>   getChannels(void) const;
+    virtual std::string getName() const;
     bool        getOper() const;
     std::string getMode() const;
-
+    void addChannel(Channel*);
+    void deleteChannel(Channel*);
 private:
     User(void);
     bool    _oper;
@@ -38,7 +45,7 @@ private:
     std::string _real_name;
     std::string _hostname;
     unsigned int _mode;
-
+    std::unordered_map<std::string, Channel*> _channelsJoined;
 };
 
 #endif

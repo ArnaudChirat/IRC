@@ -2,6 +2,7 @@
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"
+#include "Utility.hpp"
 #include <iostream>
 ClientManager::ClientManager(void)
 {
@@ -73,7 +74,7 @@ bool ClientManager::setNick(std::string const &nick, User &client)
     {
         std::string oldNick = client.getName();
         client.setName(nick);
-        IRCServer::_reply_manager.errorReply(&client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
+        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
         client.setName(oldNick);
         return (false);
     }
@@ -81,8 +82,7 @@ bool ClientManager::setNick(std::string const &nick, User &client)
     client.setName(nick);
     if (client.getName().empty())
     {
-        IRCServer::_reply_manager.errorReply(&client , NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
-        return (false);
+        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
     }
     this->_names_used.insert(Key(USER, nick));
     return (true);
@@ -95,7 +95,7 @@ bool ClientManager::setService(std::string const &nick, Service &client)
     {
         std::string old_service = client.getName();
         client.setName(real_name);
-        IRCServer::_reply_manager.errorReply(&client, NULL, ReplyManager::ERR_ALREADYREGISTRED);
+        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_ALREADYREGISTRED);
         client.setName(old_service);
         return (false);
     }
@@ -103,7 +103,7 @@ bool ClientManager::setService(std::string const &nick, Service &client)
     client.setName(real_name);
     if (client.getName().empty())
     {
-        IRCServer::_reply_manager.errorReply(&client , NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
+        IRCServer::_reply_manager.errorReply(NULL, &client , NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
         return (false);
     }
     this->_names_used.insert(Key(SERVICE, real_name));
