@@ -75,11 +75,6 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     std::istream_iterator<std::string> end;
     std::vector<std::string> vstrings(begin, end);
     this->_parameters = vstrings;
-    if (vstrings.size() == 0){
-        Client * clientError = IRCServer::_client_manager.getClient(this->_socket);
-        IRCServer::_reply_manager.errorReply(this, clientError, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
-        _is_valid = false;
-    }
     return (*this);
 }
 
@@ -119,6 +114,9 @@ bool IRCMessage::isValid()
         parameters_struct.nickname = _parameters[0];
         validation = true;
     }
+    else
+        IRCServer::_reply_manager.errorReply(this, clientError, NULL, ReplyManager::ERR_NEEDMOREPARAMS);
+
     return (validation);
 }
 

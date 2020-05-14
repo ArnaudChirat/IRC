@@ -1,35 +1,49 @@
 #include "Utility.hpp"
 #include "IRCServer.class.hpp"
 
-Utility::Parameters Utility::parametersClient(Client const & client)
-{
-    Utility::Parameters parameters = {};
-    parameters.clientName = client.getName();
-    return parameters;
+Parameters::Parameters(void) {}
+
+Parameters::Parameters(Client const & client) {
+    *this = this->paramClient(client);
 }
 
-Utility::Parameters Utility::parametersUser(User const & user)
-{
-    Utility::Parameters parameters = {};
-    parameters.clientName = user.getName();
-    parameters.user = user.getUser();
-    return parameters;
+Parameters::Parameters(User const & user) {
+    *this = this->paramUser(user);
 }
 
-Utility::Parameters Utility::parametersChannel(Channel const & channel)
-{
-    Utility::Parameters parameters = {};
-    parameters.channelName = channel.getName();
-    return parameters;
+Parameters::Parameters(Channel const & channel) {
+    *this = this->paramChannel(channel);
 }
 
-Utility::Parameters Utility::parametersUserChannel(User const & user, Channel const & channel)
+Parameters::Parameters(IRCMessage const & msg) {
+    *this = this->paramMessage(msg);
+}
+
+Parameters & Parameters::paramClient(Client const & client)
 {
-    Utility::Parameters parameters = {};
-    parameters.clientName = user.getName();
-    parameters.user = user.getUser();
-    parameters.server = IRCServer::name;
-    parameters.channelName = channel.getName();
-    parameters.channelMembers = channel.getMembersString();
-    return parameters;
+    this->clientName = client.getName();
+    this->server = IRCServer::name;
+    return *this;
+}
+
+Parameters & Parameters::paramUser(User const & user)
+{
+    this->clientName = user.getName();
+    this->user = user.getUser();
+    this->server = IRCServer::name;
+    return *this;
+}
+
+Parameters & Parameters::paramChannel(Channel const & channel)
+{
+    this->channelName = channel.getName();
+    this->channelMembers = channel.getMembersString();
+    this->server = IRCServer::name;
+    return *this;
+}
+
+Parameters & Parameters::paramMessage(IRCMessage const & msg)
+{
+    this->command = msg.getCommand();
+    return *this;
 }

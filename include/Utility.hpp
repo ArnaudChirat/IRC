@@ -3,17 +3,15 @@
 #include <netinet/in.h>
 #include "Client.class.hpp"
 #include "User.class.hpp"
+#include "IRCMessage.class.hpp"
 #include "Channel.class.hpp"
 #include <string>
 #define BUFF_MSG 512
-namespace Utility 
-{
-    int safe_dup(int fd);
 
 
-
-    struct Parameters
+struct Parameters
     {
+        std::string command;
         std::string user;
         unsigned int mode;
         std::string real_name;
@@ -29,12 +27,17 @@ namespace Utility
         std::string target;
         std::string msg_target;
         std::string text;
+
+        Parameters(void);
+        Parameters(Client const &);
+        Parameters(User const &);
+        Parameters(Channel const &);
+        Parameters(IRCMessage const &);
+        Parameters & paramClient(Client const &);
+        Parameters & paramUser(User const &);
+        Parameters & paramChannel(Channel const &);
+        Parameters & paramMessage(IRCMessage const &);
     };
 
-    Parameters parametersClient(Client const &);
-    Parameters parametersUser(User const &);
-    Parameters parametersChannel(Channel const &);
-    Parameters parametersUserChannel(User &, Channel const &);
-    
-}
+
 #endif
