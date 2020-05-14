@@ -3,7 +3,9 @@
 #include <string>
 
 #include "Client.class.hpp"
+#include "User.class.hpp"
 #include "Channel.class.hpp"
+#include "IRCMessage.class.hpp"
 
 class ReplyManager
 {
@@ -69,8 +71,10 @@ public:
         RPL_LISTEND,
         RPL_CHANNELMODEIS,
         RPL_UNIQOPIS,
-        RPL_NOTOPIC = 331,
+        RPL_WELCOMECHAN = 330,
+        RPL_NOTOPIC,
         RPL_TOPIC,
+        RPL_LEAVECHANN,
         RPL_INVITING = 341,
         RPL_SUMMONING,
         RPL_INVITELIST = 346,
@@ -167,6 +171,8 @@ public:
 
     typedef struct s_channelInfo {
         std::string     name;
+        std::string     members;
+        std::string     type;
 
     }               t_channelInfo;
 
@@ -175,16 +181,23 @@ public:
 
     }               t_serverInfo;
 
+    typedef struct s_msgInfo {
+        std::string     cmd;
+
+    }               t_msgInfo;
+
     static t_serverInfo serverInfo;
 
     std::string connectionReplyMessage(ConnectionEnum, t_clientInfo);
-    std::string commandReplyMessage(CommandEnum, std::vector<std::string>);
-    std::string errorReplyMessage(ErrorEnum, t_clientInfo, t_channelInfo);
+    std::string commandReplyMessage(CommandEnum, t_clientInfo, t_channelInfo);
+    std::string errorReplyMessage(ErrorEnum, t_msgInfo, t_clientInfo, t_channelInfo);
 
     bool connectionReply(Client * client, ConnectionEnum x);
-    bool errorReply(Client *, Channel *, ErrorEnum x);
-
-
+    bool errorReply(IRCMessage *, Client *, Channel *, ErrorEnum x);
+    bool commandReply(Client * client, Channel * channel, CommandEnum x);
+    void    _buildMsgInfo(IRCMessage * msg, t_msgInfo & msgInfo);
+    void    _buildClientInfo(Client * client, t_clientInfo & clientInfo);
+    void    _buildChannelInfo(Channel * channel, t_channelInfo & channelInfo);
 
 };
 

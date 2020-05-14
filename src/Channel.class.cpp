@@ -1,5 +1,5 @@
+#include "User.class.hpp"
 #include "Channel.class.hpp"
-
 
 Channel::Channel(void) {}
 
@@ -15,10 +15,10 @@ std::unordered_map<std::string, User*>     Channel::getMembers(void) const{
     return this->_members;
 }
 
+void    Channel::addMember(User * user){
+    this->_members.insert({user->getName(), user});
+}
 
-void    Channel::addMember(Client * user){
-    std::string name = user->getName();
-    auto it = this->_members.find(name);
-    if (it == this->_members.end())
-        this->_members.insert({name, static_cast<User*>(user)});
+void    Channel::deleteMember(User * user){
+    this->_members.erase(user->getName());
 }

@@ -6,6 +6,7 @@
 
 class Channel;
 class Client;
+class User;
 
 class ChannelManager
 {
@@ -33,9 +34,9 @@ public:
     ChannelManager(void);
     ~ChannelManager(void);
     size_t  getSize(void) const;
-    void    handleJoinChannel(IRCMessage const &, Client *);
-    bool    verify(IRCMessage const &, Client *) const;
+    void    handleJoinChannel(IRCMessage const &, User *);
 
+    // pour debug. A virer asap
     void    displayChannels(void) const;
 
 
@@ -44,10 +45,17 @@ private:
     ChannelManager &    operator=(ChannelManager const &) = delete;
     
     std::unordered_map<std::string, Channel*> _channels;
-    Channel *    _createChannel(std::string const &, std::vector<std::string> const &) const;
-    void    _addChannel(std::string const &, Channel * channel);
 
-    
+    std::vector<std::string>  _splitParam(std::string const &, std::string const &) const;
+    bool    _verify(std::string) const;
+    Channel *    _createChannel(std::string const &, User *);
+    void    _addChannel(std::string const &, Channel *);
+    void    _createAddChannel(std::string, User *);
+    void    _newMember(User *, Channel *);
+    void    _welcomeMessage(User * client, Channel * channel) const;
+    void    _leaveAllChann(User * user) const;
+    void    _leaveOneChann(User * user, Channel * channel) const;
+
 
 };
 
