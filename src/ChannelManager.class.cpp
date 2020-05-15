@@ -11,13 +11,13 @@ ChannelManager::~ChannelManager(void) {}
 
 
 void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
-    if (msg.getParameters()[0] == "0")
+    if (msg.params.channelName == "0")
         _leaveAllChann(user);
     else {
         std::vector<std::string>  names;
         std::vector<std::string>  keys;
-        names = _splitParam(msg.getParameters().at(0), ", ");
-        keys = (msg.getParameters().size() > 1 ? _splitParam(msg.getParameters().at(1), ", ") : keys);
+        names = _splitParam(msg.params.channelName, ", ");
+        keys = _splitParam(msg.params.keys, ", ");
         // verify keys?
         for (auto itName = names.begin(); itName != names.end(); ++itName)
             _createAddChannel(*itName, user);
@@ -29,8 +29,8 @@ void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
     std::string     partMessage;
     Channel * channel;
 
-    names = _splitParam(msg.getParameters().at(0), ", ");
-    partMessage = (msg.getParameters().size() > 1 ? msg.getParameters()[1] : partMessage);
+    names = _splitParam(msg.params.channelName, ", ");
+    partMessage = msg.params.leave_message;
     for (auto it = names.begin(); it != names.end(); ++it){
         if (!(channel = this->getChannel(*it))){
             Parameters param(*user);
@@ -44,17 +44,17 @@ void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
     }
 }
 
-std::vector<std::string>  ChannelManager::_splitParam(std::string const & param, std::string const & delimiters) const{
+std::vector<std::string>  ChannelManager::_splitParam(std::string const & strToSplit, std::string const & delimiters) const{
     size_t idx = 0;
     size_t foundIdx = 0;
     std::vector<std::string> splitParams;
-    while (idx < param.size()){
-        if ((foundIdx = param.find_first_of(delimiters, idx)) == std::string::npos){
-            splitParams.push_back(param.substr(idx));
+    while (idx < strToSplit.size()){
+        if ((foundIdx = strToSplit.find_first_of(delimiters, idx)) == std::string::npos){
+            splitParams.push_back(strToSplit.substr(idx));
             break;
         }
         else {
-            splitParams.push_back(param.substr(idx, foundIdx - idx));
+            splitParams.push_back(strToSplit.substr(idx, foundIdx - idx));
             idx = foundIdx + 1;
         }
     }
@@ -65,7 +65,7 @@ void    ChannelManager::_createAddChannel(std::string name, User * user) {
     if (!_verify(name)){
         Parameters param(*user);
         param.channelName = name;
-        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
         return;
     }
     auto it = this->_channels.find(name);

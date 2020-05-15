@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 std::string     ReplyManager::replyMessage(ConnectionEnum x, Parameters const & params) {
     

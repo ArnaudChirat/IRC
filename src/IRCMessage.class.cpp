@@ -115,7 +115,19 @@ bool IRCMessage::isValid(SocketClient * socket)
         params.nickname = _parameters[0];
         validation = true;
     }
-    else if (!_parameters.size())
+    else if (this->type == JOIN && _parameters.size() >= 1)
+    {
+        params.channelName = _parameters[0];
+        params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
+        validation = true;
+    }
+    else if (this->type == PART && _parameters.size() >= 1)
+    {
+        params.channelName = _parameters[0];
+        params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
+        validation = true;
+    }
+    else
         IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
 
     return (validation);
