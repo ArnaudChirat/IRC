@@ -115,8 +115,7 @@ void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socke
         if (message.parameters_struct.password == user->getPassword() && message.parameters_struct.user == user->getUser())
         {
             user->addMode(User::o);
-            user = new Oper(user);
-            // static_cast<Oper*>(user)->testOper();
+            user->setOper(*new Oper);
             IRCServer::_reply_manager.commandReply(user, NULL, ReplyManager::RPL_YOUREOPER);
         }
     }

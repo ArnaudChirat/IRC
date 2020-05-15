@@ -3,7 +3,7 @@
 #include "IRCMessage.class.hpp"
 #include <regex>
 #include <iostream>
-User::User(SocketClient *socket_client) : Client(socket_client), _oper(false)
+User::User(SocketClient *socket_client) : Client(socket_client), _oper(NULL)
 {
     return;
 }
@@ -15,16 +15,18 @@ User::User(User const &instance) : Client(instance._socket_client), _oper(instan
 }
 User &User::operator=(User const &rhs)
 {
-    if (&rhs != this)
-    {
-        this->_channelsJoined = rhs._channelsJoined;
-        this->_hostname = rhs._hostname;
-        this->_oper = rhs._oper;
-        this->_user = rhs._user;
-        this->_mode = rhs._mode;
-        this->_real_name = rhs._real_name;
-        this->_password = rhs._password;
-    }
+    // if (&rhs != this)
+    // {
+    //     Client::operator=(rhs);
+    //     this->_channelsJoined = rhs._channelsJoined;
+    //     this->_hostname = rhs._hostname;
+    //     this->_oper = rhs._oper;
+    //     this->_user = rhs._user;
+    //     this->_mode = rhs._mode;
+    //     this->_real_name = rhs._real_name;
+    //     this->_password = rhs._password;
+    // }
+    (void)rhs;
     return (*this);
 }
 
@@ -57,18 +59,6 @@ User &User::setUser(std::string const &user)
 std::string User::getUser() const
 {
     return (this->_user);
-}
-
-User &User::setOper(bool const oper)
-{
-    //TODO set decorator for operator user
-    this->_oper = oper;
-    return (*this);
-}
-
-bool User::getOper() const
-{
-    return (this->_oper);
 }
 
 User &User::setMode(unsigned int mode)
@@ -151,18 +141,27 @@ std::string User::getPassword() const
     return (this->_password);
 }
 
-
-Oper::Oper(User *user)
+User &User::setOper(Oper &oper)
 {
-    this->_user = user;
+    this->_oper = &oper;
+    return (*this);
+}
+
+Oper *User::getOper() const
+{
+    return (this->_oper);
+}
+
+Oper::Oper(void)
+{
     return;
 }
 
 Oper::~Oper(void)
 {
-    delete _user;
     return;
 }
+
 
 void Oper::testOper()
 {

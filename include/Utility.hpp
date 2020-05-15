@@ -29,6 +29,5 @@ namespace Utility
     };
 
     Parameters Parameters_from_client(Client &);
-    
 }
 #endif
