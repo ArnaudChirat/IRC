@@ -1,4 +1,5 @@
 #include "ClientManager.class.hpp"
+#include "ReplyManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"
@@ -39,12 +40,12 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
     if (choice == USER)
     {
         client = new User(socket);
-        not_error = setNick(name, *static_cast<User*>(client));
+        not_error = setNick(name, *static_cast<User *>(client));
     }
     else if (choice == ClientChoice::SERVICE)
     {
         client = new Service(socket);
-        not_error = setService(name, *static_cast<Service*>(client));
+        not_error = setService(name, *static_cast<Service *>(client));
     }
     if (!not_error)
     {
@@ -65,24 +66,28 @@ bool ClientManager::checkName(ClientChoice choice, std::string const &name)
 
 Client *ClientManager::getClient(SocketClient *socket)
 {
-    return (this->_clients.find(socket)->second);
+    auto it = this->_clients.find(socket);
+    if (it != this->_clients.end())
+        return it->second;
+    return NULL;
 }
 
 bool ClientManager::setNick(std::string const &nick, User &client)
 {
     if (checkName(USER, nick))
     {
-        std::string oldNick = client.getName();
-        client.setName(nick);
-        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_NICKNAMEINUSE);
-        client.setName(oldNick);
+        Parameters param = {};
+        param.nickname = nick;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NICKNAMEINUSE, client.getSocketClient());
         return (false);
     }
     this->_names_used.erase(Key(USER, client.getName()));
     client.setName(nick);
     if (client.getName().empty())
     {
-        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
+        Parameters param = {};
+        param.nickname = nick;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_ERRONEUSNICKNAME, client.getSocketClient());
     }
     this->_names_used.insert(Key(USER, nick));
     return (true);
@@ -93,22 +98,23 @@ bool ClientManager::setService(std::string const &nick, Service &client)
     std::string real_name(nick + IRCServer::name);
     if (checkName(SERVICE, real_name))
     {
-        std::string old_service = client.getName();
-        client.setName(real_name);
-        IRCServer::_reply_manager.errorReply(NULL, &client, NULL, ReplyManager::ERR_ALREADYREGISTRED);
-        client.setName(old_service);
+        Parameters param = {};
+        param.nickname = nick;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NICKNAMEINUSE, client.getSocketClient());
         return (false);
     }
     this->_names_used.erase(Key(SERVICE, client.getName()));
     client.setName(real_name);
     if (client.getName().empty())
     {
-        IRCServer::_reply_manager.errorReply(NULL, &client , NULL, ReplyManager::ERR_ERRONEUSNICKNAME);
-        return (false);
+        Parameters param = {};
+        param.nickname = nick;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_ERRONEUSNICKNAME, client.getSocketClient());
     }
     this->_names_used.insert(Key(SERVICE, real_name));
-    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_WELCOME);
-    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_YOURHOST);
+    Parameters param(client);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, client.getSocketClient());
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, client.getSocketClient());
     return (true);
 };
 
@@ -119,11 +125,12 @@ bool ClientManager::setUser(std::string const &username, unsigned int mode, std:
     client.setUser(username);
     if (client.getUser().empty())
         return (false);
-    mode = (mode & (User::w | User::i)); 
+    mode = (mode & (User::w | User::i));
     client.setRealName(real_name).setHostname(IRCServer::name).setMode(mode);
     client.status = Client::Status::CONNECTED;
-    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_WELCOME);
-    IRCServer::_reply_manager.connectionReply(&client, ReplyManager::RPL_YOURHOST);
+    Parameters param(client);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, client.getSocketClient());
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, client.getSocketClient());
     return (true);
 };
 

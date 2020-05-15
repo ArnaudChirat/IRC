@@ -5,7 +5,10 @@
 #include "Client.class.hpp"
 #include "User.class.hpp"
 #include "Channel.class.hpp"
+#include "IRCServer.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "MessageMediator.class.hpp"
+#include "Utility.hpp"
 
 class ReplyManager
 {
@@ -162,43 +165,22 @@ public:
         ERR_USERSDONTMATCH,
     };
 
-    typedef struct s_clientInfo {
-        std::string     nick;
-        std::string     user;
-        std::string     host;
+    std::string replyMessage(ConnectionEnum, Parameters const &);
+    std::string replyMessage(CommandEnum, Parameters const &);
+    std::string replyMessage(ErrorEnum, Parameters const &);
 
-    }               t_clientInfo;
-
-    typedef struct s_channelInfo {
-        std::string     name;
-        std::string     members;
-        std::string     type;
-
-    }               t_channelInfo;
-
-    typedef struct s_serverInfo {
-        std::string     name;
-
-    }               t_serverInfo;
-
-    typedef struct s_msgInfo {
-        std::string     cmd;
-
-    }               t_msgInfo;
-
-    static t_serverInfo serverInfo;
-
-    std::string connectionReplyMessage(ConnectionEnum, t_clientInfo);
-    std::string commandReplyMessage(CommandEnum, t_clientInfo, t_channelInfo);
-    std::string errorReplyMessage(ErrorEnum, t_msgInfo, t_clientInfo, t_channelInfo);
-
-    bool connectionReply(Client * client, ConnectionEnum x);
-    bool errorReply(IRCMessage *, Client *, Channel *, ErrorEnum x);
-    bool commandReply(Client * client, Channel * channel, CommandEnum x);
-    void    _buildMsgInfo(IRCMessage * msg, t_msgInfo & msgInfo);
-    void    _buildClientInfo(Client * client, t_clientInfo & clientInfo);
-    void    _buildChannelInfo(Channel * channel, t_channelInfo & channelInfo);
+    template< typename T >
+    bool reply(Parameters const &, T const &, SocketClient *);
 
 };
+
+template <typename T>
+bool     ReplyManager::reply(Parameters const & params, T const & enumType, SocketClient * socket){ 
+    
+    std::string reply = replyMessage(enumType, params);
+    IRCServer::_message_mediator->sendReply(reply, socket);
+    return true;
+}
+
 
 #endif

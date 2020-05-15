@@ -1,6 +1,7 @@
 #include "ChannelManager.class.hpp"
 #include "User.class.hpp"
 #include "IRCServer.class.hpp"
+#include "Utility.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -8,41 +9,52 @@ ChannelManager::ChannelManager(void) {}
 
 ChannelManager::~ChannelManager(void) {}
 
-size_t  ChannelManager::getSize(void) const{
-    return this->_channels.size();
-}
 
 void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
-    if (!msg.getParameters().size()){
-        // on fait une copie pour garder la const_ness du message initial
-        IRCMessage  msgCopy = msg;
-        IRCServer::_reply_manager.errorReply(&msgCopy, static_cast<Client*>(user), NULL, ReplyManager::ERR_NEEDMOREPARAMS);
-        return;
-    }
-    if (msg.getParameters()[0] == "0"){
+    if (msg.params.channelName == "0")
         _leaveAllChann(user);
-        return;
+    else {
+        std::vector<std::string>  names;
+        std::vector<std::string>  keys;
+        names = _splitParam(msg.params.channelName, ", ");
+        keys = _splitParam(msg.params.keys, ", ");
+        // verify keys?
+        for (auto itName = names.begin(); itName != names.end(); ++itName)
+            _createAddChannel(*itName, user);
     }
-    std::vector<std::string>  names;
-    std::vector<std::string>  keys;
-    names = _splitParam(msg.getParameters().at(0), ", ");
-    keys = (msg.getParameters().size() > 1 ? _splitParam(msg.getParameters().at(1), ", ") : keys);
-    // verify keys?
-    for (auto itName = names.begin(); itName != names.end(); ++itName)
-        _createAddChannel(*itName, user);
 }
 
-std::vector<std::string>  ChannelManager::_splitParam(std::string const & param, std::string const & delimiters) const{
+void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
+    std::vector<std::string>  names;
+    std::string     partMessage;
+    Channel * channel;
+
+    names = _splitParam(msg.params.channelName, ", ");
+    partMessage = msg.params.leave_message;
+    for (auto it = names.begin(); it != names.end(); ++it){
+        if (!(channel = this->getChannel(*it))){
+            Parameters param(*user);
+            param.channelName = *it;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
+        }
+        else if (!(channel = user->getChannel(*it)))
+            IRCServer::_reply_manager->reply(Parameters(*user).paramChannel(*channel), ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
+        else
+            this->_leaveOneChann(user, channel);      
+    }
+}
+
+std::vector<std::string>  ChannelManager::_splitParam(std::string const & strToSplit, std::string const & delimiters) const{
     size_t idx = 0;
     size_t foundIdx = 0;
     std::vector<std::string> splitParams;
-    while (idx < param.size()){
-        if ((foundIdx = param.find_first_of(delimiters, idx)) == std::string::npos){
-            splitParams.push_back(param.substr(idx));
+    while (idx < strToSplit.size()){
+        if ((foundIdx = strToSplit.find_first_of(delimiters, idx)) == std::string::npos){
+            splitParams.push_back(strToSplit.substr(idx));
             break;
         }
         else {
-            splitParams.push_back(param.substr(idx, foundIdx - idx));
+            splitParams.push_back(strToSplit.substr(idx, foundIdx - idx));
             idx = foundIdx + 1;
         }
     }
@@ -51,19 +63,19 @@ std::vector<std::string>  ChannelManager::_splitParam(std::string const & param,
 
 void    ChannelManager::_createAddChannel(std::string name, User * user) {
     if (!_verify(name)){
-        Channel *   errorChannel = new Channel(name);
-        IRCServer::_reply_manager.errorReply(NULL, static_cast<Client*>(user), errorChannel, ReplyManager::ERR_NOSUCHCHANNEL);
-        delete errorChannel;
+        Parameters param(*user);
+        param.channelName = name;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
         return;
     }
     auto it = this->_channels.find(name);
     if (it == this->_channels.end()) {
-        Channel * channel = this->_createChannel(name, user);
+        Channel * channel = this->_createChannel(name);
+        this->_newMember(user, channel);
         this->_welcomeMessage(user, channel);
     }
     else {
-        auto itChann = user->getChannels().find(it->second->getName());
-        if (itChann != user->getChannels().end()){
+        if (!user->getChannel(it->second->getName())){
             this->_newMember(user, it->second);
             this->_welcomeMessage(user, it->second);
         }
@@ -71,10 +83,10 @@ void    ChannelManager::_createAddChannel(std::string name, User * user) {
 }
 
 void    ChannelManager::_welcomeMessage(User * user, Channel * channel) const{
-    Client * client = static_cast<Client*>(user);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_WELCOMECHAN);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_NAMREPLY);
-    IRCServer::_reply_manager.commandReply(client, channel, ReplyManager::RPL_ENDOFNAMES);
+    Parameters param = Parameters(*user).paramChannel(*channel);
+    _sendParamToAll(param, channel, ReplyManager::RPL_WELCOMECHAN);
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
+    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_ENDOFNAMES, user->getSocketClient());
 }
 
 void    ChannelManager::_newMember(User * user, Channel * channel) {
@@ -91,11 +103,9 @@ bool    ChannelManager::_verify(std::string name) const {
     return false;
 }
 
-Channel *    ChannelManager::_createChannel(std::string const & name, User * user) {
+Channel *    ChannelManager::_createChannel(std::string const & name) {
     Channel *   newChannel = new Channel(name);
     this->_addChannel(name, newChannel);
-    newChannel->addMember(user);
-    user->addChannel(newChannel);
     //Ici on pourra set tous les params qui seraient donnés avec le JOIN (modes...) -> a voir si 
     // ca se fait avec le Join à la creation
     return newChannel;
@@ -112,9 +122,21 @@ void    ChannelManager::_leaveAllChann(User * user) const {
 }
 
 void    ChannelManager::_leaveOneChann(User * user, Channel * channel) const {
+    Parameters  param = Parameters(*user).paramChannel(*channel);
+    _sendParamToAll(param, channel, ReplyManager::RPL_LEAVECHANN);
     channel->deleteMember(user);
     user->deleteChannel(channel);
-    IRCServer::_reply_manager.commandReply(static_cast<Client*>(user), channel, ReplyManager::RPL_LEAVECHANN);
+}
+
+size_t  ChannelManager::getSize(void) const{
+    return this->_channels.size();
+}
+
+Channel * ChannelManager::getChannel(std::string const & name) const{
+    auto it = this->_channels.find(name);
+    if (it != this->_channels.end())
+        return it->second;    
+    return NULL;
 }
 
 void    ChannelManager::displayChannels(void) const{

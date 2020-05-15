@@ -21,6 +21,8 @@ public:
     void    addMember(User *);
     void    deleteMember(User *);
     std::unordered_map<std::string, User*>     getMembers(void) const;
+    std::string     getMembersString(void) const;
+
     // void addUser(User const &user);
     // void removeClient(User const &user);
     // void setClientPrivilege(unsigned int privilige, User const &user);

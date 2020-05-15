@@ -10,7 +10,7 @@ public:
     virtual ~Client(void);
     virtual Client & setName(std::string const &name) = 0;
     SocketClient * getSocketClient(void) const;
-    virtual std::string getName() const;
+    std::string getName() const;
     SocketClient *_socket_client;
     enum class Status
     {

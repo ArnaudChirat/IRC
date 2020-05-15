@@ -2,7 +2,6 @@
 #define MESSAGEMEDIATOR_CLASS_HPP
 #include "IRCMessage.class.hpp"
 #include "SocketClient.class.hpp"
-#include "Client.class.hpp"
 #include <map>
 
 class MessageMediator
@@ -13,7 +12,7 @@ public:
     // MessageMediator &operator=(MessageMediator const &rhs);
     ~MessageMediator(void);
     bool handleMessage(IRCMessage const &message, SocketClient *client);
-    bool sendReply(std::string const &, Client *) const;
+    bool sendReply(std::string const &, SocketClient *) const;
 
 private:
     typedef void (MessageMediator::*Command)(IRCMessage const &, SocketClient *) const;
@@ -23,6 +22,7 @@ private:
     void joinCommand(IRCMessage const &message, SocketClient *socket) const;
     void passCommand(IRCMessage const &message, SocketClient *socket) const;
     void operCommand(IRCMessage const &message, SocketClient *socket) const;
+    void partCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessage::IRCMessageType, Command> _commands;
 };
 

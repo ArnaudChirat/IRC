@@ -1,4 +1,6 @@
 #include "IRCMessage.class.hpp"
+#include "IRCServer.class.hpp"
+#include "ReplyManager.class.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -23,9 +25,10 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"SERVICE", IRCMessageType::SERVICE},
     {"JOIN", IRCMessageType::JOIN},
     {"OPER", IRCMessageType::OPER},
+    {"PART", IRCMessageType::PART},
 };
 
-IRCMessage::IRCMessage(std::string &message) : _is_valid(false)
+IRCMessage::IRCMessage(std::string &message, SocketClient * socket) : _is_valid(true), _socket(socket)
 {
     this->splitIRCMessage(message);
 }
@@ -64,7 +67,6 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     {
         this->_command = res->first;
         this->type = res->second;
-        this->_is_valid = true;
     }
     return (*this);
 }
@@ -100,41 +102,58 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid()
+bool IRCMessage::isValid(SocketClient * socket)
 {
     bool validation = false;
     if (this->type == SERVICE && _parameters.size() >= 1)
     {
-        parameters_struct.nickname = _parameters[0];
+        params.nickname = _parameters[0];
         validation = true;
     }
     else if (this->type == USER && _parameters.size() >= 3)
     {
-        parameters_struct.user = _parameters[0];
-        parameters_struct.mode = std::stoi(_parameters[1]);
-        parameters_struct.real_name = _trail;
+        params.user = _parameters[0];
+        params.mode = std::stoi(_parameters[1]);
+        params.real_name = _trail;
         validation = true;
     }
     else if (this->type == NICK && _parameters.size() >= 1)
     {
-        parameters_struct.nickname = _parameters[0];
+        params.nickname = _parameters[0];
         validation = true;
     }
     else if (this->type == PASS && _parameters.size() >= 1)
     {
-        parameters_struct.password = _parameters[0];
+        params.password = _parameters[0];
         validation = true;
     }
     else if (this->type == OPER && _parameters.size() == 2)
     {
-        parameters_struct.user = _parameters[0];
-        parameters_struct.password = _parameters[1];
+        params.user = _parameters[0];
+        params.password = _parameters[1];
         validation = true;
     }
-    else 
+    else if (this->type == JOIN && _parameters.size() >= 1)
     {
-        validation = _is_valid;
+        params.channelName = _parameters[0];
+        params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
+        validation = true;
     }
+    else if (this->type == PART && _parameters.size() >= 1)
+    {
+        params.channelName = _parameters[0];
+        params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
+        validation = true;
+    }
+    else if (this->type == QUIT)
+    {
+        if (_parameters.size() == 1)
+            params.quit_message = _parameters[0];
+        validation = true;
+    }
+    else
+        IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
+
     return (validation);
 }
 

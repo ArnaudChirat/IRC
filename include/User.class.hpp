@@ -46,6 +46,7 @@ public:
     User &setOper(Oper &);
     std::string getUser() const;
     std::unordered_map<std::string, Channel *> getChannels(void) const;
+    Channel *   getChannel(std::string const &) const;
     virtual std::string getName() const;
     Oper *getOper() const;
     std::string getMode() const;
@@ -53,8 +54,8 @@ public:
     void deleteChannel(Channel *);
     User &setPassword(std::string const &pass);
     std::string getPassword() const;
-
-protected:
+     
+private:
     User(void);
 
 private:
