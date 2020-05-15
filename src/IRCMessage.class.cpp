@@ -26,9 +26,10 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"JOIN", IRCMessageType::JOIN},
     {"OPER", IRCMessageType::OPER},
     {"PART", IRCMessageType::PART},
+    {"PRIVMSG", IRCMessageType::PRIVMSG},
 };
 
-IRCMessage::IRCMessage(std::string &message, SocketClient * socket) : _is_valid(true), _socket(socket)
+IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(true), _socket(socket)
 {
     this->splitIRCMessage(message);
 }
@@ -38,7 +39,8 @@ IRCMessage::IRCMessage(IRCMessage const &instance)
     *this = instance;
 }
 
-IRCMessage &    IRCMessage::operator=(IRCMessage const & rhs){
+IRCMessage &IRCMessage::operator=(IRCMessage const &rhs)
+{
     this->_prefix = rhs.getPrefix();
     this->_command = rhs.getCommand();
     this->_parameters = rhs.getParameters();
@@ -102,7 +104,7 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid(SocketClient * socket)
+bool IRCMessage::isValid(SocketClient *socket)
 {
     bool validation = false;
     if (this->type == SERVICE && _parameters.size() >= 1)
@@ -151,6 +153,22 @@ bool IRCMessage::isValid(SocketClient * socket)
             params.quit_message = _parameters[0];
         validation = true;
     }
+    else if (this->type == PRIVMSG)
+    {
+        if (_parameters.size() == 1)
+        {
+            params.target = _parameters[0];
+            if (!_trail.empty())
+            {
+                params.text = _trail;
+                validation = true;
+            }
+            else
+                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NOTEXTTOSEND, socket);
+        }
+        else
+            IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NORECIPIENT, socket);
+    }
     else
         IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
 
@@ -174,19 +192,23 @@ void IRCMessage::splitIRCMessage(std::string &message)
         setPrefix(cm[1]).setCommand(cm[2]).setParameters(cm[3]).setTrail(cm[4]);
 }
 
-std::string     IRCMessage::getCommand() const{
+std::string IRCMessage::getCommand() const
+{
     return this->_command;
 }
 
-std::string  IRCMessage::getPrefix() const{
+std::string IRCMessage::getPrefix() const
+{
     return this->_prefix;
 }
 
-std::string     IRCMessage::getTrail() const{
+std::string IRCMessage::getTrail() const
+{
     return this->_trail;
 }
 
-std::vector<std::string>  IRCMessage::getParameters() const {
+std::vector<std::string> IRCMessage::getParameters() const
+{
     return (this->_parameters);
 };
 

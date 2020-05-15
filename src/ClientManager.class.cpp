@@ -30,6 +30,7 @@ void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice
     (void)choice;
     // this->_names_used.insert(Key(choice, client->getName()));
     this->_clients.insert(std::pair<SocketClient *, Client *>(socket, client));
+    this->_nick_clients.insert(std::pair<std::string, Client *>(client->getName(), client));
 }
 
 Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, std::string const &name)
@@ -68,6 +69,14 @@ Client *ClientManager::getClient(SocketClient *socket)
 {
     auto it = this->_clients.find(socket);
     if (it != this->_clients.end())
+        return it->second;
+    return NULL;
+}
+
+Client *ClientManager::getClientByName(std::string const &name)
+{
+    auto it = this->_nick_clients.find(name);
+    if (it != this->_nick_clients.end())
         return it->second;
     return NULL;
 }
@@ -149,6 +158,7 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
     Key key(choice, client->getName());
     this->_names_used.erase(key);
     this->_clients.erase(socket);
+    this->_nick_clients.erase(client->getName());
     delete client;
 }
 
@@ -156,3 +166,26 @@ int ClientManager::getSize() const
 {
     return (this->_names_used.size());
 }
+
+bool ClientManager::sendMsg(User &client, std::string const &msg, std::string const &target)
+{
+    User *targer_ptr = NULL;
+    if (client.getName() != target && checkName(USER, target))
+    {
+        targer_ptr = static_cast<User *>(this->getClientByName(target));
+        if (targer_ptr->status == Client::Status::CONNECTED)
+        {
+            std::string sendingmsg;
+            std::string prefix = ":" + client.getName() + "!" + IRCServer::name;
+            sendingmsg = prefix + " PRIVMSG " + target + " :" + msg + "\n";
+            IRCServer::_message_mediator->sendReply(sendingmsg, targer_ptr->getSocketClient());
+        }
+        else
+        {
+            Parameters param = {};
+            param.nickname = target;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client.getSocketClient());
+        }
+    }
+    return (false);
+};

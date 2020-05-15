@@ -22,11 +22,13 @@ public:
     ~ClientManager(void);
     Client *createAddClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     Client *createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
+    bool sendMsg(User &client, std::string const &msg, std::string const &target);
     bool setUser(std::string const &username, unsigned int mode, std::string real_name, User &client);
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
+    Client *getClientByName(std::string const &nick);
     int getSize() const;
     // void    dispatch();
 private:
@@ -36,6 +38,7 @@ private:
     typedef std::pair<ClientChoice, std::string> Key;
     std::set<Key> _names_used;
     std::multimap<SocketClient*, Client*> _clients;
+    std::multimap<std::string, Client*> _nick_clients;
     // std::list<std::unique_ptr<Client>> _clients;
 };
 

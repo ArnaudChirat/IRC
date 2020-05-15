@@ -19,6 +19,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::PASS, &MessageMediator::passCommand});
     this->_commands.insert({IRCMessage::OPER, &MessageMediator::operCommand});
     this->_commands.insert({IRCMessage::PART, &MessageMediator::partCommand});
+    this->_commands.insert({IRCMessage::PRIVMSG, &MessageMediator::privmsgCommand});
     return;
 }
 
@@ -133,6 +134,13 @@ void    MessageMediator::partCommand(IRCMessage const &message, SocketClient *so
     Client * client = IRCServer::_client_manager->getClient(socket);
     if (client)
         IRCServer::_channel_manager->handlePartChannel(message, dynamic_cast<User*>(client));
+}
+
+void    MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    Client * client = IRCServer::_client_manager->getClient(socket);
+    if (client)
+        IRCServer::_client_manager->sendMsg(*static_cast<User*>(client), message.params.text, message.params.target);
 }
 
 bool    MessageMediator::sendReply(std::string const & msg, SocketClient * socket) const{

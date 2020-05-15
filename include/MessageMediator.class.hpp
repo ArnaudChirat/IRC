@@ -23,6 +23,7 @@ private:
     void passCommand(IRCMessage const &message, SocketClient *socket) const;
     void operCommand(IRCMessage const &message, SocketClient *socket) const;
     void partCommand(IRCMessage const &message, SocketClient *socket) const;
+    void privmsgCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessage::IRCMessageType, Command> _commands;
 };
 

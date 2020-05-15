@@ -46,6 +46,9 @@ std::string     ReplyManager::replyMessage(ErrorEnum x, Parameters const & param
         {ERR_NEEDMOREPARAMS, params.nickname + ' ' + params.command + " :Not enough parameters\n"},
         {ERR_NOSUCHCHANNEL, params.nickname +' '+params.channelName + " :No such channel\n"},
         {ERR_NOTONCHANNEL, params.nickname +' '+params.channelName + " :You are not on that channel\n"},
+        {ERR_NORECIPIENT, ":No recipient given " + params.command + "\n"},
+        {ERR_NOTEXTTOSEND, ":No text to send\n"},
+        {ERR_NOSUCHNICK, params.nickname + " :No such nick/channel\n"}
     };
 
     return oss.str() + ' ' + errorReply.at(x);
