@@ -28,6 +28,7 @@ std::string     ReplyManager::replyMessage(CommandEnum x, Parameters const & par
         {RPL_NAMREPLY, oss.str()+' '+params.nickname+' '+params.channelType+" "+params.channelName+" :"+params.channelMembers+"\n"},
         {RPL_ENDOFNAMES, oss.str()+' '+params.channelName+" :End of NAMES list\n"},
         {RPL_LEAVECHANN, ":"+params.nickname+"!~"+params.user+'@'+params.host+" PART :"+params.channelName+"\n"},
+        {RPL_YOUREOPER, ":You are now an IRC operator\n"},
     };
 
     return commandReply.at(x);

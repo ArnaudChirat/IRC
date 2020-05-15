@@ -121,6 +121,8 @@ void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socke
         {
             user->addMode(User::o);
             user->setOper(*new Oper);
+            Parameters param = {};
+            IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOUREOPER, user->getSocketClient());
         }
     }
     
