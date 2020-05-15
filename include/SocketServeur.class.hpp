@@ -4,7 +4,6 @@
 #include <string>
 #include <list>
 #include <netinet/in.h>
-#include "Utility.hpp"
 #include "Socket.class.hpp"
 #include "SocketClient.class.hpp"
 class SocketServeur : public Socket

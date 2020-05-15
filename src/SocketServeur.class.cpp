@@ -1,5 +1,4 @@
 #include "SocketServeur.class.hpp"
-#include "Utility.hpp"
 #include <stdexcept>
 #include <netdb.h>
 #include <iostream>

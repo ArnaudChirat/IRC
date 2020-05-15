@@ -3,11 +3,16 @@
 #include <netinet/in.h>
 #include "Client.class.hpp"
 #include "User.class.hpp"
-#include "Channel.class.hpp"
 #include <string>
 #define BUFF_MSG 512
 
 class IRCMessage;
+class Channel;
+
+namespace Utility {
+    std::vector<std::string>  splitParam(std::string const & strToSplit, std::string const & delimiters);
+
+};
 
 struct Parameters
     {

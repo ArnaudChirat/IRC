@@ -1,5 +1,8 @@
 #ifndef MESSAGEMEDIATOR_CLASS_HPP
 #define MESSAGEMEDIATOR_CLASS_HPP
+
+#include "Utility.hpp"
+
 #include "IRCMessage.class.hpp"
 #include "SocketClient.class.hpp"
 #include <map>

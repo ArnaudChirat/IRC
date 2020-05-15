@@ -38,8 +38,6 @@ public:
     void    handleJoinChannel(IRCMessage const &, User *);
     void    handlePartChannel(IRCMessage const &, User *);
     Channel * getChannel(std::string const &) const;
-    // pour debug. A virer asap
-    void    displayChannels(void) const;
 
 
 private:
@@ -58,19 +56,7 @@ private:
     void    _leaveAllChann(User * user) const;
     void    _leaveOneChann(User * user, Channel * channel) const;
 
-    template< typename T >
-    void    _sendParamToAll(Parameters const &, Channel *, T const &) const;
-
-
-
 };
 
-template <typename T>
-void     ChannelManager::_sendParamToAll(Parameters const & param, Channel * channel, T const & replyEnum) const
-{
-    std::unordered_map<std::string, User*> channelMembers = channel->getMembers();
-    for (auto it = channelMembers.begin(); it != channelMembers.end(); ++it)
-        IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
-}
 
 #endif

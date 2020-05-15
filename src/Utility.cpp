@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 #include "IRCServer.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "Channel.class.hpp"
 
 Parameters::Parameters(void) {}
 
@@ -50,4 +51,22 @@ Parameters & Parameters::paramMessage(IRCMessage const & msg)
 {
     this->command = msg.getCommand();
     return *this;
+}
+
+
+std::vector<std::string>  Utility::splitParam(std::string const & strToSplit, std::string const & delimiters) {
+    size_t idx = 0;
+    size_t foundIdx = 0;
+    std::vector<std::string> splitParams;
+    while (idx < strToSplit.size()){
+        if ((foundIdx = strToSplit.find_first_of(delimiters, idx)) == std::string::npos){
+            splitParams.push_back(strToSplit.substr(idx));
+            break;
+        }
+        else {
+            splitParams.push_back(strToSplit.substr(idx, foundIdx - idx));
+            idx = foundIdx + 1;
+        }
+    }
+    return splitParams;
 }
