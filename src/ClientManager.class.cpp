@@ -169,17 +169,12 @@ int ClientManager::getSize() const
 
 bool ClientManager::sendMsg(User &client, std::string const &msg, std::string const &target)
 {
-    User *targer_ptr = NULL;
+    User *target_ptr = NULL;
     if (client.getName() != target && checkName(USER, target))
     {
-        targer_ptr = static_cast<User *>(this->getClientByName(target));
-        if (targer_ptr->status == Client::Status::CONNECTED)
-        {
-            std::string sendingmsg;
-            std::string prefix = ":" + client.getName() + "!" + IRCServer::name;
-            sendingmsg = prefix + " PRIVMSG " + target + " :" + msg + "\n";
-            IRCServer::_message_mediator->sendReply(sendingmsg, targer_ptr->getSocketClient());
-        }
+        target_ptr = static_cast<User *>(this->getClientByName(target));
+        if (target_ptr->status == Client::Status::CONNECTED)
+            client.sendMsgTo(target_ptr, msg);
         else
         {
             Parameters param = {};

@@ -59,16 +59,16 @@ void    ChannelManager::_createAddChannel(std::string name, User * user) {
         IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
         return;
     }
-    auto it = this->_channels.find(name);
-    if (it == this->_channels.end()) {
+    Channel * channel = this->getChannel(name);
+    if (!channel) {
         Channel * channel = this->_createChannel(name);
         this->_newMember(user, channel);
         this->_welcomeMessage(user, channel);
     }
     else {
-        if (!user->getChannel(it->second->getName())){
-            this->_newMember(user, it->second);
-            this->_welcomeMessage(user, it->second);
+        if (!user->getChannel(name)){
+            this->_newMember(user, channel);
+            this->_welcomeMessage(user, channel);
         }
     }
 }
@@ -76,8 +76,6 @@ void    ChannelManager::_createAddChannel(std::string name, User * user) {
 Channel *    ChannelManager::_createChannel(std::string const & name) {
     Channel *   newChannel = new Channel(name);
     this->_addChannel(name, newChannel);
-    //Ici on pourra set tous les params qui seraient donnés avec le JOIN (modes...) -> a voir si 
-    // ca se fait avec le Join à la creation
     return newChannel;
 }
 
@@ -120,4 +118,13 @@ bool    ChannelManager::_verify(std::string name) const {
         return true;
     // A compléter        
     return false;
+}
+
+void    ChannelManager::sendMessageChannel(User const & user, Channel const & channel, std::string const & msg){
+    if (!user.getChannel(channel.getName())){
+        Parameters param = Parameters(user).paramChannel(channel);
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user.getSocketClient());
+    }
+    else
+        channel.sendMessageToAll(user, msg);
 }

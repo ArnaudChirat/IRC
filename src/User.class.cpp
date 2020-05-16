@@ -129,6 +129,13 @@ void User::deleteChannel(Channel * channel){
     this->_channelsJoined.erase(channel->getName());
 }
 
+void    User::sendMsgTo(User * target, std::string const & msg) const{
+    std::string sendingmsg;
+    std::string prefix = ":" + this->_name + "!~" + this->_user+"@"+this->getSocketClient()->getAddr();
+    sendingmsg = prefix + " PRIVMSG " + target->getName() + " :" + msg + "\n";
+    IRCServer::_message_mediator->sendReply(sendingmsg, target->getSocketClient());
+}
+
 User &User::setPassword(std::string const &pass)
 {
     // todo hach password

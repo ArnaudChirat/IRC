@@ -137,7 +137,13 @@ void    MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient 
 {
     Client * client = IRCServer::_client_manager->getClient(socket);
     if (client)
-        IRCServer::_client_manager->sendMsg(*static_cast<User*>(client), message.params.text, message.params.target);
+    {
+        Channel * channel = IRCServer::_channel_manager->getChannel(message.params.target);
+        if (channel)
+            IRCServer::_channel_manager->sendMessageChannel(*static_cast<User*>(client), *channel, message.params.text);
+        else
+            IRCServer::_client_manager->sendMsg(*static_cast<User*>(client), message.params.text, message.params.target);
+    }
 }
 
 bool    MessageMediator::sendReply(std::string const & msg, SocketClient * socket) const{

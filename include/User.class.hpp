@@ -54,6 +54,7 @@ public:
     void deleteChannel(Channel *);
     User &setPassword(std::string const &pass);
     std::string getPassword() const;
+    void    sendMsgTo(User * target, std::string const & msg) const;
      
 private:
     User(void);

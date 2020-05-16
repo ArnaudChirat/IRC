@@ -155,7 +155,7 @@ bool IRCMessage::isValid(SocketClient *socket)
     }
     else if (this->type == PRIVMSG)
     {
-        if (_parameters.size() == 1)
+        if (_parameters.size() >= 1)
         {
             params.target = _parameters[0];
             if (!_trail.empty())
