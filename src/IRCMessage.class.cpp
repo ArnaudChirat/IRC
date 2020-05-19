@@ -155,13 +155,22 @@ bool IRCMessage::isValid(SocketClient *socket)
                     params.text = _trail;
                 }
                 else
+                {
                     IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NOTEXTTOSEND, socket);
+                    validation = false;
+                }
             }
             else
+            {
                 IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NORECIPIENT, socket);
+                validation = false;
+            }
         }
         else
+        {
             IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
+            validation = false;
+        }
     }
     return (validation);
 }
