@@ -24,6 +24,7 @@ private:
     void operCommand(IRCMessage const &message, SocketClient *socket) const;
     void partCommand(IRCMessage const &message, SocketClient *socket) const;
     void privmsgCommand(IRCMessage const &message, SocketClient *socket) const;
+    void lusersCommand(IRCMessage const &message, SocketClient *socket) const;
     std::map<IRCMessage::IRCMessageType, Command> _commands;
 };
 

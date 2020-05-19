@@ -20,6 +20,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::OPER, &MessageMediator::operCommand});
     this->_commands.insert({IRCMessage::PART, &MessageMediator::partCommand});
     this->_commands.insert({IRCMessage::PRIVMSG, &MessageMediator::privmsgCommand});
+    this->_commands.insert({IRCMessage::LUSERS, &MessageMediator::lusersCommand});
     return;
 }
 
@@ -34,7 +35,7 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     std::cout << message << std::endl;
     // std::cout << (this->_commands.at(message.type)) << std::endl;
     (this->*_commands[message.type])(message, socket);
-    std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize() << std::endl;
+    std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL) << std::endl;
     // if ((message.type ::IRCMessage_TYPE_MASK) =::CONNECTION_REGISTRATION)
     //     this->createClient(message, socket);
     return (true);
@@ -47,7 +48,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     Service *service = NULL;
     if (message.type == IRCMessage::NICK)
     {
-        user = static_cast<User*>(IRCServer::_client_manager->getClient(socket));
+        user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
         if (!user)
             client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
         else
@@ -63,7 +64,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     }
     if (client)
         std::cout << "User created : " << client->getName() << std::endl;
-    else if(user)
+    else if (user)
         std::cout << "User already exist nickname is : " << user->getName() << std::endl;
     else
         std::cout << "Nick name already use : " << message.params.nickname << std::endl;
@@ -85,39 +86,40 @@ void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socke
     std::cout << "quit command" << std::endl;
     IRCServer::_client_manager->deleteClient(socket, ClientManager::USER);
     IRCServer::_socket_manager->deleteSocket(socket);
-    std::cout << "someone has quit" << message.params.quit_message  << std::endl;
+    std::cout << "someone has quit" << message.params.quit_message << std::endl;
 }
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    Client * client = IRCServer::_client_manager->getClient(socket);
+    Client *client = IRCServer::_client_manager->getClient(socket);
     std::cout << "join command" << std::endl;
     // if (IRCServer::_channel_manager->verify(message, client))
-    if (client){
-        IRCServer::_channel_manager->handleJoinChannel(message, dynamic_cast<User*>(client));
-    // dispay channels à virer asap
+    if (client)
+    {
+        IRCServer::_channel_manager->handleJoinChannel(message, dynamic_cast<User *>(client));
+        // dispay channels à virer asap
         IRCServer::_channel_manager->displayChannels();
     }
-    
 }
 
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    User * user = static_cast<User*>(IRCServer::_client_manager->getClient(socket));
+    User *user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
     std::cout << "pass command" << std::endl;
     // if (IRCServer::_channel_manager.verify(message, user))
-    if (user){
+    if (user)
+    {
         user->setPassword(message.params.password);
     }
-    
 }
 
 void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    User * user = static_cast<User*>(IRCServer::_client_manager->getClient(socket));
+    User *user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
     std::cout << "oper command" << std::endl;
     // if (IRCServer::_channel_manager.verify(message, user))
-    if (user){
+    if (user)
+    {
         if (message.params.password == user->getPassword() && message.params.user == user->getUser())
         {
             user->addMode(User::o);
@@ -126,24 +128,44 @@ void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socke
             IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOUREOPER, user->getSocketClient());
         }
     }
-    
 }
 
-void    MessageMediator::partCommand(IRCMessage const &message, SocketClient *socket) const
+void MessageMediator::partCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    Client * client = IRCServer::_client_manager->getClient(socket);
+    Client *client = IRCServer::_client_manager->getClient(socket);
     if (client)
-        IRCServer::_channel_manager->handlePartChannel(message, dynamic_cast<User*>(client));
+        IRCServer::_channel_manager->handlePartChannel(message, dynamic_cast<User *>(client));
 }
 
-void    MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *socket) const
+void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    Client * client = IRCServer::_client_manager->getClient(socket);
+    Client *client = IRCServer::_client_manager->getClient(socket);
     if (client)
-        IRCServer::_client_manager->sendMsg(*static_cast<User*>(client), message.params.text, message.params.target);
+        IRCServer::_client_manager->sendMsg(*static_cast<User *>(client), message.params.text, message.params.target);
 }
 
-bool    MessageMediator::sendReply(std::string const & msg, SocketClient * socket) const{
+bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) const
+{
     socket->appendToBuffer(msg);
     return true;
+}
+
+void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    Client *client = IRCServer::_client_manager->getClient(socket);
+    (void)message;
+    if (client)
+    {
+        int clients = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL);
+        int servers = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::SERVER);
+        int users = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::USER);
+        int channels = IRCServer::_channel_manager->getSize();
+        std::ostringstream msg;
+        msg << "Stats de IRC :" << std::endl;
+        msg << "nombre de clients : " << clients << std::endl;
+        msg << "nombre de serveurs (sans compter le serveur local)) : " << servers << std::endl;
+        msg << "nombre de users : " << users << std::endl;
+        msg << "nombre de channel : " << channels << std::endl;
+        this->sendReply(msg.str(), socket);
+    }
 }

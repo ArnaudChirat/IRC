@@ -27,6 +27,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"OPER", IRCMessageType::OPER},
     {"PART", IRCMessageType::PART},
     {"PRIVMSG", IRCMessageType::PRIVMSG},
+    {"LUSERS", IRCMessageType::LUSERS},
 };
 
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(true), _socket(socket)
@@ -151,6 +152,12 @@ bool IRCMessage::isValid(SocketClient *socket)
     {
         if (_parameters.size() == 1)
             params.quit_message = _parameters[0];
+        validation = true;
+    }
+    else if (this->type == LUSERS)
+    {
+        if (_parameters.size() == 1)
+            params.target = _parameters[0];
         validation = true;
     }
     else if (this->type == PRIVMSG)

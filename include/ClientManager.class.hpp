@@ -29,7 +29,7 @@ public:
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     Client *getClientByName(std::string const &nick);
-    int getSize() const;
+    int getSize(ClientChoice choice) const;
     // void    dispatch();
 private:
     void addClient(SocketClient *socket, Client *client, ClientChoice choice);

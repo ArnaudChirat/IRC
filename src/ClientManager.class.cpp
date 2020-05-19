@@ -162,9 +162,20 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
     delete client;
 }
 
-int ClientManager::getSize() const
+int ClientManager::getSize(ClientChoice choice) const
 {
-    return (this->_names_used.size());
+    unsigned long total_size = this->_names_used.size();
+    std::set<Key> list;
+    if (total_size != this->_clients.size() || total_size != this->_nick_clients.size() || this->_clients.size() != this->_nick_clients.size())
+        throw std::length_error("Erreur de taille entre les containeurs..");
+    if (choice == ClientChoice::ALL)
+        return (total_size);
+    else
+    {
+        std::copy_if(this->_names_used.begin(), this->_names_used.end(), std::inserter(list, list.end()), [choice](Key const &key) {
+            return (key.first == choice);});
+        return (list.size());
+    }
 }
 
 bool ClientManager::sendMsg(User &client, std::string const &msg, std::string const &target)
