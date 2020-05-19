@@ -156,10 +156,11 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
         if (dynamic_cast<Service *>(client))
             choice = ClientManager::SERVICE;
     }
-    Key key(choice, client->getName());
+    std::string name = client->getName();
+    Key key(choice, name);
     this->_names_used.erase(key);
     this->_clients.erase(socket);
-    this->_nick_clients.erase(client->getName());
+    this->_nick_clients.erase(name);
     delete client;
 }
 
