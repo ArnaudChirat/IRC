@@ -93,12 +93,9 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
 {
     Client *client = IRCServer::_client_manager->getClient(socket);
     std::cout << "join command" << std::endl;
-    // if (IRCServer::_channel_manager->verify(message, client))
     if (client)
     {
         IRCServer::_channel_manager->handleJoinChannel(message, dynamic_cast<User *>(client));
-        // dispay channels à virer asap
-        IRCServer::_channel_manager->displayChannels();
     }
 }
 
@@ -141,7 +138,13 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
 {
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client)
-        IRCServer::_client_manager->sendMsg(*static_cast<User *>(client), message.params.text, message.params.target);
+    {
+        Channel *channel = IRCServer::_channel_manager->getChannel(message.params.target);
+        if (channel)
+            IRCServer::_channel_manager->sendMessageChannel(*static_cast<User *>(client), *channel, message.params.text);
+        else
+            IRCServer::_client_manager->sendMsg(*static_cast<User *>(client), message.params.text, message.params.target);
+    }
 }
 
 bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) const

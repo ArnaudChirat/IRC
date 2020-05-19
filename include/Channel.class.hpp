@@ -3,10 +3,14 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include "IRCServer.class.hpp"
+#include "ReplyManager.class.hpp"
+
 #define STANDARD 0
 #define SAFE 1
 
 class User;
+struct Parameters;
 
 class Channel
 {
@@ -22,24 +26,25 @@ public:
     void    deleteMember(User *);
     std::unordered_map<std::string, User*>     getMembers(void) const;
     std::string     getMembersString(void) const;
+    void    sendMessageToAll(User const &, std::string const &) const;
 
-    // void addUser(User const &user);
-    // void removeClient(User const &user);
-    // void setClientPrivilege(unsigned int privilige, User const &user);
-    // void getClientPrivilege(User const &user) const;
-    // void setMode(unsigned int mode);
-    // void getMode() const;
+    
+    template< typename T >
+    void    sendParamToAll(Parameters const &, T const &) const;
 
 private:
-    // TODO state pattern à implementer
-    // Statut *statut;
     std::string  _name;
-    // unsigned int _type;
-    // unsigned int _modes;
     std::unordered_map<std::string, User*> _members;
+
 };
 
 
+template <typename T>
+void     Channel::sendParamToAll(Parameters const & param, T const & replyEnum) const
+{
+    for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
+        IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+}
 
 
 #endif

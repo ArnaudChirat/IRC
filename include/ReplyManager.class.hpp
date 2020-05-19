@@ -3,12 +3,10 @@
 #include <string>
 
 #include "Client.class.hpp"
-#include "User.class.hpp"
-#include "Channel.class.hpp"
 #include "IRCServer.class.hpp"
-#include "IRCMessage.class.hpp"
 #include "MessageMediator.class.hpp"
-#include "Utility.hpp"
+
+struct Parameters;
 
 class ReplyManager
 {
