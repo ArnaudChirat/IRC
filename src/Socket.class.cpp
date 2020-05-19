@@ -1,4 +1,5 @@
 #include "Socket.class.hpp"
+#include "Utility.hpp"
 #include <cerrno>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -15,8 +16,8 @@ Socket::Socket(void) : _socket(socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)),
     return;
 }
 
-Socket::Socket(int const socket, sockaddr_in const &addr) : _socket(socket),
-                                                            _addr(addr)
+Socket::Socket(int const socket, sockaddr const & addr) : _socket(socket),
+                                                    _addr(addr)
 {
     this->checkSocket();
     return;
@@ -39,23 +40,24 @@ void Socket::checkSocket() const
         throw std::runtime_error(std::strerror(errno));
 }
 
-std::string Socket::getAddr() const
+std::string Socket::getAddr()
 {
     if (this->getPort() == 0)
         return "NONE";
     char buff[INET6_ADDRSTRLEN];
-    return inet_ntop(this->_addr.sin_family, &(this->_addr.sin_addr), buff, INET6_ADDRSTRLEN);
+    return inet_ntop(this->_addr.sa_family, Utility::get_in_addr(&this->_addr), buff, INET6_ADDRSTRLEN);
 }
 
-Socket &Socket::setAddr(sockaddr_in const &addr)
+void Socket::setAddr(sockaddr const & addr)
 {
     this->_addr = addr;
-    return (*this);
 }
 
-unsigned int Socket::getPort() const
+unsigned int Socket::getPort()
 {
-    return ntohs(this->_addr.sin_port);
+    if (Utility::ipv4(&this->_addr))
+        return ntohs((reinterpret_cast<sockaddr_in *>(&this->_addr))->sin_port);
+    return ntohs((reinterpret_cast<sockaddr_in6 *>(&this->_addr))->sin6_port);
 }
 
 void Socket::readStdin()

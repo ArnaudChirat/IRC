@@ -25,21 +25,21 @@ public:
     };
 
     Socket(void);
-    Socket(int const socket, sockaddr_in const &addr);
+    Socket(int const socket, sockaddr const & addr);
     Socket(Socket const &instance) = delete;
     Socket &operator=(Socket const &rhs) = delete;
     virtual ~Socket(void);
     int getSocket() const;
-    std::string getAddr() const;
-    unsigned int getPort() const;
-    Socket &setAddr(sockaddr_in const &addr);
+    std::string getAddr();
+    unsigned int getPort();
+    void setAddr(sockaddr const & addr);
     void readStdin();
     virtual void handle(SocketManagerInterface &dispatcher, type);
 
 private:
     void checkSocket() const;
     int const _socket;
-    sockaddr_in _addr;
+    sockaddr _addr;
 };
 
 #endif

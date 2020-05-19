@@ -30,7 +30,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"LUSERS", IRCMessageType::LUSERS},
 };
 
-IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(true), _socket(socket)
+IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(false), _socket(socket)
 {
     this->splitIRCMessage(message);
 }
@@ -70,6 +70,7 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     {
         this->_command = res->first;
         this->type = res->second;
+        this->_is_valid = true;
     }
     return (*this);
 }
@@ -107,78 +108,61 @@ std::string IRCMessage::getMessage() const
 
 bool IRCMessage::isValid(SocketClient *socket)
 {
-    bool validation = false;
-    if (this->type == SERVICE && _parameters.size() >= 1)
+    bool validation = this->_is_valid;
+    if (validation)
     {
-        params.nickname = _parameters[0];
-        validation = true;
-    }
-    else if (this->type == USER && _parameters.size() >= 3)
-    {
-        params.user = _parameters[0];
-        params.mode = std::stoi(_parameters[1]);
-        params.real_name = _trail;
-        validation = true;
-    }
-    else if (this->type == NICK && _parameters.size() >= 1)
-    {
-        params.nickname = _parameters[0];
-        validation = true;
-    }
-    else if (this->type == PASS && _parameters.size() >= 1)
-    {
-        params.password = _parameters[0];
-        validation = true;
-    }
-    else if (this->type == OPER && _parameters.size() == 2)
-    {
-        params.user = _parameters[0];
-        params.password = _parameters[1];
-        validation = true;
-    }
-    else if (this->type == JOIN && _parameters.size() >= 1)
-    {
-        params.channelName = _parameters[0];
-        params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
-        validation = true;
-    }
-    else if (this->type == PART && _parameters.size() >= 1)
-    {
-        params.channelName = _parameters[0];
-        params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
-        validation = true;
-    }
-    else if (this->type == QUIT)
-    {
-        if (_parameters.size() == 1)
-            params.quit_message = _parameters[0];
-        validation = true;
-    }
-    else if (this->type == LUSERS)
-    {
-        if (_parameters.size() == 1)
-            params.target = _parameters[0];
-        validation = true;
-    }
-    else if (this->type == PRIVMSG)
-    {
-        if (_parameters.size() >= 1)
+        if (this->type == SERVICE && _parameters.size() >= 1)
+            params.nickname = _parameters[0];
+        else if (this->type == USER && _parameters.size() >= 3)
         {
-            params.target = _parameters[0];
-            if (!_trail.empty())
+            params.user = _parameters[0];
+            params.mode = std::stoi(_parameters[1]);
+            params.real_name = _trail;
+        }
+        else if (this->type == NICK && _parameters.size() >= 1)
+            params.nickname = _parameters[0];
+        else if (this->type == PASS && _parameters.size() >= 1)
+        {
+            params.password = _parameters[0];
+        }
+        else if (this->type == OPER && _parameters.size() == 2)
+        {
+            params.user = _parameters[0];
+            params.password = _parameters[1];
+        }
+        else if (this->type == JOIN && _parameters.size() >= 1)
+        {
+            params.channelName = _parameters[0];
+            params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
+        }
+        else if (this->type == PART && _parameters.size() >= 1)
+        {
+            params.channelName = _parameters[0];
+            params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
+        }
+        else if (this->type == QUIT)
+        {
+            if (_parameters.size() == 1)
+                params.quit_message = _parameters[0];
+        }
+        else if (this->type == PRIVMSG)
+        {
+            if (_parameters.size() >= 1)
             {
-                params.text = _trail;
-                validation = true;
+                params.target = _parameters[0];
+                if (!_trail.empty())
+                {
+                    params.text = _trail;
+                }
+                else
+                    IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NOTEXTTOSEND, socket);
             }
             else
-                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NOTEXTTOSEND, socket);
+                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NORECIPIENT, socket);
         }
         else
-            IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NORECIPIENT, socket);
+            IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
     }
-    else
-        IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
-
     return (validation);
 }
 

@@ -22,7 +22,7 @@ SocketServeur::SocketServeur(unsigned short port)
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
-    this->setAddr(server);
+    this->setAddr(*(reinterpret_cast<sockaddr *>(&server)));
     if (setsockopt(sck, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
         throw std::runtime_error(std::strerror(errno));
     if (bind(sck, reinterpret_cast<sockaddr *>(&server), sizeof(server)) == -1)
@@ -44,7 +44,7 @@ SocketClient *SocketServeur::acceptNewClient()
     int newSocket = accept(sck, reinterpret_cast<sockaddr *>(&addr), &len);
     if (newSocket != -1)
     {
-        SocketClient *newClient = new SocketClient(newSocket, addr);
+        SocketClient *newClient = new SocketClient(newSocket, *(reinterpret_cast<sockaddr *>(&addr)));
         std::cout << "Acceptation de #" << newClient->getSocket() << " from " << newClient->getAddr().c_str() << ":" << newClient->getPort() << std::endl;
         // send(newSocket, "Tu es connecté\n", 16, 0);
         return newClient;

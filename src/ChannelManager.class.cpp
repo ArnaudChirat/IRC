@@ -36,7 +36,7 @@ void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
         if (!(channel = this->getChannel(*it))){
             Parameters param(*user);
             param.channelName = *it;
-            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
         }
         else if (!(channel = user->getChannel(*it)))
             IRCServer::_reply_manager->reply(Parameters(*user).paramChannel(*channel), ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Utility.hpp"
 #include <time.h>
+#include <cstring>
 #include <regex>
 #include "IRCServer.class.hpp"
 SocketClient::SocketClient(void)
@@ -11,7 +12,7 @@ SocketClient::SocketClient(void)
     return;
 }
 
-SocketClient::SocketClient(int const socket, sockaddr_in const &addr) : Socket(socket, addr)
+SocketClient::SocketClient(int const socket, sockaddr const & addr) : Socket(socket, addr)
 {
     return;
 }

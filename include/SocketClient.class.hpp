@@ -6,7 +6,7 @@
 class SocketClient : public Socket
 {
 public:
-    SocketClient(int const socket, sockaddr_in const &addr);
+    SocketClient(int const socket, sockaddr const & addr);
     SocketClient(SocketClient const &instance);
     SocketClient &operator=(SocketClient const &rhs);
     ~SocketClient(void);

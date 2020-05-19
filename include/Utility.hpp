@@ -4,6 +4,7 @@
 #include "Client.class.hpp"
 #include "User.class.hpp"
 #include <string>
+#include <vector>
 #define BUFF_MSG 512
 
 class IRCMessage;
@@ -11,6 +12,8 @@ class Channel;
 
 namespace Utility {
     std::vector<std::string>  splitParam(std::string const & strToSplit, std::string const & delimiters);
+    void    *get_in_addr(struct sockaddr *sa);
+    bool    ipv4(struct sockaddr *sa);
 
 };
 
