@@ -135,6 +135,11 @@ bool IRCMessage::isValid(SocketClient *socket)
             params.channelName = _parameters[0];
             params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
         }
+        else if (this->type == LUSERS)
+        {
+            if (!_parameters.empty())
+                params.target = _parameters[0];
+        }
         else if (this->type == PART && _parameters.size() >= 1)
         {
             params.channelName = _parameters[0];
