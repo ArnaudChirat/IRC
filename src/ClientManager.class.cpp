@@ -4,6 +4,7 @@
 #include "User.class.hpp"
 #include "Service.class.hpp"
 #include "Utility.hpp"
+#include <algorithm>
 #include <iostream>
 ClientManager::ClientManager(void)
 {
