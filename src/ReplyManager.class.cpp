@@ -48,7 +48,9 @@ std::string     ReplyManager::replyMessage(ErrorEnum x, Parameters const & param
         {ERR_NOTONCHANNEL, params.nickname +' '+params.channelName + " :You are not on that channel\n"},
         {ERR_NORECIPIENT, ":No recipient given " + params.command + "\n"},
         {ERR_NOTEXTTOSEND, ":No text to send\n"},
-        {ERR_NOSUCHNICK, params.nickname + " :No such nick/channel\n"}
+        {ERR_NOSUCHNICK, params.nickname + " :No such nick/channel\n"},
+        {ERR_ALREADYREGISTRED, " :Unauthorized command (already registered)\n"},
+        {ERR_UNKNOWNCOMMAND, params.command + " :Unknown command\n"},
     };
 
     return oss.str() + ' ' + errorReply.at(x);

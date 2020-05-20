@@ -75,3 +75,10 @@ bool    SocketClient::sendMessage(){
     return false;
 }
 
+std::string     SocketClient::getPassword(void) const{
+    return this->_password;
+}
+
+void    SocketClient::setPassword(std::string const & password){
+    this->_password = password;
+}

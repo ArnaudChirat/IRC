@@ -33,7 +33,7 @@ void    launchServer(unsigned short const port, std::string const password, std:
         std::string portNetwork;
         IRCServer server;
         server.config(port, password);
-        if (networkInfo.size()){
+        if (!networkInfo.empty()){
             hostNetwork = networkInfo[0];
             portNetwork = networkInfo[1];
             server.connectNetwork(hostNetwork, portNetwork);

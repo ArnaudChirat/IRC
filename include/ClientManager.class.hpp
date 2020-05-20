@@ -6,6 +6,9 @@
 #include "User.class.hpp"
 #include <set>
 #include <map>
+
+class ServerClient;
+
 class ClientManager
 {
 public:
@@ -26,6 +29,7 @@ public:
     bool setUser(std::string const &username, unsigned int mode, std::string real_name, User &client);
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
+    bool setServerName(std::string const &name, ServerClient &server);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     Client *getClientByName(std::string const &nick);

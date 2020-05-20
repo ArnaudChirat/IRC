@@ -28,6 +28,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"PART", IRCMessageType::PART},
     {"PRIVMSG", IRCMessageType::PRIVMSG},
     {"LUSERS", IRCMessageType::LUSERS},
+    {"SERVER", IRCMessageType::SERVER},
 };
 
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(false), _socket(socket)
@@ -72,6 +73,9 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
         this->type = res->second;
         this->_is_valid = true;
     }
+    // else if {
+    //     // for_each -> is_digit + length = 3 + changer _is_valid en COMMAND/NUMERIC_REPLY/UNKNOWN
+    // }
     return (*this);
 }
 
@@ -116,15 +120,14 @@ bool IRCMessage::isValid(SocketClient *socket)
         else if (this->type == USER && _parameters.size() >= 3)
         {
             params.user = _parameters[0];
+            // Attention crash si non digit
             params.mode = std::stoi(_parameters[1]);
             params.real_name = _trail;
         }
         else if (this->type == NICK && _parameters.size() >= 1)
             params.nickname = _parameters[0];
         else if (this->type == PASS && _parameters.size() >= 1)
-        {
             params.password = _parameters[0];
-        }
         else if (this->type == OPER && _parameters.size() == 2)
         {
             params.user = _parameters[0];
@@ -149,6 +152,20 @@ bool IRCMessage::isValid(SocketClient *socket)
         {
             if (_parameters.size() == 1)
                 params.quit_message = _parameters[0];
+        }
+        else if (this->type == SERVER)
+        {
+            if (_parameters.size() >= 3)
+                params.newServer = _parameters[0];
+                try {
+                    params.hopcount = std::stoi(_parameters[1]);
+                    params.token = std::stoi(_parameters[2]);
+                } catch(std::invalid_argument & e) {
+                    std::cout << e.what() << std::endl;
+                    return (false);
+                }
+                params.serverInfo = this->_trail;
+                params.host = this->_prefix;
         }
         else if (this->type == PRIVMSG)
         {
@@ -177,6 +194,8 @@ bool IRCMessage::isValid(SocketClient *socket)
             validation = false;
         }
     }
+    // else
+        // IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_UNKNOWNCOMMAND, socket);
     return (validation);
 }
 

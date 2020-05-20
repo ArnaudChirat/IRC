@@ -29,6 +29,10 @@ struct Parameters
         std::string host;
         std::string quit_message;
         std::string server;
+        std::string newServer;
+        unsigned int hopcount;
+        unsigned int token;
+        std::string serverInfo;
         std::string comment;
         std::string channelName;
         std::string channelType;

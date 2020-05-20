@@ -13,11 +13,15 @@ public:
     void appendToBuffer(std::string const & msg);
     bool recvMessage();
     bool sendMessage();
+    std::string getPassword() const;
+    void    setPassword(std::string const & password);
 	void handle(SocketManagerInterface &dispatcher, type);
 
 private:
     SocketClient(void);
     std::string     _buffer;
+    std::string     _password;
+    
 };
 
 enum SocketClientPrivilige

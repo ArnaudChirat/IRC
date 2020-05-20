@@ -52,8 +52,6 @@ public:
     std::string getMode() const;
     void addChannel(Channel *);
     void deleteChannel(Channel *);
-    User &setPassword(std::string const &pass);
-    std::string getPassword() const;
     void    sendMsgTo(User * target, std::string const & msg) const;
      
 private:
@@ -64,7 +62,6 @@ private:
     std::string _user;
     std::string _real_name;
     std::string _hostname;
-    std::string _password;
     unsigned int _mode;
     std::unordered_map<std::string, Channel *> _channelsJoined;
 };

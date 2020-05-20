@@ -136,18 +136,6 @@ void    User::sendMsgTo(User * target, std::string const & msg) const{
     IRCServer::_message_mediator->sendReply(sendingmsg, target->getSocketClient());
 }
 
-User &User::setPassword(std::string const &pass)
-{
-    // todo hach password
-    this->_password = pass;
-    return (*this);
-}
-
-std::string User::getPassword() const
-{
-    return (this->_password);
-}
-
 User &User::setOper(Oper &oper)
 {
     this->_oper = &oper;

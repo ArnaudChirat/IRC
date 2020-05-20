@@ -106,6 +106,8 @@ public:
         PING,
         PONG,
         ERROR,
+        SERVER_COMMANDS = 0x700,
+        SERVER,
         // OPTIONAL = 0x200
 
         IRCMessage_TYPE_MASK = 0XFF00,

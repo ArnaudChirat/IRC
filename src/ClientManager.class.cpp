@@ -2,10 +2,12 @@
 #include "ReplyManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
+#include "ServerClient.class.hpp"
 #include "Service.class.hpp"
 #include "Utility.hpp"
 #include <algorithm>
 #include <iostream>
+#include <algorithm>
 ClientManager::ClientManager(void)
 {
     return;
@@ -49,11 +51,16 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         client = new Service(socket);
         not_error = setService(name, *static_cast<Service *>(client));
     }
+    else if (choice == ClientChoice::SERVER) {
+        client = new ServerClient(socket);
+        not_error = setServerName(name, *static_cast<ServerClient *>(client));
+    }
     if (!not_error)
     {
         delete client;
         return (NULL);
     }
+    client->setPassword(socket->getPassword());
     return (client);
 }
 
@@ -81,6 +88,17 @@ Client *ClientManager::getClientByName(std::string const &name)
         return it->second;
     return NULL;
 }
+
+bool ClientManager::setServerName(std::string const &name, ServerClient &server)
+{
+    if (checkName(SERVER, name) || this->getClient(server.getSocketClient())){
+        IRCServer::_reply_manager->reply(Parameters(), ReplyManager::ERR_ALREADYREGISTRED, server.getSocketClient());
+        return (false);
+    }
+    server.setName(name);
+    this->_names_used.insert(Key(SERVER, name));
+    return (true);
+};
 
 bool ClientManager::setNick(std::string const &nick, User &client)
 {

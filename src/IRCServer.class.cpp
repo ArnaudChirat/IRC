@@ -61,7 +61,6 @@ void  IRCServer::connectNetwork(std::string const hostNetowrk, std::string const
         SocketClient * networkSocket = new SocketClient(sockfd, *(ptr->ai_addr));
         IRCServer::_socket_manager->addSocket(networkSocket);
         std::cout << "server connecting to " << networkSocket->getAddr() << ":" << networkSocket->getPort() << std::endl;
-        // IRCServer::_message_mediator->sendReply("coucou je me connecte à toi!", networkSocket);
     }
     freeaddrinfo(serverinfo); // all done with the list of results -> can free it
 }

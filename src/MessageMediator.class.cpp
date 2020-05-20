@@ -1,9 +1,10 @@
 #include <iostream>
+#include <sstream>
 #include "IRCServer.class.hpp"
 #include "MessageMediator.class.hpp"
 #include "ReplyManager.class.hpp"
-#include <iostream>
-#include <sstream>
+#include "ServerClient.class.hpp"
+#include "Client.class.hpp"
 #include "SocketManager.class.hpp"
 #include "ChannelManager.class.hpp"
 #include "IRCServer.class.hpp"
@@ -21,6 +22,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::PART, &MessageMediator::partCommand});
     this->_commands.insert({IRCMessage::PRIVMSG, &MessageMediator::privmsgCommand});
     this->_commands.insert({IRCMessage::LUSERS, &MessageMediator::lusersCommand});
+    this->_commands.insert({IRCMessage::SERVER, &MessageMediator::createClient});
     return;
 }
 
@@ -62,12 +64,22 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setService(message.params.nickname, *service);
     }
-    if (client)
-        std::cout << "User created : " << client->getName() << std::endl;
-    else if (user)
-        std::cout << "User already exist nickname is : " << user->getName() << std::endl;
-    else
-        std::cout << "Nick name already use : " << message.params.nickname << std::endl;
+    if (message.type == IRCMessage::SERVER){
+        ServerClient * server = static_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
+        ServerClient * serverHost = static_cast<ServerClient*>(IRCServer::_client_manager->getClientByName(message.params.host));
+        if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
+            return;
+        if (message.params.host.empty() && message.params.hopcount > 1)
+            return;
+        if ((!server && !socket->getPassword().empty()) || (server && message.params.host == server->getName()))
+        {
+            client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
+            // 1st part of if client asking registration (need to set password before)
+            // 2nd is new server presented by already connected server
+            static_cast<ServerClient*>(client)->setServerInfo(message.params);
+            std::cout << *(static_cast<ServerClient*>(client)) << std::endl;
+        }
+    }
 }
 
 void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socket) const
@@ -101,13 +113,12 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
 
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    User *user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
+    Client * client = IRCServer::_client_manager->getClient(socket);
     std::cout << "pass command" << std::endl;
-    // if (IRCServer::_channel_manager.verify(message, user))
-    if (user)
-    {
-        user->setPassword(message.params.password);
-    }
+    if (!client)
+        socket->setPassword(message.params.password);
+    else
+        IRCServer::_reply_manager->reply(Parameters(), ReplyManager::ERR_ALREADYREGISTRED, socket);
 }
 
 void MessageMediator::operCommand(IRCMessage const &message, SocketClient *socket) const

@@ -11,6 +11,8 @@ public:
     virtual Client & setName(std::string const &name) = 0;
     SocketClient * getSocketClient(void) const;
     std::string getName() const;
+    void setPassword(std::string const &pass);
+    std::string getPassword() const;
     SocketClient *_socket_client;
     enum class Status
     {
@@ -22,6 +24,10 @@ public:
 protected:
     std::string _name;
     Client(void);
+
+private:
+    std::string _password;
+
 };
 
 #endif

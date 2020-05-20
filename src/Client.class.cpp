@@ -35,3 +35,14 @@ SocketClient *Client::getSocketClient(void) const
 {
     return this->_socket_client;
 }
+
+void Client::setPassword(std::string const &pass)
+{
+    // hash password
+    this->_password = pass;
+}
+
+std::string Client::getPassword() const
+{
+    return (this->_password);
+}
