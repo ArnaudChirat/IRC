@@ -46,11 +46,14 @@ bool SocketClient::recvMessage() {
     {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
         std::string message(buffer);
+        std::vector<std::string>  messages = Utility::splitParam(message, "\n");
         //Todo decouper les buffers par CR-LF
-        message.erase(message.size() - 1);
-        IRCMessage IRC_message(message, this);
-        if (IRC_message.isCommand(this))
-            IRCServer::_message_mediator->handleMessage(IRC_message, this);
+        // message.erase(message.size() - 1);
+        for (auto it = messages.begin(); it != messages.end(); ++it){
+            IRCMessage IRC_message(*it, this);
+            if (IRC_message.isValid(this))
+                IRCServer::_message_mediator->handleMessage(IRC_message, this);
+        }
     }
     return (false);
 }

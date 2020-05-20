@@ -6,6 +6,7 @@
 #include "ClientManager.class.hpp"
 #include "Socket.class.hpp"
 #include "Utility.hpp"
+class SocketClient;
 // Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
 // prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
@@ -59,8 +60,12 @@
 class IRCMessage
 {
 public:
+    enum class IRCMessageWay {
+        SENDING,
+        RECIEVING,
+    };
 
-    enum IRCMessageType
+    enum class IRCMessageType
     {
         CONNECTION_REGISTRATION = 0x000,
         PASS,
@@ -120,16 +125,18 @@ public:
         NUMERIC_REPLY,
         UNKNOWN
     };
-
+    
+    IRCMessage(void);
     IRCMessage(std::string &message, SocketClient * socket);
     IRCMessage(IRCMessage const &instance);
     IRCMessage &operator=(IRCMessage const &rhs);
     ~IRCMessage(void);
     void splitIRCMessage(std::string &message);
-    IRCMessage &setPrefix(std::string const &prefix);
+    IRCMessage &setPrefix(std::string const &prefix, IRCMessageWay);
     IRCMessage &setCommand(std::string const &command);
     IRCMessage &setParameters(std::string const &parameters);
-    IRCMessage &setTrail(std::string const &trail);
+    IRCMessage &setParameters(std::vector<std::string> const &);
+    IRCMessage &setTrail(std::string const &trail, IRCMessageWay);
 
     std::string getMessage() const;
     bool isCommand(SocketClient *);
@@ -137,6 +144,10 @@ public:
     std::string getCommand() const;
     std::string getTrail() const;
     std::vector<std::string> getParameters() const;
+
+    SocketClient *    getSocket(void) const;
+    void    setSocket(SocketClient *);
+    std::string to_string(void) const;
 
     static const std::string special;
     static const std::string shortname;
@@ -151,8 +162,12 @@ public:
     IRCMessageType type;
     Parameters params;
 private:
+<<<<<<< HEAD
     IRCMessage(void);
     Category    _is_valid;
+=======
+    bool    _is_valid;
+>>>>>>> server_auto_connection_almost_done
     SocketClient *  _socket;
     std::string _prefix;
     std::string _command;

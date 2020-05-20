@@ -12,17 +12,17 @@
 #include "Service.class.hpp"
 MessageMediator::MessageMediator(void)
 {
-    this->_commands.insert({IRCMessage::NICK, &MessageMediator::createClient});
-    this->_commands.insert({IRCMessage::SERVICE, &MessageMediator::createClient});
-    this->_commands.insert({IRCMessage::USER, &MessageMediator::userCommand});
-    this->_commands.insert({IRCMessage::QUIT, &MessageMediator::quitCommand});
-    this->_commands.insert({IRCMessage::JOIN, &MessageMediator::joinCommand});
-    this->_commands.insert({IRCMessage::PASS, &MessageMediator::passCommand});
-    this->_commands.insert({IRCMessage::OPER, &MessageMediator::operCommand});
-    this->_commands.insert({IRCMessage::PART, &MessageMediator::partCommand});
-    this->_commands.insert({IRCMessage::PRIVMSG, &MessageMediator::privmsgCommand});
-    this->_commands.insert({IRCMessage::LUSERS, &MessageMediator::lusersCommand});
-    this->_commands.insert({IRCMessage::SERVER, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::IRCMessageType::NICK, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::IRCMessageType::SERVICE, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::IRCMessageType::USER, &MessageMediator::userCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::QUIT, &MessageMediator::quitCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::JOIN, &MessageMediator::joinCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::PASS, &MessageMediator::passCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::OPER, &MessageMediator::operCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::PART, &MessageMediator::partCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::PRIVMSG, &MessageMediator::privmsgCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::LUSERS, &MessageMediator::lusersCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::SERVER, &MessageMediator::createClient});
     return;
 }
 
@@ -48,7 +48,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     Client *client = NULL;
     User *user = NULL;
     Service *service = NULL;
-    if (message.type == IRCMessage::NICK)
+    if (message.type == IRCMessage::IRCMessageType::NICK)
     {
         user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
         if (!user)
@@ -56,7 +56,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setNick(message.params.nickname, *user);
     }
-    if (message.type == IRCMessage::SERVICE)
+    if (message.type == IRCMessage::IRCMessageType::SERVICE)
     {
         service = static_cast<Service *>(IRCServer::_client_manager->getClient(socket));
         if (!service)
@@ -64,7 +64,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setService(message.params.nickname, *service);
     }
-    if (message.type == IRCMessage::SERVER){
+    if (message.type == IRCMessage::IRCMessageType::SERVER){
         ServerClient * server = static_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
         ServerClient * serverHost = static_cast<ServerClient*>(IRCServer::_client_manager->getClientByName(message.params.host));
         if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
@@ -78,8 +78,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             // 2nd is new server presented by already connected server
             if (client)
             {
-                static_cast<ServerClient*>(client)->setServerInfo(message.params);
-                std::cout << *(static_cast<ServerClient*>(client)) << std::endl;
+                server = static_cast<ServerClient*>(client);
+                server->setServerInfo(message.params);
+                std::cout << *server << std::endl;
+                IRCServer::replyToNewConnection(server->getHopcount(), socket);
             }  
         }
     }
@@ -164,6 +166,12 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
 bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) const
 {
     socket->appendToBuffer(msg);
+    return true;
+}
+
+bool MessageMediator::sendReply(IRCMessage const & message) const
+{
+    message.getSocket()->appendToBuffer(message.to_string());
     return true;
 }
 

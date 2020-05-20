@@ -1,6 +1,7 @@
 #include "IRCMessage.class.hpp"
 #include "IRCServer.class.hpp"
 #include "ReplyManager.class.hpp"
+#include "SocketClient.class.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -55,10 +56,10 @@ IRCMessage::~IRCMessage(void)
     return;
 }
 
-IRCMessage &IRCMessage::setPrefix(std::string const &prefix)
+IRCMessage &IRCMessage::setPrefix(std::string const &prefix, IRCMessageWay w)
 {
     this->_prefix = prefix;
-    this->_prefix.erase(0, 1);
+    (w == IRCMessageWay::RECIEVING) ? this->_prefix.erase(0, 1) : this->_prefix;
     return (*this);
 }
 
@@ -94,10 +95,16 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     return (*this);
 }
 
-IRCMessage &IRCMessage::setTrail(std::string const &trail)
+IRCMessage &IRCMessage::setParameters(std::vector<std::string> const & params)
+{
+    this->_parameters = params;
+    return (*this);
+}
+
+IRCMessage &IRCMessage::setTrail(std::string const &trail, IRCMessageWay w)
 {
     this->_trail = trail;
-    this->_trail.erase(0, 1);
+    (w == IRCMessageWay::RECIEVING) ? this->_trail.erase(0, 1) : this->_trail;
     return (*this);
 }
 
@@ -119,9 +126,9 @@ bool IRCMessage::isCommand(SocketClient *socket)
 {
     if (this->_is_valid == Category::COMMAND)
     {
-        if (this->type == SERVICE && _parameters.size() >= 1)
+        if (this->type == IRCMessageType::SERVICE && _parameters.size() >= 1)
             params.nickname = _parameters[0];
-        else if (this->type == USER && _parameters.size() >= 3)
+        else if (this->type == IRCMessageType::USER && _parameters.size() >= 3)
         {
             params.user = _parameters[0];
             params.real_name = _trail;
@@ -136,36 +143,36 @@ bool IRCMessage::isCommand(SocketClient *socket)
                 return (false);
             }
         }
-        else if (this->type == NICK && _parameters.size() >= 1)
+        else if (this->type == IRCMessageType::NICK && _parameters.size() >= 1)
             params.nickname = _parameters[0];
-        else if (this->type == PASS && _parameters.size() >= 1)
+        else if (this->type == IRCMessageType::PASS && _parameters.size() >= 1)
             params.password = _parameters[0];
-        else if (this->type == OPER && _parameters.size() == 2)
+        else if (this->type == IRCMessageType::OPER && _parameters.size() == 2)
         {
             params.user = _parameters[0];
             params.password = _parameters[1];
         }
-        else if (this->type == JOIN && _parameters.size() >= 1)
+        else if (this->type == IRCMessageType::JOIN && _parameters.size() >= 1)
         {
             params.channelName = _parameters[0];
             params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
         }
-        else if (this->type == LUSERS)
+        else if (this->type == IRCMessageType::LUSERS)
         {
             if (!_parameters.empty())
                 params.target = _parameters[0];
         }
-        else if (this->type == PART && _parameters.size() >= 1)
+        else if (this->type == IRCMessageType::PART && _parameters.size() >= 1)
         {
             params.channelName = _parameters[0];
             params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
         }
-        else if (this->type == QUIT)
+        else if (this->type == IRCMessageType::QUIT)
         {
             if (_parameters.size() == 1)
                 params.quit_message = _parameters[0];
         }
-        else if (this->type == SERVER)
+        else if (this->type == IRCMessageType::SERVER)
         {
             if (_parameters.size() >= 3)
                 params.newServer = _parameters[0];
@@ -183,7 +190,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
             params.serverInfo = this->_trail;
             params.host = this->_prefix;
         }
-        else if (this->type == PRIVMSG)
+        else if (this->type == IRCMessageType::PRIVMSG)
         {
             if (_parameters.size() >= 1)
             {
@@ -230,7 +237,7 @@ void IRCMessage::splitIRCMessage(std::string &message)
     std::cmatch cm;
     bool res = std::regex_match(message.c_str(), cm, e);
     if (res)
-        setPrefix(cm[1]).setCommand(cm[2]).setParameters(cm[3]).setTrail(cm[4]);
+        setPrefix(cm[1], IRCMessageWay::RECIEVING).setCommand(cm[2]).setParameters(cm[3]).setTrail(cm[4], IRCMessageWay::RECIEVING);
 }
 
 std::string IRCMessage::getCommand() const
@@ -252,6 +259,26 @@ std::vector<std::string> IRCMessage::getParameters() const
 {
     return (this->_parameters);
 };
+
+void    IRCMessage::setSocket(SocketClient *socket){
+    this->_socket = socket;
+}
+
+SocketClient *    IRCMessage::getSocket(void) const{
+    return this->_socket;
+}
+
+std::string     IRCMessage::to_string(void) const{
+    std::string result;
+    !(this->_prefix.empty()) ? result += ":" + this->_prefix : result;
+    this->_command.empty() ? throw std::logic_error("Error : no command in automatic IRCMessage") : 0;
+    result += ' ' + this->_command;
+    this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
+    std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const & str){result +=  ' ' + str;});
+    !(this->_trail.empty()) ? result += " :" + this->_trail : result;
+    return result + '\n';
+}
+
 
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message)
 {

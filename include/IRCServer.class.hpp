@@ -2,17 +2,21 @@
 #define IRCSERVER_CLASS_HPP
 
 #include <string>
+#include <vector>
 
 class SocketManager;
+class SocketClient;
 class MessageMediator;
 class ClientManager;
 class ReplyManager;
 class ChannelManager;
+class IRCMessage;
 
 class IRCServer
 {
 private:
-    std::string   _password;
+    static std::string   _password;
+    static std::vector<SocketClient *>     _newSocketConnections;
 
 public:
     IRCServer(void);
@@ -26,6 +30,11 @@ public:
     void stop();
     void config(unsigned short const port, std::string const password);
     void connectNetwork(std::string const hostNetowrk, std::string const portNetwork);
+    void  joinIRCNetwork(void);
+    static void  replyToNewConnection(unsigned int const & hops, SocketClient * socket);
+
+    static IRCMessage  buildPassMessage(void);
+    static IRCMessage  buildServerMessage(std::string const & newServer, unsigned int const &hops, unsigned int const &token, std::string const &info);
     static SocketManager * _socket_manager;
     static MessageMediator * _message_mediator;
     static ClientManager * _client_manager;

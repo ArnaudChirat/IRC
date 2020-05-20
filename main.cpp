@@ -37,6 +37,7 @@ void    launchServer(unsigned short const port, std::string const password, std:
             hostNetwork = networkInfo[0];
             portNetwork = networkInfo[1];
             server.connectNetwork(hostNetwork, portNetwork);
+            server.joinIRCNetwork();
         }
         server.run();
     }

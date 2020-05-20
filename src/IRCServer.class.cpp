@@ -1,4 +1,5 @@
 #include "IRCServer.class.hpp"
+#include "IRCMessage.class.hpp"
 #include "SocketServeur.class.hpp"
 #include "SocketManager.class.hpp"
 #include "MessageMediator.class.hpp"
@@ -11,6 +12,8 @@
 #include <netdb.h>
 #include <iostream>
 #include <cstring>
+#include <vector>
+#include <string>
 
 SocketManager * IRCServer::_socket_manager = new SocketManager();
 MessageMediator * IRCServer::_message_mediator = new MessageMediator();
@@ -18,7 +21,9 @@ ClientManager * IRCServer::_client_manager = new ClientManager();
 ReplyManager * IRCServer::_reply_manager = new ReplyManager; 
 ChannelManager * IRCServer::_channel_manager = new ChannelManager();
 
-std::string const IRCServer::name = std::string("GvannAchir IRC");
+std::string const IRCServer::name = std::string("GvannAchirIRC");
+std::string IRCServer::_password = std::string("default");
+std::vector<SocketClient *>     IRCServer::_newSocketConnections = {};
 
 IRCServer::IRCServer(void) {}
 
@@ -27,7 +32,7 @@ IRCServer::~IRCServer(void)
 }
 
 void IRCServer::config(unsigned short const port, std::string const password){
-    this->_password = password;
+    IRCServer::_password = password;
     SocketServeur *server = new SocketServeur(port);
     sockaddr_in std_addr = {};
     Socket *std_in = new Socket(STDIN_FILENO, *(reinterpret_cast<sockaddr *>(&std_addr)));
@@ -35,7 +40,7 @@ void IRCServer::config(unsigned short const port, std::string const password){
     IRCServer::_socket_manager->addSocket(std_in);
 }
 
-void  IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork){
+void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork){
     int status, sockfd;
     struct addrinfo hints = {};
     struct addrinfo *serverinfo, *ptr; // list of results
@@ -60,9 +65,62 @@ void  IRCServer::connectNetwork(std::string const hostNetowrk, std::string const
         }
         SocketClient * networkSocket = new SocketClient(sockfd, *(ptr->ai_addr));
         IRCServer::_socket_manager->addSocket(networkSocket);
+        IRCServer::_newSocketConnections.push_back(networkSocket);
         std::cout << "server connecting to " << networkSocket->getAddr() << ":" << networkSocket->getPort() << std::endl;
     }
     freeaddrinfo(serverinfo); // all done with the list of results -> can free it
+}
+
+IRCMessage  IRCServer::buildPassMessage(void){
+    std::string prefix = IRCServer::name;
+    std::vector<std::string>  parameters;
+    parameters.push_back(IRCServer::_password);
+    IRCMessage passMessage;
+    passMessage.setPrefix(prefix, IRCMessage::IRCMessageWay::SENDING).setCommand("PASS").setParameters(parameters);
+    return passMessage;
+}
+
+IRCMessage  IRCServer::buildServerMessage(std::string const & newServer, unsigned int const &hops, unsigned int const &token, std::string const &info)
+{
+    std::string prefix = IRCServer::name;
+
+    std::vector<std::string>  parameters;
+    parameters.push_back(newServer);
+    parameters.push_back(std::to_string(hops));
+    parameters.push_back(std::to_string(token));
+
+    std::string trail = info;
+    IRCMessage serverMessage;
+    serverMessage.setPrefix(prefix, IRCMessage::IRCMessageWay::SENDING).setCommand("SERVER").setParameters(parameters).setTrail(trail, IRCMessage::IRCMessageWay::SENDING);
+    return serverMessage;
+}
+
+void  IRCServer::joinIRCNetwork(){
+    // creation IRCMessage password => a voir pour rajouter les infos
+    IRCMessage passMessage = IRCServer::buildPassMessage();
+    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, 1, 1, "Salut BG");
+
+    // envoi via le MessageMediator
+    for (auto it = IRCServer::_newSocketConnections.begin(); it != IRCServer::_newSocketConnections.end(); ++it)
+    {
+        passMessage.setSocket(*it);
+        serverMessage.setSocket(*it);
+        IRCServer::_message_mediator->sendReply(passMessage);
+        IRCServer::_message_mediator->sendReply(serverMessage);
+    }
+    // if (success)
+        // vider le vector des nouvelles connexions
+    IRCServer::_newSocketConnections.clear();
+}
+
+void    IRCServer::replyToNewConnection(unsigned int const & hops, SocketClient * socket) {
+    IRCMessage passMessage = IRCServer::buildPassMessage();
+    // quel token en reponse au server?? Meme hops que le server, mais quelle token?
+    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, 1, "Main Server");
+    passMessage.setSocket(socket);
+    serverMessage.setSocket(socket);
+    IRCServer::_message_mediator->sendReply(passMessage);
+    IRCServer::_message_mediator->sendReply(serverMessage);
 }
 
 void IRCServer::run()
@@ -74,8 +132,6 @@ void IRCServer::run()
             break;
     }
 }
-
-
 
 void IRCServer::stop()
 {

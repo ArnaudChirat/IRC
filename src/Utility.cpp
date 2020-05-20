@@ -82,3 +82,4 @@ bool    Utility::ipv4(struct sockaddr *sa){
         return true;
     return false;
 }
+

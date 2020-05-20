@@ -16,6 +16,7 @@ public:
     ~MessageMediator(void);
     bool handleMessage(IRCMessage const &message, SocketClient *client);
     bool sendReply(std::string const &, SocketClient *) const;
+    bool sendReply(IRCMessage const &) const;
 
 private:
     typedef void (MessageMediator::*Command)(IRCMessage const &, SocketClient *) const;
