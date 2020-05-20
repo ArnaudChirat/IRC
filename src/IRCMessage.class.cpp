@@ -61,7 +61,7 @@ IRCMessage::~IRCMessage(void)
 IRCMessage &IRCMessage::setPrefix(std::string const &prefix, IRCMessageWay w)
 {
     this->_prefix = prefix;
-    if (w == IRCMessageWay::RECIEVING){
+    if (w == IRCMessageWay::RECIEVING && !prefix.empty()){
         this->_prefix.erase(0, 1);
         std::size_t idxSpace = this->_prefix.rfind(" ");
         (idxSpace != std::string::npos) ? this->_prefix.erase(idxSpace, 1) : 0;
