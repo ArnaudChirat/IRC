@@ -73,8 +73,9 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
         this->type = res->second;
         this->_is_valid = Category::COMMAND;
     }
-    else {
-        std::regex e ("\\d{3}");
+    else
+    {
+        std::regex e("\\d{3}");
         if (std::regex_match(command, e))
             this->_is_valid = Category::NUMERIC_REPLY;
         else
@@ -129,7 +130,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
             {
                 params.mode = std::stoi(_parameters[1]);
             }
-            catch(const std::invalid_argument& e)
+            catch (const std::invalid_argument &e)
             {
                 IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
                 return (false);
@@ -168,15 +169,19 @@ bool IRCMessage::isCommand(SocketClient *socket)
         {
             if (_parameters.size() >= 3)
                 params.newServer = _parameters[0];
-                try {
-                    params.hopcount = std::stoi(_parameters[1]);
-                    params.token = std::stoi(_parameters[2]);
-                } catch(std::invalid_argument & e) {
-                    std::cout << e.what() << std::endl;
-                    return (false);
-                }
-                params.serverInfo = this->_trail;
-                params.host = this->_prefix;
+            try
+            {
+                params.hopcount = std::stoi(_parameters[1]);
+                params.token = std::stoi(_parameters[2]);
+            }
+            catch (std::invalid_argument &e)
+            {
+                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
+                std::cout << e.what() << std::endl;
+                return (false);
+            }
+            params.serverInfo = this->_trail;
+            params.host = this->_prefix;
         }
         else if (this->type == PRIVMSG)
         {
