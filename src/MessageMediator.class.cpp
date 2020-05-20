@@ -81,7 +81,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 server = static_cast<ServerClient*>(client);
                 server->setServerInfo(message.params);
                 std::cout << *server << std::endl;
-                IRCServer::replyToNewConnection(server->getHopcount(), socket);
+                if (server->status == Client::Status::CONNECTING){
+                    IRCServer::replyToNewConnection(server->getHopcount(), socket);
+                    server->status = Client::Status::CONNECTED;
+                }
             }  
         }
     }
