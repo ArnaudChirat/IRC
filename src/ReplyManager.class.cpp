@@ -51,6 +51,7 @@ std::string     ReplyManager::replyMessage(ErrorEnum x, Parameters const & param
         {ERR_NOSUCHNICK, params.nickname + " :No such nick/channel\n"},
         {ERR_ALREADYREGISTRED, " :Unauthorized command (already registered)\n"},
         {ERR_UNKNOWNCOMMAND, params.command + " :Unknown command\n"},
+        {ERR_MALFORMEDPARAMS, params.command + " :parameters malformed\n"},
     };
 
     return oss.str() + ' ' + errorReply.at(x);

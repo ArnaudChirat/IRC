@@ -31,7 +31,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"SERVER", IRCMessageType::SERVER},
 };
 
-IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(false), _socket(socket)
+IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(Category::UNKNOWN), _socket(socket)
 {
     this->splitIRCMessage(message);
 }
@@ -71,11 +71,15 @@ IRCMessage &IRCMessage::setCommand(std::string const &command)
     {
         this->_command = res->first;
         this->type = res->second;
-        this->_is_valid = true;
+        this->_is_valid = Category::COMMAND;
     }
-    // else if {
-    //     // for_each -> is_digit + length = 3 + changer _is_valid en COMMAND/NUMERIC_REPLY/UNKNOWN
-    // }
+    else {
+        std::regex e ("\\d{3}");
+        if (std::regex_match(command, e))
+            this->_is_valid = Category::NUMERIC_REPLY;
+        else
+            this->_is_valid = Category::UNKNOWN;
+    }
     return (*this);
 }
 
@@ -110,19 +114,26 @@ std::string IRCMessage::getMessage() const
     return message;
 }
 
-bool IRCMessage::isValid(SocketClient *socket)
+bool IRCMessage::isCommand(SocketClient *socket)
 {
-    bool validation = this->_is_valid;
-    if (validation)
+    if (this->_is_valid == Category::COMMAND)
     {
         if (this->type == SERVICE && _parameters.size() >= 1)
             params.nickname = _parameters[0];
         else if (this->type == USER && _parameters.size() >= 3)
         {
             params.user = _parameters[0];
-            // Attention crash si non digit
-            params.mode = std::stoi(_parameters[1]);
             params.real_name = _trail;
+            // Attention crash si non digit
+            try
+            {
+                params.mode = std::stoi(_parameters[1]);
+            }
+            catch(const std::invalid_argument& e)
+            {
+                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
+                return (false);
+            }
         }
         else if (this->type == NICK && _parameters.size() >= 1)
             params.nickname = _parameters[0];
@@ -179,24 +190,25 @@ bool IRCMessage::isValid(SocketClient *socket)
                 else
                 {
                     IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NOTEXTTOSEND, socket);
-                    validation = false;
+                    return (false);
                 }
             }
             else
             {
                 IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NORECIPIENT, socket);
-                validation = false;
+                return (false);
             }
         }
         else
         {
             IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_NEEDMOREPARAMS, socket);
-            validation = false;
+            return (false);
         }
+        return (true);
     }
-    // else
-        // IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_UNKNOWNCOMMAND, socket);
-    return (validation);
+    else if (this->_is_valid == Category::UNKNOWN)
+        IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_UNKNOWNCOMMAND, socket);
+    return (false);
 }
 
 /*

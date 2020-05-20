@@ -49,7 +49,7 @@ bool SocketClient::recvMessage() {
         //Todo decouper les buffers par CR-LF
         message.erase(message.size() - 1);
         IRCMessage IRC_message(message, this);
-        if (IRC_message.isValid(this))
+        if (IRC_message.isCommand(this))
             IRCServer::_message_mediator->handleMessage(IRC_message, this);
     }
     return (false);

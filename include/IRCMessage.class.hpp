@@ -114,6 +114,13 @@ public:
         IRCMessage_DETAIL_MASK = 0X00FF,
     };
 
+    enum Category
+    {
+        COMMAND,
+        NUMERIC_REPLY,
+        UNKNOWN
+    };
+
     IRCMessage(std::string &message, SocketClient * socket);
     IRCMessage(IRCMessage const &instance);
     IRCMessage &operator=(IRCMessage const &rhs);
@@ -125,7 +132,7 @@ public:
     IRCMessage &setTrail(std::string const &trail);
 
     std::string getMessage() const;
-    bool isValid(SocketClient *);
+    bool isCommand(SocketClient *);
     std::string getPrefix() const;
     std::string getCommand() const;
     std::string getTrail() const;
@@ -145,7 +152,7 @@ public:
     Parameters params;
 private:
     IRCMessage(void);
-    bool    _is_valid;
+    Category    _is_valid;
     SocketClient *  _socket;
     std::string _prefix;
     std::string _command;

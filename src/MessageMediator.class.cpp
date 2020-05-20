@@ -76,8 +76,11 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
             // 1st part of if client asking registration (need to set password before)
             // 2nd is new server presented by already connected server
-            static_cast<ServerClient*>(client)->setServerInfo(message.params);
-            std::cout << *(static_cast<ServerClient*>(client)) << std::endl;
+            if (client)
+            {
+                static_cast<ServerClient*>(client)->setServerInfo(message.params);
+                std::cout << *(static_cast<ServerClient*>(client)) << std::endl;
+            }  
         }
     }
 }
