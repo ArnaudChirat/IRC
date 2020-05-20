@@ -162,12 +162,7 @@ public:
     IRCMessageType type;
     Parameters params;
 private:
-<<<<<<< HEAD
-    IRCMessage(void);
     Category    _is_valid;
-=======
-    bool    _is_valid;
->>>>>>> server_auto_connection_almost_done
     SocketClient *  _socket;
     std::string _prefix;
     std::string _command;

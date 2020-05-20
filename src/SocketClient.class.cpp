@@ -51,7 +51,7 @@ bool SocketClient::recvMessage() {
         // message.erase(message.size() - 1);
         for (auto it = messages.begin(); it != messages.end(); ++it){
             IRCMessage IRC_message(*it, this);
-            if (IRC_message.isValid(this))
+            if (IRC_message.isCommand(this))
                 IRCServer::_message_mediator->handleMessage(IRC_message, this);
         }
     }

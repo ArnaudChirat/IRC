@@ -32,6 +32,8 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"SERVER", IRCMessageType::SERVER},
 };
 
+IRCMessage::IRCMessage(void) {}
+
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(Category::UNKNOWN), _socket(socket)
 {
     this->splitIRCMessage(message);
