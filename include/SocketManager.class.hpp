@@ -2,6 +2,7 @@
 #define SOCKETMANAGER_CLASS_HPP
 #include <list>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <memory>
 #include "Socket.class.hpp"
 #include "SocketClient.class.hpp"
