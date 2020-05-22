@@ -15,16 +15,16 @@
 #include <vector>
 #include <string>
 
-SocketManager * IRCServer::_socket_manager = new SocketManager();
-MessageMediator * IRCServer::_message_mediator = new MessageMediator();
-ClientManager * IRCServer::_client_manager = new ClientManager();
-ReplyManager * IRCServer::_reply_manager = new ReplyManager; 
-ChannelManager * IRCServer::_channel_manager = new ChannelManager();
+SocketManager *IRCServer::_socket_manager = new SocketManager();
+MessageMediator *IRCServer::_message_mediator = new MessageMediator();
+ClientManager *IRCServer::_client_manager = new ClientManager();
+ReplyManager *IRCServer::_reply_manager = new ReplyManager;
+ChannelManager *IRCServer::_channel_manager = new ChannelManager();
 
 std::string const IRCServer::name = std::string("GvannAchirIRC");
 std::string IRCServer::_password = std::string("default");
-std::vector<SocketClient *>     IRCServer::_newSocketConnections = {};
-std::map<Token, ServerClient*> IRCServer::_servers;
+std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
+std::map<Token, ServerClient *> IRCServer::_servers_local;
 
 IRCServer::IRCServer(void) {}
 
@@ -32,7 +32,8 @@ IRCServer::~IRCServer(void)
 {
 }
 
-void IRCServer::config(unsigned short const port, std::string const password){
+void IRCServer::config(unsigned short const port, std::string const password)
+{
     IRCServer::_password = password;
     SocketServeur *server = new SocketServeur(port);
     sockaddr_in std_addr = {};
@@ -41,7 +42,8 @@ void IRCServer::config(unsigned short const port, std::string const password){
     IRCServer::_socket_manager->addSocket(std_in);
 }
 
-void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork){
+void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork)
+{
     int status, sockfd;
     struct addrinfo hints = {};
     struct addrinfo *serverinfo, *ptr; // list of results
@@ -53,18 +55,20 @@ void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const 
     for (ptr = serverinfo; ptr != NULL; ptr = ptr->ai_next) //on parcourt la liste des resultats possible à cette addresse
     {
         // ptr->ai_family can be IPv4 (AF_INET) or IPv6 (AF_INET6)
-        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == -1){
+        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == -1)
+        {
             std::cerr << "Error : socket creation for conneciton to distant server" << std::endl;
             throw std::runtime_error(std::strerror(errno));
             continue;
         }
         // ptr->ai_addr is of type sockaddr * which can be ipv4 (sockaddr_in) or v6 as well
-        if (connect(sockfd, ptr->ai_addr, ptr->ai_addrlen) == -1){
+        if (connect(sockfd, ptr->ai_addr, ptr->ai_addrlen) == -1)
+        {
             close(sockfd);
             throw std::runtime_error(std::strerror(errno));
             continue;
         }
-        SocketClient * networkSocket = new SocketClient(sockfd, *(ptr->ai_addr));
+        SocketClient *networkSocket = new SocketClient(sockfd, *(ptr->ai_addr));
         IRCServer::_socket_manager->addSocket(networkSocket);
         IRCServer::_newSocketConnections.push_back(networkSocket);
         std::cout << "server connecting to " << networkSocket->getAddr() << ":" << networkSocket->getPort() << std::endl;
@@ -72,20 +76,21 @@ void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const 
     freeaddrinfo(serverinfo); // all done with the list of results -> can free it
 }
 
-IRCMessage  IRCServer::buildPassMessage(void){
+IRCMessage IRCServer::buildPassMessage(void)
+{
     std::string prefix = IRCServer::name;
-    std::vector<std::string>  parameters;
+    std::vector<std::string> parameters;
     parameters.push_back(IRCServer::_password);
     IRCMessage passMessage;
     passMessage.setPrefix(prefix, IRCMessage::IRCMessageWay::SENDING).setCommand("PASS").setParameters(parameters);
     return passMessage;
 }
 
-IRCMessage  IRCServer::buildServerMessage(std::string const & newServer, unsigned int const &hops, unsigned int const &token, std::string const &info)
+IRCMessage IRCServer::buildServerMessage(std::string const &newServer, unsigned int const &hops, unsigned int const &token, std::string const &info)
 {
     std::string prefix = IRCServer::name;
 
-    std::vector<std::string>  parameters;
+    std::vector<std::string> parameters;
     parameters.push_back(newServer);
     parameters.push_back(std::to_string(hops));
     parameters.push_back(std::to_string(token));
@@ -96,7 +101,8 @@ IRCMessage  IRCServer::buildServerMessage(std::string const & newServer, unsigne
     return serverMessage;
 }
 
-void  IRCServer::joinIRCNetwork(){
+void IRCServer::joinIRCNetwork()
+{
     // creation IRCMessage password => a voir pour rajouter les infos
     IRCMessage passMessage = IRCServer::buildPassMessage();
     IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, 1, 1, "Salut BG");
@@ -110,11 +116,12 @@ void  IRCServer::joinIRCNetwork(){
         IRCServer::_message_mediator->sendReply(serverMessage);
     }
     // if (success)
-        // vider le vector des nouvelles connexions
+    // vider le vector des nouvelles connexions
     IRCServer::_newSocketConnections.clear();
 }
 
-void    IRCServer::replyToNewConnection(unsigned int const & hops, SocketClient * socket) {
+void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket)
+{
     IRCMessage passMessage = IRCServer::buildPassMessage();
     // quel token en reponse au server?? Meme hops que le server, mais quelle token?
     IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, 1, "Main Server");
@@ -126,8 +133,8 @@ void    IRCServer::replyToNewConnection(unsigned int const & hops, SocketClient 
 
 bool IRCServer::checkToken(Token token)
 {
-    auto it = IRCServer::_servers.find(token);
-    if (it == IRCServer::_servers.end())
+    auto it = IRCServer::_servers_local.find(token);
+    if (it == IRCServer::_servers_local.end())
         return (false);
     return (true);
 }
@@ -135,7 +142,21 @@ bool IRCServer::checkToken(Token token)
 void IRCServer::addServer(Token token, ServerClient &server)
 {
     std::pair<Token, ServerClient *> value(token, &server);
-    IRCServer::_servers.insert(value);
+    IRCServer::_servers_local.insert(value);
+}
+
+void IRCServer::sendServerNeighborData(ServerClient &server)
+{
+    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); it++)
+    {
+        auto server_tmp = it->second;
+        if (server_tmp != &server)
+        {
+            IRCMessage serverMessage = IRCServer::buildServerMessage(server_tmp->getName(), 1, it->first, ":local info");
+            serverMessage.setSocket(server.getSocketClient());
+            IRCServer::_message_mediator->sendReply(serverMessage);
+        }
+    }
 }
 
 void IRCServer::run()

@@ -88,6 +88,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                     IRCServer::replyToNewConnection(server->getHopcount(), socket);
                     server->status = Client::Status::CONNECTED;
                     IRCServer::addServer(message.params.token, *static_cast<ServerClient*>(client));
+                    IRCServer::sendServerNeighborData(*static_cast<ServerClient*>(client));
                 }
             }  
         }

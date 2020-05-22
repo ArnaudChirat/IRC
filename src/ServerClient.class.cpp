@@ -33,6 +33,12 @@ std::string     ServerClient::getInfo(void) const{
     
 }
 
+void ServerClient::addServer(Token token, ServerClient &server)
+{
+    std::pair<Token, ServerClient *> value(token, &server);
+    this->_servers.insert(value);
+}
+
 std::ostream &   operator<<(std::ostream & o, ServerClient const & rhs){
     o << "server name : " << rhs.getName() << std::endl;
     o << "password : " << rhs.getPassword() << std::endl;

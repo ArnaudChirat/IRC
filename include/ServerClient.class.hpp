@@ -2,7 +2,9 @@
 #define SERVER_CLASS_HPP
 
 #include "Client.class.hpp"
+#include "Utility.hpp"
 #include <ostream>
+#include <map>
 
 struct Parameters;
 
@@ -19,7 +21,8 @@ public:
     unsigned int    getHopcount(void) const;
     unsigned int getToken(void) const;
     std::string getInfo(void) const;
-
+    void addServer(Token token, ServerClient &server);
+    void getServer(Token token);
 
 private:
     ServerClient(void);
@@ -27,8 +30,7 @@ private:
     unsigned int    _hopcount;
     unsigned int    _token;
     std::string     _info;
-
-
+    std::map<Token, ServerClient*> _servers;
 };
 
 std::ostream &   operator<<(std::ostream & o, ServerClient const & rhs);

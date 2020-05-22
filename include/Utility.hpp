@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #define BUFF_MSG 512
-
+typedef unsigned int Token;
 class IRCMessage;
 class Channel;
 
