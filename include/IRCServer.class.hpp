@@ -3,7 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "ServerClient.class.hpp"
 
+typedef unsigned int Token;
 class SocketManager;
 class SocketClient;
 class MessageMediator;
@@ -17,6 +20,7 @@ class IRCServer
 private:
     static std::string   _password;
     static std::vector<SocketClient *>     _newSocketConnections;
+    static std::map<Token, ServerClient*> _servers;
 
 public:
     IRCServer(void);
@@ -32,7 +36,8 @@ public:
     void connectNetwork(std::string const hostNetowrk, std::string const portNetwork);
     void  joinIRCNetwork(void);
     static void  replyToNewConnection(unsigned int const & hops, SocketClient * socket);
-
+    static bool checkToken(Token token);
+    static void addServer(Token token, ServerClient &server);
     static IRCMessage  buildPassMessage(void);
     static IRCMessage  buildServerMessage(std::string const & newServer, unsigned int const &hops, unsigned int const &token, std::string const &info);
     static SocketManager * _socket_manager;

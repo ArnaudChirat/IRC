@@ -24,6 +24,7 @@ ChannelManager * IRCServer::_channel_manager = new ChannelManager();
 std::string const IRCServer::name = std::string("GvannAchirIRC");
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *>     IRCServer::_newSocketConnections = {};
+std::map<Token, ServerClient*> IRCServer::_servers;
 
 IRCServer::IRCServer(void) {}
 
@@ -121,6 +122,20 @@ void    IRCServer::replyToNewConnection(unsigned int const & hops, SocketClient 
     serverMessage.setSocket(socket);
     IRCServer::_message_mediator->sendReply(passMessage);
     IRCServer::_message_mediator->sendReply(serverMessage);
+}
+
+bool IRCServer::checkToken(Token token)
+{
+    auto it = IRCServer::_servers.find(token);
+    if (it == IRCServer::_servers.end())
+        return (false);
+    return (true);
+}
+
+void IRCServer::addServer(Token token, ServerClient &server)
+{
+    std::pair<Token, ServerClient *> value(token, &server);
+    IRCServer::_servers.insert(value);
 }
 
 void IRCServer::run()

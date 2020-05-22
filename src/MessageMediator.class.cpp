@@ -71,6 +71,9 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             return;
         if (message.params.host.empty() && message.params.hopcount > 1)
             return;
+        // Send numeric reply for token allready used ?
+        if (IRCServer::checkToken(message.params.token))
+            return;
         if ((!server && !socket->getPassword().empty()) || (server && message.params.host == server->getName()))
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
@@ -84,6 +87,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 if (server->status == Client::Status::CONNECTING){
                     IRCServer::replyToNewConnection(server->getHopcount(), socket);
                     server->status = Client::Status::CONNECTED;
+                    IRCServer::addServer(message.params.token, *static_cast<ServerClient*>(client));
                 }
             }  
         }
