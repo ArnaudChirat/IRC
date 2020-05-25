@@ -27,12 +27,12 @@ services:
       - "50002:6667"
     tty: true
     depends_on:
-      - "irc"
+      - "irc2"
 
   irc4:
     build: .
     image: ircimage:1.0
-    entrypoint: ["./server", "irc3:6667", "6667", "arnaud"]
+    entrypoint: ["./server", "irc:6667", "6667", "arnaud"]
     ports:
       - "50003:6667"
     tty: true

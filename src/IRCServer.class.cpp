@@ -14,6 +14,8 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
 
 SocketManager *IRCServer::_socket_manager = new SocketManager();
 MessageMediator *IRCServer::_message_mediator = new MessageMediator();
@@ -21,12 +23,14 @@ ClientManager *IRCServer::_client_manager = new ClientManager();
 ReplyManager *IRCServer::_reply_manager = new ReplyManager;
 ChannelManager *IRCServer::_channel_manager = new ChannelManager();
 
-std::string const IRCServer::name = std::string("GvannAchirIRC");
+std::string IRCServer::name;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
 std::map<Token, ServerClient *> IRCServer::_servers_local;
 
-IRCServer::IRCServer(void) {}
+IRCServer::IRCServer(void) {
+
+}
 
 IRCServer::~IRCServer(void)
 {
@@ -40,6 +44,21 @@ void IRCServer::config(unsigned short const port, std::string const password)
     Socket *std_in = new Socket(STDIN_FILENO, *(reinterpret_cast<sockaddr *>(&std_addr)));
     IRCServer::_socket_manager->addSocket(server);
     IRCServer::_socket_manager->addSocket(std_in);
+    
+    struct ifaddrs *ifap, *ifa;
+    struct sockaddr_in *sa;
+    char *addr;
+
+    getifaddrs (&ifap);
+    for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET) {
+            sa = (struct sockaddr_in *) ifa->ifa_addr;
+            addr = inet_ntoa(sa->sin_addr);
+        }
+    }
+    this->name = addr;
+    freeifaddrs(ifap);
+
 }
 
 void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork)

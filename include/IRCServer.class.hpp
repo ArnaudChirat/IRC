@@ -24,7 +24,7 @@ private:
 
 public:
     IRCServer(void);
-    static std::string const name;
+    static std::string name;
     IRCServer(IRCServer const &instance) = delete;
     IRCServer &operator=(IRCServer const &rhs) = delete;
     ~IRCServer(void);
