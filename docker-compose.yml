@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+
+  irc:
+    build: .
+    image: ircimage:1.0
+    ports:
+      - "50000:6667"
+    tty: true
+
+  irc2:
+    build: .
+    image: ircimage:1.0
+    entrypoint: ["./server", "irc:6667", "6667", "arnaud"]
+    ports:
+      - "50001:6667"
+    tty: true
+    depends_on:
+      - "irc"
+
+  irc3:
+    build: .
+    image: ircimage:1.0
+    entrypoint: ["./server", "irc:6667", "6667", "arnaud"]
+    ports:
+      - "50002:6667"
+    tty: true
+    depends_on:
+      - "irc"
+
+  irc4:
+    build: .
+    image: ircimage:1.0
+    entrypoint: ["./server", "irc3:6667", "6667", "arnaud"]
+    ports:
+      - "50003:6667"
+    tty: true
+    depends_on:
+      - "irc3"

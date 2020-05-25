@@ -1,0 +1,13 @@
+1. docker-machine create irc 
+2. docker-machine start irc 
+3. set env variables to connect docker client to docker machine : eval$(docker-machine env irc)
+4. build image from Dockerfile : docker build --tag ircimage:1.0  .
+5. docker run -it --publish 6667:6667 --name server_1 ircimage:1.0
+	note: -i is for interactive (allows to give commands in stdin) and -t goes with it (it set a terminal up)
+		publish : port forwarding from port 6667 of docker-machine to port 6667 of container
+		PS: you can add --rm so that the container is deleted when stopped
+
+6. get ip of docker-machine : docker-machine ip irc 
+7. nc [ip_vm] 6667 
+
+:)
