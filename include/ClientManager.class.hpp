@@ -34,6 +34,7 @@ public:
     Client *getClient(SocketClient *socket_client);
     Client *getClientByName(std::string const &nick);
     int getSize(ClientChoice choice) const;
+    std::multimap<SocketClient*, Client*> getClients() const;
     // void    dispatch();
 private:
     void addClient(SocketClient *socket, Client *client, ClientChoice choice);

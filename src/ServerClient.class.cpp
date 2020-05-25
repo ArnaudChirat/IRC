@@ -39,6 +39,11 @@ void ServerClient::addServer(Token token, ServerClient &server)
     this->_servers.insert(value);
 }
 
+std::map<Token, ServerClient*> ServerClient::getServers() const
+{
+    return (this->_servers);
+}
+
 std::ostream &   operator<<(std::ostream & o, ServerClient const & rhs){
     o << "server name : " << rhs.getName() << std::endl;
     o << "password : " << rhs.getPassword() << std::endl;
@@ -46,5 +51,11 @@ std::ostream &   operator<<(std::ostream & o, ServerClient const & rhs){
     o << "hopcount : " << rhs.getHopcount() << std::endl;
     o << "token : " << rhs.getToken() << std::endl;
     o << "info : " << rhs.getInfo() << std::endl;
+    auto servers = rhs.getServers();
+    o << "other servers : " << std::endl;
+    for (auto i = servers.begin(); i != servers.end(); i++)
+    {
+        o << i->first << " " << i->second->getName() << std::endl;
+    }
     return o;
 }

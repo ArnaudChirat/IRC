@@ -14,6 +14,7 @@ namespace Utility {
     std::vector<std::string>  splitParam(std::string const & strToSplit, std::string const & delimiters);
     void    *get_in_addr(struct sockaddr *sa);
     bool    ipv4(struct sockaddr *sa);
+    std::string random_string(std::size_t length);
 };
 
 struct Parameters

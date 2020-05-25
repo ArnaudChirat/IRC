@@ -27,6 +27,11 @@ Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket
     return (client);
 }
 
+std::multimap<SocketClient *, Client *> ClientManager::getClients() const
+{
+    return (this->_clients);
+}
+
 void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice choice)
 {
     // this->_clients.emplace_back(client);
@@ -51,7 +56,8 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         client = new Service(socket);
         not_error = setService(name, *static_cast<Service *>(client));
     }
-    else if (choice == ClientChoice::SERVER) {
+    else if (choice == ClientChoice::SERVER)
+    {
         client = new ServerClient(socket);
         not_error = setServerName(name, *static_cast<ServerClient *>(client));
     }
@@ -91,7 +97,8 @@ Client *ClientManager::getClientByName(std::string const &name)
 
 bool ClientManager::setServerName(std::string const &name, ServerClient &server)
 {
-    if (checkName(SERVER, name) || this->getClient(server.getSocketClient())){
+    if (checkName(SERVER, name) || this->getClient(server.getSocketClient()))
+    {
         IRCServer::_reply_manager->reply(Parameters(), ReplyManager::ERR_ALREADYREGISTRED, server.getSocketClient());
         return (false);
     }
@@ -192,8 +199,7 @@ int ClientManager::getSize(ClientChoice choice) const
         return (total_size);
     else
     {
-        std::copy_if(this->_names_used.begin(), this->_names_used.end(), std::inserter(list, list.end()), [choice](Key const &key) {
-            return (key.first == choice);});
+        std::copy_if(this->_names_used.begin(), this->_names_used.end(), std::inserter(list, list.end()), [choice](Key const &key) { return (key.first == choice); });
         return (list.size());
     }
 }

@@ -56,9 +56,8 @@ void IRCServer::config(unsigned short const port, std::string const password)
             addr = inet_ntoa(sa->sin_addr);
         }
     }
-    this->name = addr;
     freeifaddrs(ifap);
-
+    this->name = Utility::random_string(8);
 }
 
 void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork)
@@ -139,11 +138,11 @@ void IRCServer::joinIRCNetwork()
     IRCServer::_newSocketConnections.clear();
 }
 
-void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket)
+void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token)
 {
     IRCMessage passMessage = IRCServer::buildPassMessage();
     // quel token en reponse au server?? Meme hops que le server, mais quelle token?
-    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, 1, "Main Server");
+    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, token, "Main Server");
     passMessage.setSocket(socket);
     serverMessage.setSocket(socket);
     IRCServer::_message_mediator->sendReply(passMessage);
@@ -158,10 +157,16 @@ bool IRCServer::checkToken(Token token)
     return (true);
 }
 
-void IRCServer::addServer(Token token, ServerClient &server)
+Token IRCServer::addServer(ServerClient &server)
 {
+    Token token = 0;
+    do
+    {
+        token++;
+    } while (_servers_local.find(token) != _servers_local.end());
     std::pair<Token, ServerClient *> value(token, &server);
     IRCServer::_servers_local.insert(value);
+    return (token);
 }
 
 void IRCServer::sendServerNeighborData(ServerClient &server)

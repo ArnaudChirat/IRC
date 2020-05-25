@@ -22,8 +22,8 @@ public:
     unsigned int getToken(void) const;
     std::string getInfo(void) const;
     void addServer(Token token, ServerClient &server);
-    void getServer(Token token);
-
+    // void getServer(Token token);
+    std::map<Token, ServerClient*> getServers() const;
 private:
     ServerClient(void);
     std::string     _uplink;

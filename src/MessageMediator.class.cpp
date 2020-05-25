@@ -64,9 +64,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setService(message.params.nickname, *service);
     }
-    if (message.type == IRCMessage::IRCMessageType::SERVER){
-        ServerClient * server = static_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
-        ServerClient * serverHost = static_cast<ServerClient*>(IRCServer::_client_manager->getClientByName(message.params.host));
+    if (message.type == IRCMessage::IRCMessageType::SERVER)
+    {
+        ServerClient *server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
+        ServerClient *serverHost = static_cast<ServerClient *>(IRCServer::_client_manager->getClientByName(message.params.host));
         if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
             return;
         if (message.params.host.empty() && message.params.hopcount > 1)
@@ -81,16 +82,14 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             // 2nd is new server presented by already connected server
             if (client)
             {
-                server = static_cast<ServerClient*>(client);
+                server = static_cast<ServerClient *>(client);
                 server->setServerInfo(message.params);
-                std::cout << *server << std::endl;
-                if (server->status == Client::Status::CONNECTING){
-                    IRCServer::replyToNewConnection(server->getHopcount(), socket);
-                    server->status = Client::Status::CONNECTED;
-                    IRCServer::addServer(message.params.token, *static_cast<ServerClient*>(client));
-                    IRCServer::sendServerNeighborData(*static_cast<ServerClient*>(client));
-                }
-            }  
+                Token token;
+                token = IRCServer::addServer(*static_cast<ServerClient *>(client));
+                IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
+                IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
+                server->status = Client::Status::CONNECTED;
+            }
         }
     }
 }
@@ -126,7 +125,7 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
 
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
 {
-    Client * client = IRCServer::_client_manager->getClient(socket);
+    Client *client = IRCServer::_client_manager->getClient(socket);
     std::cout << "pass command" << std::endl;
     if (!client)
         socket->setPassword(message.params.password);
@@ -177,7 +176,7 @@ bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) co
     return true;
 }
 
-bool MessageMediator::sendReply(IRCMessage const & message) const
+bool MessageMediator::sendReply(IRCMessage const &message) const
 {
     message.getSocket()->appendToBuffer(message.to_string());
     return true;
@@ -199,6 +198,21 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
         msg << "nombre de serveurs (sans compter le serveur local)) : " << servers << std::endl;
         msg << "nombre de users : " << users << std::endl;
         msg << "nombre de channel : " << channels << std::endl;
+        std::multimap<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
+        for (auto it = clients_map.begin(); it != clients_map.end(); it++)
+        {
+            if (dynamic_cast<User *>(it->second))
+            {  
+                msg << "user : " << it->second->getName() << std::endl;
+            }
+            else if (dynamic_cast<ServerClient *>(it->second))
+            {
+                msg << "*******SERVER******" << std::endl;
+                msg  << *static_cast<ServerClient *>(it->second) << std::endl;
+                msg << "*******************" << std::endl;
+            }
+        }
+
         this->sendReply(msg.str(), socket);
     }
 }
