@@ -56,7 +56,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setNick(message.params.nickname, *user);
     }
-    if (message.type == IRCMessage::IRCMessageType::SERVICE)
+    else if (message.type == IRCMessage::IRCMessageType::SERVICE)
     {
         service = static_cast<Service *>(IRCServer::_client_manager->getClient(socket));
         if (!service)
@@ -64,7 +64,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         else
             IRCServer::_client_manager->setService(message.params.nickname, *service);
     }
-    if (message.type == IRCMessage::IRCMessageType::SERVER)
+    else if (message.type == IRCMessage::IRCMessageType::SERVER)
     {
         ServerClient *server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
         ServerClient *serverHost = static_cast<ServerClient *>(IRCServer::_client_manager->getClientByName(message.params.host));
@@ -84,14 +84,11 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 Token token;
                 token = IRCServer::addServer(*static_cast<ServerClient *>(client));
                 server->status = Client::Status::CONNECTED;
-                if (message.params.token == 1)
-                {
-                    IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
-                    IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
-                }
+                IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
+                IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
             }
         }
-        if (server)
+        else if (server)
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
             if (client)
@@ -208,13 +205,13 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
         for (auto it = clients_map.begin(); it != clients_map.end(); it++)
         {
             if (dynamic_cast<User *>(it->second))
-            {  
+            {
                 msg << "user : " << it->second->getName() << std::endl;
             }
             else if (dynamic_cast<ServerClient *>(it->second))
             {
                 msg << "*******SERVER******" << std::endl;
-                msg  << *static_cast<ServerClient *>(it->second) << std::endl;
+                msg << *static_cast<ServerClient *>(it->second) << std::endl;
                 msg << "*******************" << std::endl;
             }
         }
