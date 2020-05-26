@@ -55,7 +55,7 @@ std::ostream &   operator<<(std::ostream & o, ServerClient const & rhs){
     o << "other servers : " << std::endl;
     for (auto i = servers.begin(); i != servers.end(); i++)
     {
-        o << i->first << " " << i->second->getName() << std::endl;
+        o << i->first << " : " << i->second->getName() << std::endl;
     }
     return o;
 }

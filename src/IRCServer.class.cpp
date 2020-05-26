@@ -159,7 +159,7 @@ bool IRCServer::checkToken(Token token)
 
 Token IRCServer::addServer(ServerClient &server)
 {
-    Token token = 0;
+    Token token = 1;
     do
     {
         token++;
@@ -176,7 +176,7 @@ void IRCServer::sendServerNeighborData(ServerClient &server)
         auto server_tmp = it->second;
         if (server_tmp != &server)
         {
-            IRCMessage serverMessage = IRCServer::buildServerMessage(server_tmp->getName(), 1, it->first, ":local info");
+            IRCMessage serverMessage = IRCServer::buildServerMessage(server_tmp->getName(), 1, it->first, "local info");
             serverMessage.setSocket(server.getSocketClient());
             IRCServer::_message_mediator->sendReply(serverMessage);
         }

@@ -72,9 +72,6 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             return;
         if (message.params.host.empty() && message.params.hopcount > 1)
             return;
-        // Send numeric reply for token allready used ?
-        // if (IRCServer::checkToken(message.params.token))
-        //     return;
         if ((!server && !socket->getPassword().empty()) || (server && message.params.host == server->getName()))
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
@@ -86,10 +83,19 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 server->setServerInfo(message.params);
                 Token token;
                 token = IRCServer::addServer(*static_cast<ServerClient *>(client));
-                IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
-                IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
                 server->status = Client::Status::CONNECTED;
+                if (message.params.token == 1)
+                {
+                    IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
+                    IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
+                }
             }
+        }
+        if (server)
+        {
+            client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
+            if (client)
+                server->addServer(message.params.token, *static_cast<ServerClient *>(client));
         }
     }
 }
@@ -212,7 +218,6 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
                 msg << "*******************" << std::endl;
             }
         }
-
         this->sendReply(msg.str(), socket);
     }
 }
