@@ -12,11 +12,13 @@
 #include <netdb.h>
 #include <iostream>
 #include <cstring>
+#include <string>
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <net/if.h>
 
 SocketManager *IRCServer::_socket_manager = new SocketManager();
 MessageMediator *IRCServer::_message_mediator = new MessageMediator();
@@ -48,17 +50,19 @@ void IRCServer::config(unsigned short const port, std::string const password)
     
     struct ifaddrs *ifap, *ifa;
     struct sockaddr_in *sa;
-    char *addr;
+    std::string addr;
 
     getifaddrs (&ifap);
     for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET) {
+        if (ifa->ifa_addr && (ifa->ifa_addr->sa_family==AF_INET)
+            && !(ifa->ifa_flags & (IFF_LOOPBACK))) {
             sa = (struct sockaddr_in *) ifa->ifa_addr;
-            addr = inet_ntoa(sa->sin_addr);
+            addr = std::string(inet_ntoa(sa->sin_addr)) + ".." + std::string(std::to_string(port));
+            break;
         }
     }
     freeifaddrs(ifap);
-    this->name = Utility::random_string(8);
+    this->name = addr;
 }
 
 void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const portNetwork)
