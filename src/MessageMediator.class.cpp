@@ -10,6 +10,7 @@
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"
+#include "Utility.hpp"
 MessageMediator::MessageMediator(void)
 {
     this->_commands.insert({IRCMessage::IRCMessageType::NICK, &MessageMediator::createClient});
@@ -33,7 +34,7 @@ MessageMediator::~MessageMediator(void)
 
 bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *socket)
 {
-    std::cout << "Message mediator : " << std::endl;
+    std::cout << RED << "Message mediator : " << RESET << std::endl;
     std::cout << message << std::endl;
     // std::cout << (this->_commands.at(message.type)) << std::endl;
     (this->*_commands[message.type])(message, socket);
@@ -72,7 +73,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             return;
         if (message.params.host.empty() && message.params.hopcount > 1)
             return;
-        if (!server && !socket->getPassword().empty())
+        if ((!server && !socket->getPassword().empty()))
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
             // 1st part of if client asking registration (need to set password before)
@@ -81,18 +82,20 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             {
                 server = static_cast<ServerClient *>(client);
                 server->setServerInfo(message.params);
-                Token token;
-                token = IRCServer::addServer(*static_cast<ServerClient *>(client));
+                IRCServer::addServer(*server);
                 server->status = Client::Status::CONNECTED;
-                IRCServer::replyToNewConnection(server->getHopcount(), socket, token);
-                IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
+                IRCServer::replyToNewConnection(server->getHopcount(), socket, 1);
             }
         }
         else if (server && server->getName() != message.params.newServer)
         {
-            client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
-            if (client)
-                server->addServer(message.params.token, *static_cast<ServerClient *>(client));
+            ServerClient *new_server = static_cast<ServerClient*>(IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer));
+            if (new_server)
+            {
+                new_server->setServerInfo(message.params);
+                server->addServer(message.params.token, *new_server, message.params.hopcount);
+                IRCServer::addServer(*new_server);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
 #include "ClientManager.class.hpp"
 #include "ReplyManager.class.hpp"
 #include "ChannelManager.class.hpp"
+#include "ServerClient.class.hpp"
 #include "Socket.class.hpp"
 #include <unistd.h>
 #include <sys/types.h>
@@ -152,48 +153,41 @@ void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *soc
         serverMessage.setSocket(socket);
         IRCServer::_message_mediator->sendReply(passMessage);
         IRCServer::_message_mediator->sendReply(serverMessage);
+        IRCServer::sendDataServer(socket);
+
     }
     else
         IRCServer::_newSocketConnections.erase(it);
 }
 
-bool IRCServer::checkToken(Token token)
-{
-    auto it = IRCServer::_servers_local.find(token);
-    if (it == IRCServer::_servers_local.end())
-        return (false);
-    return (true);
-}
-
-Token IRCServer::addServer(ServerClient &server)
+void IRCServer::addServer(ServerClient &server)
 {
     Token token = 1;
     do
     {
         token++;
-    } while (_servers_local.find(token) != _servers_local.end());
+    } while (IRCServer::_servers_local.find(token) != IRCServer::_servers_local.end());
     std::pair<Token, ServerClient *> value(token, &server);
     IRCServer::_servers_local.insert(value);
-    return (token);
 }
 
-void IRCServer::sendServerNeighborData(ServerClient &server)
+void IRCServer::sendDataServer(SocketClient *socket)
 {
-    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); it++)
+    for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
     {
-        auto server_tmp = it->second;
-        if (server_tmp != &server)
+        if (socket != i->second->getSocketClient())
         {
-            IRCMessage serverMessage = IRCServer::buildServerMessage(server_tmp->getName(), 1, it->first, "local info");
-            serverMessage.setSocket(server.getSocketClient());
+            IRCMessage serverMessage = IRCServer::buildServerMessage(i->second->getName(), i->second->getHopcount() + 1, i->first, "Other servers");
+            serverMessage.setSocket(socket);
             IRCServer::_message_mediator->sendReply(serverMessage);
         }
     }
+    
 }
 
 void IRCServer::run()
 {
-    std::cout << "Starting server: hit return to shutdown" << std::endl;
+    std::cout << "Starting server " << this->name << ": hit return to shutdown" << std::endl;
     while (1)
     {
         if (!IRCServer::_socket_manager->route())
