@@ -1,6 +1,7 @@
 #ifndef SOCKET_CLIENT_CLASS_HPP
 #define SOCKET_CLIENT_CLASS_HPP
 #include <string>
+#include <queue>
 #include <netinet/in.h>
 #include "Socket.class.hpp"
 class SocketClient : public Socket
@@ -10,7 +11,7 @@ public:
     SocketClient(SocketClient const &instance);
     SocketClient &operator=(SocketClient const &rhs);
     ~SocketClient(void);
-    void appendToBuffer(std::string const & msg);
+    void addToQueue(std::string const & msg);
     bool recvMessage();
     bool sendMessage();
     std::string getPassword() const;
@@ -19,8 +20,8 @@ public:
 
 private:
     SocketClient(void);
-    std::string     _buffer;
-    std::string     _password;
+    std::queue<std::string> _msgQueue;
+    std::string             _password;
     
 };
 

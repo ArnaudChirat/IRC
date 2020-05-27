@@ -21,8 +21,8 @@ SocketClient::~SocketClient(void)
 {
 }
 
-void    SocketClient::appendToBuffer(std::string const & msg){
-    this->_buffer += msg;
+void    SocketClient::addToQueue(std::string const & msg){
+    this->_msgQueue.push(msg);
 }
 
 
@@ -47,8 +47,6 @@ bool SocketClient::recvMessage() {
         std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
         std::string message(buffer);
         std::vector<std::string>  messages = Utility::splitParam(message, "\n");
-        //Todo decouper les buffers par CR-LF
-        // message.erase(message.size() - 1);
         for (auto it = messages.begin(); it != messages.end(); ++it){
             IRCMessage IRC_message(*it, this);
             if (IRC_message.isCommand(this))
@@ -68,12 +66,16 @@ void SocketClient::handle(SocketManagerInterface &dispatcher, type t)
 
 bool    SocketClient::sendMessage(){
     int sentBytes;
-    while (this->_buffer.size()){
-        if ((sentBytes = send(this->getSocket(), this->_buffer.c_str(), this->_buffer.size(), 0)) == -1){
-            throw std::runtime_error(std::strerror(errno));
-            return true;
+    if (!this->_msgQueue.empty()){
+        std::string buffer = this->_msgQueue.front();
+        while (buffer.size()){
+            if ((sentBytes = send(this->getSocket(), buffer.c_str(), buffer.size(), 0)) == -1){
+                throw std::runtime_error(std::strerror(errno));
+                return true;
+            }
+            buffer.erase(0, sentBytes);
         }
-        this->_buffer.erase(0, sentBytes);
+        this->_msgQueue.pop();
     }
     return false;
 }

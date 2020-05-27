@@ -175,13 +175,13 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
 
 bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) const
 {
-    socket->appendToBuffer(msg);
+    socket->addToQueue(msg);
     return true;
 }
 
 bool MessageMediator::sendReply(IRCMessage const &message) const
 {
-    message.getSocket()->appendToBuffer(message.to_string());
+    message.getSocket()->addToQueue(message.to_string());
     return true;
 }
 
