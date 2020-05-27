@@ -97,7 +97,7 @@ Client *ClientManager::getClientByName(std::string const &name)
 
 bool ClientManager::setServerName(std::string const &name, ServerClient &server)
 {
-    if (checkName(SERVER, name) || this->getClient(server.getSocketClient()))
+    if (checkName(SERVER, name))
     {
         IRCServer::_reply_manager->reply(Parameters(), ReplyManager::ERR_ALREADYREGISTRED, server.getSocketClient());
         return (false);

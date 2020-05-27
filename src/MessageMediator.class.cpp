@@ -72,7 +72,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             return;
         if (message.params.host.empty() && message.params.hopcount > 1)
             return;
-        if ((!server && !socket->getPassword().empty()) || (server && message.params.host == server->getName()))
+        if (!server && !socket->getPassword().empty())
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
             // 1st part of if client asking registration (need to set password before)
@@ -88,7 +88,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 IRCServer::sendServerNeighborData(*static_cast<ServerClient *>(client));
             }
         }
-        else if (server)
+        else if (server && server->getName() != message.params.newServer)
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
             if (client)

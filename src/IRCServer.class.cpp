@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <ifaddrs.h>
@@ -133,20 +134,23 @@ void IRCServer::joinIRCNetwork()
         IRCServer::_message_mediator->sendReply(passMessage);
         IRCServer::_message_mediator->sendReply(serverMessage);
     }
-    // if (success)
-    // vider le vector des nouvelles connexions
-    IRCServer::_newSocketConnections.clear();
 }
 
 void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token)
 {
-    IRCMessage passMessage = IRCServer::buildPassMessage();
-    // quel token en reponse au server?? Meme hops que le server, mais quelle token?
-    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, token, "Main Server");
-    passMessage.setSocket(socket);
-    serverMessage.setSocket(socket);
-    IRCServer::_message_mediator->sendReply(passMessage);
-    IRCServer::_message_mediator->sendReply(serverMessage);
+    std::vector<SocketClient*>::iterator it;
+    it = std::find(IRCServer::_newSocketConnections.begin(), IRCServer::_newSocketConnections.end(), socket);
+    if (it == IRCServer::_newSocketConnections.end()){
+        IRCMessage passMessage = IRCServer::buildPassMessage();
+        // quel token en reponse au server?? Meme hops que le server, mais quelle token?
+        IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, token, "Main Server");
+        passMessage.setSocket(socket);
+        serverMessage.setSocket(socket);
+        IRCServer::_message_mediator->sendReply(passMessage);
+        IRCServer::_message_mediator->sendReply(serverMessage);
+    }
+    else
+        IRCServer::_newSocketConnections.erase(it);
 }
 
 bool IRCServer::checkToken(Token token)
