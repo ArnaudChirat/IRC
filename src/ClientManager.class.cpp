@@ -180,6 +180,8 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
             choice = ClientManager::USER;
         if (dynamic_cast<Service *>(client))
             choice = ClientManager::SERVICE;
+        if (dynamic_cast<ServerClient *>(client))
+            choice = ClientManager::SERVER;
     }
     std::string name = client->getName();
     Key key(choice, name);

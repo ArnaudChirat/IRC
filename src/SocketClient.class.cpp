@@ -27,9 +27,10 @@ void    SocketClient::addToQueue(std::string const & msg){
 
 
 bool SocketClient::recvMessage() {
+    int ret = 0;
     char buffer[BUFF_MSG] = {0};
     int sckt = this->getSocket();
-    int ret = recv(sckt, buffer, BUFF_MSG - 1, 0);
+    ret = recv(sckt, buffer, BUFF_MSG - 1, 0);
     buffer[BUFF_MSG - 1] = '\0';
     if (ret == 0)
     {
@@ -44,13 +45,24 @@ bool SocketClient::recvMessage() {
     }
     else if (ret > 1)
     {
-        std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << buffer;
-        std::string message(buffer);
-        std::vector<std::string>  messages = Utility::splitParam(message, "\n");
-        for (auto it = messages.begin(); it != messages.end(); ++it){
-            IRCMessage IRC_message(*it, this);
-            if (IRC_message.isCommand(this))
-                IRCServer::_message_mediator->handleMessage(IRC_message, this);
+        this->_buffer += buffer;
+        if (this->_buffer.find('\n') != std::string::npos){
+            std::cout << "[" << this->getAddr().c_str() << ":" << this->getPort() << "] " << this->_buffer;
+            std::vector<std::string>  messages = Utility::splitParam(this->_buffer, "\n");
+            char c = this->_buffer.back();
+            this->_buffer.clear();
+            std::cout << messages[0] << std::endl;
+            auto it = messages.rbegin();
+            if (c != '\n'){
+                this->_buffer = *it;
+                messages.pop_back();
+            }
+            for (auto it = messages.begin(); it != messages.end(); ++it){
+                std::cout << "in the messages loop : " << *it << std::endl;
+                IRCMessage IRC_message(*it, this);
+                if (IRC_message.isCommand(this))
+                    IRCServer::_message_mediator->handleMessage(IRC_message, this);
+            }
         }
     }
     return (false);

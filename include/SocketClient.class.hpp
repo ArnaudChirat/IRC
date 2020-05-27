@@ -20,6 +20,7 @@ public:
 
 private:
     SocketClient(void);
+    std::string     _buffer;
     std::queue<std::string> _msgQueue;
     std::string             _password;
     
