@@ -32,8 +32,8 @@ std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
 std::map<Token, ServerClient *> IRCServer::_servers_local;
 
-IRCServer::IRCServer(void) {
-
+IRCServer::IRCServer(void)
+{
 }
 
 IRCServer::~IRCServer(void)
@@ -48,16 +48,17 @@ void IRCServer::config(unsigned short const port, std::string const password)
     Socket *std_in = new Socket(STDIN_FILENO, *(reinterpret_cast<sockaddr *>(&std_addr)));
     IRCServer::_socket_manager->addSocket(server);
     IRCServer::_socket_manager->addSocket(std_in);
-    
+
     struct ifaddrs *ifap, *ifa;
     struct sockaddr_in *sa;
     std::string addr;
 
-    getifaddrs (&ifap);
-    for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr && (ifa->ifa_addr->sa_family==AF_INET)
-            && !(ifa->ifa_flags & (IFF_LOOPBACK))) {
-            sa = (struct sockaddr_in *) ifa->ifa_addr;
+    getifaddrs(&ifap);
+    for (ifa = ifap; ifa; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr && (ifa->ifa_addr->sa_family == AF_INET) && !(ifa->ifa_flags & (IFF_LOOPBACK)))
+        {
+            sa = (struct sockaddr_in *)ifa->ifa_addr;
             addr = std::string(inet_ntoa(sa->sin_addr)) + ".." + std::string(std::to_string(port));
             break;
         }
@@ -143,9 +144,10 @@ void IRCServer::joinIRCNetwork()
 
 void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token)
 {
-    std::vector<SocketClient*>::iterator it;
+    std::vector<SocketClient *>::iterator it;
     it = std::find(IRCServer::_newSocketConnections.begin(), IRCServer::_newSocketConnections.end(), socket);
-    if (it == IRCServer::_newSocketConnections.end()){
+    if (it == IRCServer::_newSocketConnections.end())
+    {
         IRCMessage passMessage = IRCServer::buildPassMessage();
         // quel token en reponse au server?? Meme hops que le server, mais quelle token?
         IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, token, "Main Server");
@@ -154,11 +156,11 @@ void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *soc
         IRCServer::_message_mediator->sendReply(passMessage);
         IRCServer::_message_mediator->sendReply(serverMessage);
         IRCServer::sendDataServer(socket);
-
     }
     else
         IRCServer::_newSocketConnections.erase(it);
 }
+
 
 void IRCServer::addServer(ServerClient &server)
 {
@@ -182,7 +184,6 @@ void IRCServer::sendDataServer(SocketClient *socket)
             IRCServer::_message_mediator->sendReply(serverMessage);
         }
     }
-    
 }
 
 void IRCServer::run()
