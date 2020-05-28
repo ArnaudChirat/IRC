@@ -35,9 +35,11 @@ public:
     void connectNetwork(std::string const hostNetowrk, std::string const portNetwork);
     void joinIRCNetwork(void);
     static void sendDataServer(SocketClient *socket);
+    static void sendDataUser(SocketClient *socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
     static void addServer(ServerClient &server);
     static IRCMessage buildPassMessage(void);
+    static IRCMessage buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname ,unsigned int const token, unsigned int const mode, std::string const &realname);
     static IRCMessage buildServerMessage(std::string const &newServer, unsigned int const &hops, unsigned int const &token, std::string const &info);
     static SocketManager *_socket_manager;
     static MessageMediator *_message_mediator;

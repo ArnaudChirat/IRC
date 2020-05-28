@@ -32,6 +32,21 @@ std::multimap<SocketClient *, Client *> ClientManager::getClients() const
     return (this->_clients);
 }
 
+std::vector<User*> ClientManager::getUsers()
+{
+    std::vector<User*> users;
+    for (auto i = _clients.begin(); i != _clients.end() ; i++)
+    {
+        User *user = dynamic_cast<User*>(i->second);
+        if (user)
+        {
+            users.push_back(user);
+        }
+    }
+    return (users);
+};
+
+
 void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice choice)
 {
     // this->_clients.emplace_back(client);

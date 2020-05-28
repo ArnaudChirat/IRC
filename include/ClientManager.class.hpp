@@ -32,6 +32,7 @@ public:
     bool setServerName(std::string const &name, ServerClient &server);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
+    std::vector<User*> getUsers();
     Client *getClientByName(std::string const &nick);
     int getSize(ClientChoice choice) const;
     std::multimap<SocketClient*, Client*> getClients() const;

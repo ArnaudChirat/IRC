@@ -77,6 +77,7 @@
         "fstream": "cpp",
         "shared_mutex": "cpp",
         "set": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "queue": "cpp"
     }
 }

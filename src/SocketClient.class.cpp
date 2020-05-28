@@ -58,7 +58,6 @@ bool SocketClient::recvMessage() {
                 messages.pop_back();
             }
             for (auto it = messages.begin(); it != messages.end(); ++it){
-                std::cout << "in the messages loop : " << *it << std::endl;
                 IRCMessage IRC_message(*it, this);
                 if (IRC_message.isCommand(this))
                     IRCServer::_message_mediator->handleMessage(IRC_message, this);

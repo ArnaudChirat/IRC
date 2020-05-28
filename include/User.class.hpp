@@ -50,6 +50,7 @@ public:
     virtual std::string getName() const;
     Oper *getOper() const;
     std::string getMode() const;
+    unsigned int getModeInt() const;
     void addChannel(Channel *);
     void deleteChannel(Channel *);
     void    sendMsgTo(User * target, std::string const & msg) const;

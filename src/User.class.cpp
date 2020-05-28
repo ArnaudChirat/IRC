@@ -99,6 +99,11 @@ std::string User::getMode() const
     return modes;
 }
 
+unsigned int User::getModeInt() const
+{
+    return (this->_mode);
+}
+
 User &User::setRealName(std::string const &real_name)
 {
     this->_real_name = real_name;
