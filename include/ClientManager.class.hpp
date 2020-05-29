@@ -8,6 +8,7 @@
 #include <map>
 
 class ServerClient;
+class IRCMessage;
 
 class ClientManager
 {
@@ -30,6 +31,7 @@ public:
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
     bool setServerName(std::string const &name, ServerClient &server);
+    bool setNewServer(IRCMessage, ServerClient &, ServerClient &);
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     std::vector<User*> getUsers();

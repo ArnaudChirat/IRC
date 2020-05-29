@@ -18,6 +18,15 @@ ClientManager::~ClientManager(void)
     return;
 }
 
+bool ClientManager::setNewServer(IRCMessage msg, ServerClient & server, ServerClient & newServer){
+    server.setServerInfo(msg.params);
+    server.addServer(msg.params.token, newServer, msg.params.hopcount);
+    if (server.getHopcount() == 1)
+        IRCServer::_observer->subscribe(server.getSocketClient());
+    server.status = Client::Status::CONNECTED;
+    return true;
+}
+
 Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket, std::string const &name)
 {
     Client *client = this->createClient(choice, socket, name);

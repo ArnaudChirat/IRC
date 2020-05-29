@@ -15,9 +15,9 @@ ServerClient &ServerClient::setName(std::string const &name)
 
 void ServerClient::setServerInfo(Parameters const &params)
 {
-    this->_uplink = params.host;
-    this->_hopcount = params.hopcount;
-    this->_token = params.token;
+    this->_uplink = !params.host.empty() ? params.host : IRCServer::name;
+    this->_token = IRCServer::addServer(*this);
+    this->_hopcount = params.hopcount + 1;
     this->_info = params.serverInfo;
 }
 
@@ -33,6 +33,7 @@ unsigned int ServerClient::getToken(void) const
 {
     return this->_token;
 }
+
 std::string ServerClient::getInfo(void) const
 {
     return this->_info;

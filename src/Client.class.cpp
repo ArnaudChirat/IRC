@@ -31,6 +31,11 @@ std::string Client::getName() const
     return (this->_name);
 }
 
+std::string Client::getPrevName() const
+{
+    return (this->_prevName);
+}
+
 SocketClient *Client::getSocketClient(void) const
 {
     return this->_socket_client;

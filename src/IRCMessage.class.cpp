@@ -36,6 +36,20 @@ IRCMessage::IRCMessage(void)
 {
 }
 
+IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
+    this->setCommand(command);
+    if (command == "PASS"){
+        // this->setPrefix(":" + ownServer.name, IRCMessageWay::SENDING);
+        this->setParameters(param.password);
+    }
+    else if (command == "SERVER"){
+        this->setPrefix(param.uplink, IRCMessageWay::SENDING);
+        this->setParameters(param.name + ' ' + std::to_string(param.hopcount) + ' ' +  std::to_string(param.token));
+        this->setTrail(param.serverInfo, IRCMessageWay::SENDING);
+    }
+}
+
+
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(Category::UNKNOWN), _socket(socket)
 {
     this->splitIRCMessage(message);

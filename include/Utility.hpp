@@ -19,12 +19,14 @@ class IRCMessage;
 class Channel;
 class Client;
 class User;
+class ServerClient;
+class IRCServer;
+
 namespace Utility
 {
     std::vector<std::string> splitParam(std::string const &strToSplit, std::string const &delimiters);
     void *get_in_addr(struct sockaddr *sa);
     bool ipv4(struct sockaddr *sa);
-    std::string random_string(std::size_t length);
 }; // namespace Utility
 
 struct Parameters
@@ -33,9 +35,11 @@ struct Parameters
     std::string user;
     unsigned int mode;
     std::string real_name;
+    std::string prevNickname;
     std::string nickname;
     std::string password;
     std::string name;
+    std::string uplink;
     std::string host;
     std::string quit_message;
     std::string server;
@@ -54,14 +58,21 @@ struct Parameters
     std::string text;
 
     Parameters(void);
+    Parameters(Parameters const & instance);
     Parameters(Client const &);
     Parameters(User const &);
+    Parameters(ServerClient const &);
     Parameters(Channel const &);
     Parameters(IRCMessage const &);
+    Parameters(IRCServer const &);
+    Parameters & operator=(Parameters const & rhs);
+
     Parameters &paramClient(Client const &);
     Parameters &paramUser(User const &);
+    Parameters &paramServer(ServerClient const &);
     Parameters &paramChannel(Channel const &);
     Parameters &paramMessage(IRCMessage const &);
+    Parameters &paramIRCServer(IRCServer const &);
 };
 
 #endif

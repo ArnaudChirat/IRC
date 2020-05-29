@@ -14,17 +14,20 @@ class ClientManager;
 class ReplyManager;
 class ChannelManager;
 class IRCMessage;
+class Observer;
 
 class IRCServer
 {
 private:
     static std::string _password;
+    static IRCServer * _myself;
     static std::vector<SocketClient *> _newSocketConnections;
     static std::map<Token, ServerClient *> _servers_local;
     static std::map<std::string, Token> _user_to_server;
 public:
     IRCServer(void);
     static std::string name;
+    static std::string info;
     IRCServer(IRCServer const &instance) = delete;
     IRCServer &operator=(IRCServer const &rhs) = delete;
     ~IRCServer(void);
@@ -34,10 +37,11 @@ public:
     void config(unsigned short const port, std::string const password);
     void connectNetwork(std::string const hostNetowrk, std::string const portNetwork);
     void joinIRCNetwork(void);
+    static void replyToNewConnection(SocketClient *socket);
     static void sendDataServer(SocketClient *socket);
     static void sendDataUser(SocketClient *socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
-    static void addServer(ServerClient &server);
+    static Token addServer(ServerClient &server);
     static void addUser(User &user, Token token);
     static ServerClient *getServerClient(Token token);
     static IRCMessage buildPassMessage(void);
@@ -48,6 +52,9 @@ public:
     static ClientManager *_client_manager;
     static ReplyManager *_reply_manager;
     static ChannelManager *_channel_manager;
+    static Observer *_observer;
+
+    std::string     getPassword(void) const;
 };
 
 #endif

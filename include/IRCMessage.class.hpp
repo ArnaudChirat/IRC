@@ -6,6 +6,7 @@
 #include "ClientManager.class.hpp"
 #include "Socket.class.hpp"
 #include "Utility.hpp"
+class IRCServer;
 class SocketClient;
 // Représentation BNF des messages :
 // message    =  [ ":" prefix SPACE ] command [ params ] crlf
@@ -128,6 +129,7 @@ public:
     
     IRCMessage(void);
     IRCMessage(std::string &message, SocketClient * socket);
+    IRCMessage(Parameters const & param, std::string const &);
     IRCMessage(IRCMessage const &instance);
     IRCMessage &operator=(IRCMessage const &rhs);
     ~IRCMessage(void);

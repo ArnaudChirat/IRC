@@ -11,6 +11,7 @@ public:
     virtual Client & setName(std::string const &name) = 0;
     SocketClient * getSocketClient(void) const;
     std::string getName() const;
+    std::string getPrevName() const;
     void setPassword(std::string const &pass);
     std::string getPassword() const;
     SocketClient *_socket_client;
@@ -22,6 +23,7 @@ public:
     };
     Status status;
 protected:
+    std::string _prevName;
     std::string _name;
     Client(void);
 

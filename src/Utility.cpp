@@ -1,16 +1,26 @@
 #include "Utility.hpp"
 #include "IRCServer.class.hpp"
 #include "IRCMessage.class.hpp"
+#include "ServerClient.class.hpp"
 #include "Channel.class.hpp"
-#include <random>
-Parameters::Parameters(void) : mode(0), hopcount(0), token(0)  {}
+#include <map>
+Parameters::Parameters(void) {
+}
 
-Parameters::Parameters(Client const & client) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(Parameters const & instance) : mode(0), hopcount(0), token(0){
+    *this = instance;
+}
+
+Parameters::Parameters(Client const & client) : mode(0), hopcount(0), token(0){
     *this = this->paramClient(client);
 }
 
 Parameters::Parameters(User const & user) : mode(0), hopcount(0), token(0) {
     *this = this->paramUser(user);
+}
+
+Parameters::Parameters(ServerClient const & server) : mode(0), hopcount(0), token(0) {
+    *this = this->paramServer(server);
 }
 
 Parameters::Parameters(Channel const & channel) : mode(0), hopcount(0), token(0) {
@@ -19,6 +29,10 @@ Parameters::Parameters(Channel const & channel) : mode(0), hopcount(0), token(0)
 
 Parameters::Parameters(IRCMessage const & msg) : mode(0), hopcount(0), token(0) {
     *this = this->paramMessage(msg);
+}
+
+Parameters::Parameters(IRCServer const & msg) : mode(0), hopcount(0), token(0) {
+    *this = this->paramIRCServer(msg);
 }
 
 Parameters & Parameters::paramClient(Client const & client)
@@ -31,10 +45,21 @@ Parameters & Parameters::paramClient(Client const & client)
 
 Parameters & Parameters::paramUser(User const & user)
 {
+    this->prevNickname = user.getPrevName();
     this->nickname = user.getName();
     this->user = user.getUser();
     this->host = user.getSocketClient()->getAddr();
     this->server = IRCServer::name;
+    return *this;
+}
+
+Parameters & Parameters::paramServer(ServerClient const & server)
+{
+    this->name = server.getName();
+    this->uplink = server.getUplink();
+    this->hopcount = server.getHopcount();
+    this->token = server.getToken();
+    this->serverInfo = "Other server";
     return *this;
 }
 
@@ -53,6 +78,15 @@ Parameters & Parameters::paramMessage(IRCMessage const & msg)
     return *this;
 }
 
+Parameters & Parameters::paramIRCServer(IRCServer const & server)
+{
+    this->name = server.name;
+    this->password = server.getPassword();
+    this->hopcount = 1;
+    this->token = 1;
+    this->serverInfo = server.info;
+    return *this;
+}
 
 std::vector<std::string>  Utility::splitParam(std::string const & strToSplit, std::string const & delimiters) {
     size_t idx = 0;
@@ -83,20 +117,31 @@ bool    Utility::ipv4(struct sockaddr *sa){
     return false;
 }
 
-std::string Utility::random_string(std::size_t length)
-{
-    const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    std::random_device random_device;
-    std::mt19937 generator(random_device());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
-
-    std::string random_string;
-
-    for (std::size_t i = 0; i < length; ++i)
-    {
-        random_string += CHARACTERS[distribution(generator)];
-    }
-
-    return random_string;
+Parameters &    Parameters::operator=(Parameters const & rhs){
+    this->command = rhs.command;
+    this->user = rhs.user;
+    this->mode = rhs.mode;
+    this->real_name = rhs.real_name;
+    this->nickname = rhs.nickname;
+    this->prevNickname = rhs.prevNickname;
+    this->password = rhs.password;
+    this->name = rhs.name;
+    this->host = rhs.host;
+    this->quit_message = rhs.quit_message;
+    this->server = rhs.server;
+    this->newServer = rhs.newServer;
+    this->hopcount = rhs.hopcount;
+    this->token = rhs.token;
+    this->uplink = rhs.uplink;
+    this->serverInfo = rhs.serverInfo;
+    this->comment = rhs.comment;
+    this->channelName = rhs.channelName;
+    this->channelType = rhs.channelType;
+    this->channelMembers = rhs.channelMembers;
+    this->keys = rhs.keys;
+    this->leave_message = rhs.leave_message;
+    this->target = rhs.target;
+    this->msg_target = rhs.msg_target;
+    this->text = rhs.text;
+    return *this;
 }

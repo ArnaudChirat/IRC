@@ -26,8 +26,11 @@ MessageMediator *IRCServer::_message_mediator = new MessageMediator();
 ClientManager *IRCServer::_client_manager = new ClientManager();
 ReplyManager *IRCServer::_reply_manager = new ReplyManager;
 ChannelManager *IRCServer::_channel_manager = new ChannelManager();
+Observer *IRCServer::_observer = new Observer();
 
 std::string IRCServer::name;
+std::string IRCServer::info;
+IRCServer * IRCServer::_myself = NULL;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
 std::map<Token, ServerClient *> IRCServer::_servers_local;
@@ -35,6 +38,8 @@ std::map<std::string, Token> IRCServer::_user_to_server;
 
 IRCServer::IRCServer(void)
 {
+    IRCServer::_myself = this;
+    this->info = "Hey I am your server";
 }
 
 IRCServer::~IRCServer(void)
@@ -101,31 +106,6 @@ void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const 
     freeaddrinfo(serverinfo); // all done with the list of results -> can free it
 }
 
-IRCMessage IRCServer::buildPassMessage(void)
-{
-    std::string prefix = IRCServer::name;
-    std::vector<std::string> parameters;
-    parameters.push_back(IRCServer::_password);
-    IRCMessage passMessage;
-    passMessage.setPrefix(prefix, IRCMessage::IRCMessageWay::SENDING).setCommand("PASS").setParameters(parameters);
-    return passMessage;
-}
-
-IRCMessage IRCServer::buildServerMessage(std::string const &newServer, unsigned int const &hops, unsigned int const &token, std::string const &info)
-{
-    std::string prefix = IRCServer::name;
-
-    std::vector<std::string> parameters;
-    parameters.push_back(newServer);
-    parameters.push_back(std::to_string(hops));
-    parameters.push_back(std::to_string(token));
-
-    std::string trail = info;
-    IRCMessage serverMessage;
-    serverMessage.setPrefix(prefix, IRCMessage::IRCMessageWay::SENDING).setCommand("SERVER").setParameters(parameters).setTrail(trail, IRCMessage::IRCMessageWay::SENDING);
-    return serverMessage;
-}
-
 IRCMessage IRCServer::buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname, unsigned int const token, unsigned int const mode, std::string const &realname)
 {
     std::vector<std::string> parameters;
@@ -144,33 +124,30 @@ IRCMessage IRCServer::buildNickMessage(std::string const &nickname, unsigned int
 
 void IRCServer::joinIRCNetwork()
 {
-    // creation IRCMessage password => a voir pour rajouter les infos
-    IRCMessage passMessage = IRCServer::buildPassMessage();
-    IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, 1, 1, "Salut BG");
+    Parameters param(*this);
+    IRCMessage passMessage(param, "PASS");
+    IRCMessage serverMessage(param, "SERVER"); // voir comment gerer token et hopcount
 
     // envoi via le MessageMediator
     for (auto it = IRCServer::_newSocketConnections.begin(); it != IRCServer::_newSocketConnections.end(); ++it)
     {
-        passMessage.setSocket(*it);
-        serverMessage.setSocket(*it);
-        IRCServer::_message_mediator->sendReply(passMessage);
-        IRCServer::_message_mediator->sendReply(serverMessage);
+        IRCServer::_message_mediator->sendReply(passMessage.to_string(), *it);
+        IRCServer::_message_mediator->sendReply(serverMessage.to_string(), *it);
     }
 }
 
-void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token)
+void IRCServer::replyToNewConnection(SocketClient *socket)
 {
+    Parameters param(*(IRCServer::_myself));
+    IRCMessage passMessage(param, "PASS");
+    IRCMessage serverMessage(param, "SERVER");
+    
     std::vector<SocketClient *>::iterator it;
     it = std::find(IRCServer::_newSocketConnections.begin(), IRCServer::_newSocketConnections.end(), socket);
     if (it == IRCServer::_newSocketConnections.end())
     {
-        IRCMessage passMessage = IRCServer::buildPassMessage();
-        // quel token en reponse au server?? Meme hops que le server, mais quelle token?
-        IRCMessage serverMessage = IRCServer::buildServerMessage(IRCServer::name, hops, token, "Main Server");
-        passMessage.setSocket(socket);
-        serverMessage.setSocket(socket);
-        IRCServer::_message_mediator->sendReply(passMessage);
-        IRCServer::_message_mediator->sendReply(serverMessage);
+        IRCServer::_message_mediator->sendReply(passMessage.to_string(), socket);
+        IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         IRCServer::sendDataServer(socket);
         IRCServer::sendDataUser(socket);
     }
@@ -178,7 +155,8 @@ void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *soc
         IRCServer::_newSocketConnections.erase(it);
 }
 
-void IRCServer::addServer(ServerClient &server)
+
+Token IRCServer::addServer(ServerClient &server)
 {
     Token token = 1;
     do
@@ -187,6 +165,7 @@ void IRCServer::addServer(ServerClient &server)
     } while (IRCServer::_servers_local.find(token) != IRCServer::_servers_local.end());
     std::pair<Token, ServerClient *> value(token, &server);
     IRCServer::_servers_local.insert(value);
+    return token;
 }
 
 void IRCServer::addUser(User &user, Token token)
@@ -201,9 +180,9 @@ void IRCServer::sendDataServer(SocketClient *socket)
     {
         if (socket != i->second->getSocketClient())
         {
-            IRCMessage serverMessage = IRCServer::buildServerMessage(i->second->getName(), i->second->getHopcount() + 1, i->first, "Other servers");
-            serverMessage.setSocket(socket);
-            IRCServer::_message_mediator->sendReply(serverMessage);
+            Parameters params(*(i->second));
+            IRCMessage serverMessage(params, "SERVER");
+            IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         }
     }
 }
@@ -222,8 +201,7 @@ void IRCServer::sendDataUser(SocketClient *socket)
                 int hop = server ? server->getHopcount() + 1 : 1;
                 Token token = server ? server->getToken() : 1;
                 IRCMessage nick_message = IRCServer::buildNickMessage(user->getName(), hop, user->getUser(), IRCServer::name, token, user->getModeInt(), "ok");
-                nick_message.setSocket(socket);
-                IRCServer::_message_mediator->sendReply(nick_message);
+                IRCServer::_message_mediator->sendReply(nick_message.to_string(), socket);
             }
         }
     }
@@ -250,3 +228,8 @@ void IRCServer::run()
 void IRCServer::stop()
 {
 }
+
+std::string     IRCServer::getPassword(void) const{
+    return this->_password;
+}
+

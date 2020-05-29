@@ -9,7 +9,7 @@ SRC=main.cpp SocketServeur.class.cpp Utility.cpp SocketClient.class.cpp\
 	MessageMediator.class.cpp Client.class.cpp User.class.cpp\
 	IRCServer.class.cpp ClientManager.class.cpp ReplyManager.class.cpp\
 	Service.class.cpp ChannelManager.class.cpp Channel.class.cpp \
-	ServerClient.class.cpp
+	ServerClient.class.cpp Observer.class.cpp
 OBJ=$(addprefix obj_irc/, $(SRC:.cpp=.o))
 
 all: $(EXEC)
