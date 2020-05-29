@@ -27,7 +27,7 @@ Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket
     return (client);
 }
 
-std::multimap<SocketClient *, Client *> ClientManager::getClients() const
+std::map<SocketClient *, Client *> ClientManager::getClients() const
 {
     return (this->_clients);
 }
@@ -52,7 +52,8 @@ void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice
     // this->_clients.emplace_back(client);
     (void)choice;
     // this->_names_used.insert(Key(choice, client->getName()));
-    this->_clients.insert(std::pair<SocketClient *, Client *>(socket, client));
+    if (_clients.find(socket) == _clients.end())
+        this->_clients.insert(std::pair<SocketClient *, Client *>(socket, client));
     this->_nick_clients.insert(std::pair<std::string, Client *>(client->getName(), client));
 }
 
@@ -81,7 +82,8 @@ Client *ClientManager::createClient(ClientChoice choice, SocketClient *socket, s
         delete client;
         return (NULL);
     }
-    client->setPassword(socket->getPassword());
+    if (socket)
+        client->setPassword(socket->getPassword());
     return (client);
 }
 
@@ -210,8 +212,6 @@ int ClientManager::getSize(ClientChoice choice) const
 {
     unsigned long total_size = this->_names_used.size();
     std::set<Key> list;
-    if (total_size != this->_clients.size() || total_size != this->_nick_clients.size() || this->_clients.size() != this->_nick_clients.size())
-        throw std::length_error("Erreur de taille entre les containeurs..");
     if (choice == ClientChoice::ALL)
         return (total_size);
     else

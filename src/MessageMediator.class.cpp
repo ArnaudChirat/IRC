@@ -44,6 +44,18 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     return (true);
 }
 
+void MessageMediator::nickServerCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    ServerClient *server_talk = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
+    if (server_talk)
+    {
+        User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
+        ServerClient * server = server_talk->getServer(message.params.token);
+        server->addUser(*user);
+        // add to IRCServer user_to_server
+    }
+};
+
 void MessageMediator::createClient(IRCMessage const &message, SocketClient *socket) const
 {
     Client *client = NULL;
@@ -51,11 +63,20 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     Service *service = NULL;
     if (message.type == IRCMessage::IRCMessageType::NICK)
     {
-        user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
-        if (!user)
-            client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
+        if (message.params.token != 0)
+            this->nickServerCommand(message, socket);
+        else if (!message.getPrefix().empty())
+        {
+            //Find user via user_to_server and change name
+        }
         else
-            IRCServer::_client_manager->setNick(message.params.nickname, *user);
+        {
+            user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
+            if (!user)
+                client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
+            else
+                IRCServer::_client_manager->setNick(message.params.nickname, *user);
+        }
     }
     else if (message.type == IRCMessage::IRCMessageType::SERVICE)
     {
@@ -84,12 +105,13 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 server->setServerInfo(message.params);
                 IRCServer::addServer(*server);
                 server->status = Client::Status::CONNECTED;
+                server->addServer(message.params.token, *server, message.params.hopcount);
                 IRCServer::replyToNewConnection(server->getHopcount(), socket, 1);
             }
         }
         else if (server && server->getName() != message.params.newServer)
         {
-            ServerClient *new_server = static_cast<ServerClient*>(IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer));
+            ServerClient *new_server = static_cast<ServerClient *>(IRCServer::_client_manager->createClient(ClientManager::SERVER, socket, message.params.newServer));
             if (new_server)
             {
                 new_server->setServerInfo(message.params);
@@ -204,7 +226,7 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
         msg << "nombre de serveurs (sans compter le serveur local)) : " << servers << std::endl;
         msg << "nombre de users : " << users << std::endl;
         msg << "nombre de channel : " << channels << std::endl;
-        std::multimap<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
+        std::map<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
         for (auto it = clients_map.begin(); it != clients_map.end(); it++)
         {
             if (dynamic_cast<User *>(it->second))

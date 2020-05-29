@@ -127,18 +127,17 @@ IRCMessage IRCServer::buildServerMessage(std::string const &newServer, unsigned 
 
 IRCMessage IRCServer::buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname, unsigned int const token, unsigned int const mode, std::string const &realname)
 {
-    Parameters parameters;
-    parameters.nickname = nickname;
-    parameters.hopcount = hops;
-    parameters.user = username;
-    parameters.host = hostname;
-    parameters.token = token;
-    parameters.mode = mode;
-    parameters.real_name = realname;
+    std::vector<std::string> parameters;
+
+    parameters.push_back(nickname);
+    parameters.push_back(std::to_string(hops));
+    parameters.push_back(username);
+    parameters.push_back(hostname);
+    parameters.push_back(std::to_string(token));
+    parameters.push_back(std::to_string(mode));
 
     IRCMessage userMessage;
-    userMessage.params = parameters;
-    userMessage.setCommand("USER");
+    userMessage.setCommand("NICK").setParameters(parameters).setTrail(realname, IRCMessage::IRCMessageWay::SENDING);
     return userMessage;
 }
 
@@ -172,7 +171,7 @@ void IRCServer::replyToNewConnection(unsigned int const &hops, SocketClient *soc
         IRCServer::_message_mediator->sendReply(passMessage);
         IRCServer::_message_mediator->sendReply(serverMessage);
         IRCServer::sendDataServer(socket);
-        // IRCServer::sendDataUser(socket);
+        IRCServer::sendDataUser(socket);
     }
     else
         IRCServer::_newSocketConnections.erase(it);
@@ -207,20 +206,28 @@ void IRCServer::sendDataUser(SocketClient *socket)
     std::vector<User *> users = IRCServer::_client_manager->getUsers();
     if (!users.empty())
     {
-        for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
+        for (auto user_it = users.begin(); user_it != users.end(); user_it++)
         {
-            if (socket != i->second->getSocketClient())
+            User *user = (*user_it);
+            if (socket != user->getSocketClient())
             {
-                for (auto user_it = users.begin(); user_it != users.end(); user_it++)
-                {
-                    User *user = (*user_it);
-                    IRCMessage nick_message = IRCServer::buildNickMessage(user->getName(), i->second->getHopcount() + 1, user->getUser(), IRCServer::name, i->first, user->getModeInt(), "test");
-                    nick_message.setSocket(socket);
-                    IRCServer::_message_mediator->sendReply(nick_message);
-                }
+                ServerClient *server = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(user->getSocketClient()));
+                int hop = server ? server->getHopcount() + 1 : 1;
+                Token token = server ? server->getToken() : 1;
+                IRCMessage nick_message = IRCServer::buildNickMessage(user->getName(), hop, user->getUser(), IRCServer::name, token, user->getModeInt(), "ok");
+                nick_message.setSocket(socket);
+                IRCServer::_message_mediator->sendReply(nick_message);
             }
         }
     }
+}
+
+ServerClient *IRCServer::getServerClient(Token token)
+{
+    auto it = IRCServer::_servers_local.find(token);
+    if (it != IRCServer::_servers_local.end())
+        return (it->second);
+    return (NULL);
 }
 
 void IRCServer::run()

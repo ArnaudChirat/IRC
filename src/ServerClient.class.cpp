@@ -38,6 +38,14 @@ std::string ServerClient::getInfo(void) const
     return this->_info;
 }
 
+ServerClient *ServerClient::getServer(Token token) const
+{
+    auto it = _servers.find(token);
+    if (it != _servers.end())
+        return (it->second.server_client);
+    return (NULL);
+}
+
 void ServerClient::addServer(Token token, ServerClient &server, unsigned int hopcount)
 {
     ServerClientLight light_server;
@@ -45,6 +53,12 @@ void ServerClient::addServer(Token token, ServerClient &server, unsigned int hop
     light_server.server_client = &server;
     std::pair<Token, ServerClientLight> value(token, light_server);
     this->_servers.insert(value);
+}
+
+void ServerClient::addUser(User &user)
+{
+    std::pair<std::string, User*> value(user.getName(), &user);
+    this->_users.insert(value);
 }
 
 std::map<Token, ServerClientLight> ServerClient::getServers() const

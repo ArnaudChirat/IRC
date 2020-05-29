@@ -1,6 +1,7 @@
 #ifndef USER_CLASS_HPP
 #define USER_CLASS_HPP
 #include "Client.class.hpp"
+#include "ServerClient.class.hpp"
 #include <stack>
 #include <unordered_map>
 
@@ -57,13 +58,12 @@ public:
      
 private:
     User(void);
-
-private:
     Oper *_oper;
     std::string _user;
     std::string _real_name;
     std::string _hostname;
     unsigned int _mode;
+
     std::unordered_map<std::string, Channel *> _channelsJoined;
 };
 

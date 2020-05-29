@@ -7,6 +7,7 @@
 
 struct Parameters;
 struct ServerClientLight;
+struct UserClientLight;
 class ServerClient : public Client
 {
 public:
@@ -22,7 +23,8 @@ public:
     std::string getInfo(void) const;
     void addServer(Token token, ServerClient &server, unsigned int hopcount);
     void addServer(ServerClient &server);
-    // void getServer(Token token);
+    void addUser(User &user);
+    ServerClient *getServer(Token token) const;
     std::map<Token, ServerClientLight> getServers() const;
 private:
     ServerClient(void);
@@ -31,6 +33,7 @@ private:
     unsigned int    _token;
     std::string     _info;
     std::map<Token, ServerClientLight> _servers;
+    std::map<std::string, User*> _users;
 };
 
 struct ServerClientLight

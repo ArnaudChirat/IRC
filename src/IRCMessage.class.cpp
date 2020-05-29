@@ -32,7 +32,9 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"SERVER", IRCMessageType::SERVER},
 };
 
-IRCMessage::IRCMessage(void) {}
+IRCMessage::IRCMessage(void)
+{
+}
 
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(Category::UNKNOWN), _socket(socket)
 {
@@ -61,7 +63,8 @@ IRCMessage::~IRCMessage(void)
 IRCMessage &IRCMessage::setPrefix(std::string const &prefix, IRCMessageWay w)
 {
     this->_prefix = prefix;
-    if (w == IRCMessageWay::RECIEVING && !prefix.empty()){
+    if (w == IRCMessageWay::RECIEVING && !prefix.empty())
+    {
         this->_prefix.erase(0, 1);
         std::size_t idxSpace = this->_prefix.rfind(" ");
         (idxSpace != std::string::npos) ? this->_prefix.erase(idxSpace, 1) : 0;
@@ -101,7 +104,7 @@ IRCMessage &IRCMessage::setParameters(std::string const &parameters)
     return (*this);
 }
 
-IRCMessage &IRCMessage::setParameters(std::vector<std::string> const & params)
+IRCMessage &IRCMessage::setParameters(std::vector<std::string> const &params)
 {
     this->_parameters = params;
     return (*this);
@@ -150,7 +153,26 @@ bool IRCMessage::isCommand(SocketClient *socket)
             }
         }
         else if (this->type == IRCMessageType::NICK && _parameters.size() >= 1)
+        {
             params.nickname = _parameters[0];
+            if (_parameters.size() >= 6)
+            {
+                try
+                {
+                    params.hopcount = std::stoi(_parameters[1]);
+                    params.user = _parameters[2];
+                    params.host = _parameters[3];
+                    params.token = std::stoi(_parameters[4]);
+                    params.mode = std::stoi(_parameters[5]);
+                    params.real_name = _trail;
+                }
+                catch (const std::invalid_argument &e)
+                {
+                    IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
+                    return (false);
+                }
+            }
+        }
         else if (this->type == IRCMessageType::PASS && _parameters.size() >= 1)
             params.password = _parameters[0];
         else if (this->type == IRCMessageType::OPER && _parameters.size() == 2)
@@ -266,45 +288,30 @@ std::vector<std::string> IRCMessage::getParameters() const
     return (this->_parameters);
 };
 
-void    IRCMessage::setSocket(SocketClient *socket){
+void IRCMessage::setSocket(SocketClient *socket)
+{
     this->_socket = socket;
 }
 
-SocketClient *    IRCMessage::getSocket(void) const{
+SocketClient *IRCMessage::getSocket(void) const
+{
     return this->_socket;
 }
 
-std::string     IRCMessage::to_string(void) const{
+std::string IRCMessage::to_string(void) const
+{
     std::string result;
     !(this->_prefix.empty()) ? result += ":" + this->_prefix : result;
     this->_command.empty() ? throw std::logic_error("Error : no command in automatic IRCMessage") : 0;
     result += ' ' + this->_command;
     this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
-    std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const & str){result +=  ' ' + str;});
+    std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const &str) { result += ' ' + str; });
     !(this->_trail.empty()) ? result += " :" + this->_trail : result;
     return result + '\n';
 }
 
-
 std::ostream &operator<<(std::ostream &os, const IRCMessage &message)
 {
     os << message.getMessage();
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const IRCMessage::IRCMessageType &type)
-{
-    switch (type)
-    {
-    case IRCMessage::IRCMessageType::NICK:
-        os << "NICK COMMAND";
-        break;
-    case IRCMessage::IRCMessageType::USER:
-        os << "USER COMMAND";
-        break;
-    default:
-        os << "UNKNOW";
-        break;
-    }
     return os;
 }

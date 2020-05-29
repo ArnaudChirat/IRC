@@ -3,21 +3,21 @@
 #include "IRCMessage.class.hpp"
 #include "Channel.class.hpp"
 #include <random>
-Parameters::Parameters(void) {}
+Parameters::Parameters(void) : mode(0), hopcount(0), token(0)  {}
 
-Parameters::Parameters(Client const & client) {
+Parameters::Parameters(Client const & client) : mode(0), hopcount(0), token(0) {
     *this = this->paramClient(client);
 }
 
-Parameters::Parameters(User const & user) {
+Parameters::Parameters(User const & user) : mode(0), hopcount(0), token(0) {
     *this = this->paramUser(user);
 }
 
-Parameters::Parameters(Channel const & channel) {
+Parameters::Parameters(Channel const & channel) : mode(0), hopcount(0), token(0) {
     *this = this->paramChannel(channel);
 }
 
-Parameters::Parameters(IRCMessage const & msg) {
+Parameters::Parameters(IRCMessage const & msg) : mode(0), hopcount(0), token(0) {
     *this = this->paramMessage(msg);
 }
 

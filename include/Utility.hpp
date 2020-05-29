@@ -1,8 +1,6 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 #include <netinet/in.h>
-#include "Client.class.hpp"
-#include "User.class.hpp"
 #include <string>
 #include <vector>
 #define BUFF_MSG 512
@@ -19,6 +17,8 @@
 typedef unsigned int Token;
 class IRCMessage;
 class Channel;
+class Client;
+class User;
 namespace Utility
 {
     std::vector<std::string> splitParam(std::string const &strToSplit, std::string const &delimiters);
