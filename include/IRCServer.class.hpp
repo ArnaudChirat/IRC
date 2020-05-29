@@ -21,6 +21,7 @@ private:
     static std::string _password;
     static std::vector<SocketClient *> _newSocketConnections;
     static std::map<Token, ServerClient *> _servers_local;
+    static std::map<std::string, Token> _user_to_server;
 public:
     IRCServer(void);
     static std::string name;
@@ -37,6 +38,7 @@ public:
     static void sendDataUser(SocketClient *socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
     static void addServer(ServerClient &server);
+    static void addUser(User &user, Token token);
     static ServerClient *getServerClient(Token token);
     static IRCMessage buildPassMessage(void);
     static IRCMessage buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname ,unsigned int const token, unsigned int const mode, std::string const &realname);

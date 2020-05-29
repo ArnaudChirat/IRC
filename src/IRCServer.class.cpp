@@ -31,6 +31,7 @@ std::string IRCServer::name;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
 std::map<Token, ServerClient *> IRCServer::_servers_local;
+std::map<std::string, Token> IRCServer::_user_to_server;
 
 IRCServer::IRCServer(void)
 {
@@ -186,6 +187,12 @@ void IRCServer::addServer(ServerClient &server)
     } while (IRCServer::_servers_local.find(token) != IRCServer::_servers_local.end());
     std::pair<Token, ServerClient *> value(token, &server);
     IRCServer::_servers_local.insert(value);
+}
+
+void IRCServer::addUser(User &user, Token token)
+{
+    std::pair<std::string, Token> value(user.getName(), token);
+    IRCServer::_user_to_server.insert(value);
 }
 
 void IRCServer::sendDataServer(SocketClient *socket)

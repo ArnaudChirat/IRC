@@ -53,6 +53,7 @@ void MessageMediator::nickServerCommand(IRCMessage const &message, SocketClient 
         ServerClient * server = server_talk->getServer(message.params.token);
         server->addUser(*user);
         // add to IRCServer user_to_server
+        IRCServer::addUser(*user, server->getToken());
     }
 };
 
@@ -73,7 +74,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         {
             user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
             if (!user)
+            {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
+                IRCServer::addUser(*static_cast<User*>(client), 1);
+            }
             else
                 IRCServer::_client_manager->setNick(message.params.nickname, *user);
         }
