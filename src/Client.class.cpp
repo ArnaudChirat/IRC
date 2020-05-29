@@ -36,6 +36,11 @@ std::string Client::getPrevName() const
     return (this->_prevName);
 }
 
+void Client::setPrevName(name){
+    this->_prevName = name;
+}
+
+
 SocketClient *Client::getSocketClient(void) const
 {
     return this->_socket_client;

@@ -10,6 +10,7 @@
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"
+#include "Observer.class.hpp"
 #include "Utility.hpp"
 MessageMediator::MessageMediator(void)
 {

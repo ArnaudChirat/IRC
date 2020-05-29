@@ -46,7 +46,7 @@ Parameters & Parameters::paramClient(Client const & client)
 Parameters & Parameters::paramUser(User const & user)
 {
     this->prevNickname = user.getPrevName();
-    this->nickname = user.getName();
+    this->name = user.getName();
     this->user = user.getUser();
     this->host = user.getSocketClient()->getAddr();
     this->server = IRCServer::name;

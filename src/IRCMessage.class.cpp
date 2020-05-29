@@ -38,7 +38,12 @@ IRCMessage::IRCMessage(void)
 
 IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
     this->setCommand(command);
-    if (command == "PASS"){
+    if (command == "NICK"){
+        this->setParameters(param.name);
+        if(!param.prevNickname.empty()) //means he is new
+            this->setPrefix(param.prevNickname, IRCMessageWay::SENDING);
+    }
+    else if (command == "PASS"){
         // this->setPrefix(":" + ownServer.name, IRCMessageWay::SENDING);
         this->setParameters(param.password);
     }

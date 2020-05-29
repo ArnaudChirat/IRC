@@ -4,6 +4,7 @@
 #include "User.class.hpp"
 #include "ServerClient.class.hpp"
 #include "Service.class.hpp"
+#include "Observer.class.hpp"
 #include "Utility.hpp"
 #include <algorithm>
 #include <iostream>
@@ -135,6 +136,7 @@ bool ClientManager::setServerName(std::string const &name, ServerClient &server)
 
 bool ClientManager::setNick(std::string const &nick, User &client)
 {
+    client.setPrevName(client.getName());
     if (checkName(USER, nick))
     {
         Parameters param = {};
@@ -151,6 +153,7 @@ bool ClientManager::setNick(std::string const &nick, User &client)
         IRCServer::_reply_manager->reply(param, ReplyManager::ERR_ERRONEUSNICKNAME, client.getSocketClient());
     }
     this->_names_used.insert(Key(USER, nick));
+    IRCServer::_observer->notify(&client, "NICK");
     return (true);
 };
 

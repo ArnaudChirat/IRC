@@ -8,6 +8,7 @@
 #include "ChannelManager.class.hpp"
 #include "ServerClient.class.hpp"
 #include "Socket.class.hpp"
+#include "Observer.class.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <netdb.h>
