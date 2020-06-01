@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "Utility.hpp"
 
 class SocketManager;
@@ -22,8 +22,8 @@ private:
     static std::string _password;
     static IRCServer * _myself;
     static std::vector<SocketClient *> _newSocketConnections;
-    static std::map<Token, ServerClient *> _servers_local;
-    static std::map<std::string, Token> _user_to_server;
+    static std::unordered_map<Token, ServerClient *> _servers_local;
+    static std::unordered_map<std::string, Token> _user_to_server;
 public:
     IRCServer(void);
     static std::string name;
@@ -37,12 +37,16 @@ public:
     void config(unsigned short const port, std::string const password);
     void connectNetwork(std::string const hostNetowrk, std::string const portNetwork);
     void joinIRCNetwork(void);
+    static IRCServer * getInstance(void);
+    static ServerClient * getServerFromUser(std::string const &);
     static void replyToNewConnection(SocketClient *socket);
     static void sendDataServer(SocketClient *socket);
     static void sendDataUser(SocketClient *socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
     static Token addServer(ServerClient &server);
     static void addUser(User &user, Token token);
+
+
     static ServerClient *getServerClient(Token token);
     static IRCMessage buildPassMessage(void);
     static IRCMessage buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname ,unsigned int const token, unsigned int const mode, std::string const &realname);

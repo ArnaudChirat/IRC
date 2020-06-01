@@ -36,7 +36,7 @@ std::string Client::getPrevName() const
     return (this->_prevName);
 }
 
-void Client::setPrevName(name){
+void Client::setPrevName(std::string const & name){
     this->_prevName = name;
 }
 

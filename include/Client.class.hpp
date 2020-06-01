@@ -12,7 +12,7 @@ public:
     SocketClient * getSocketClient(void) const;
     std::string getName() const;
     std::string getPrevName() const;
-    void setPrevName(name);
+    void setPrevName(std::string const &);
     void setPassword(std::string const &pass);
     std::string getPassword() const;
     SocketClient *_socket_client;

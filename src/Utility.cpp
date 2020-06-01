@@ -3,35 +3,35 @@
 #include "IRCMessage.class.hpp"
 #include "ServerClient.class.hpp"
 #include "Channel.class.hpp"
-#include <map>
+#include <unordered_map>
 Parameters::Parameters(void) {
 }
 
-Parameters::Parameters(Parameters const & instance) : mode(0), hopcount(0), token(0){
+Parameters::Parameters(Parameters const & instance) : modeint(0), hopcount(0), token(0){
     *this = instance;
 }
 
-Parameters::Parameters(Client const & client) : mode(0), hopcount(0), token(0){
+Parameters::Parameters(Client const & client) : modeint(0), hopcount(0), token(0){
     *this = this->paramClient(client);
 }
 
-Parameters::Parameters(User const & user) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(User const & user) : modeint(0), hopcount(0), token(0) {
     *this = this->paramUser(user);
 }
 
-Parameters::Parameters(ServerClient const & server) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(ServerClient const & server) : modeint(0), hopcount(0), token(0) {
     *this = this->paramServer(server);
 }
 
-Parameters::Parameters(Channel const & channel) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(Channel const & channel) : modeint(0), hopcount(0), token(0) {
     *this = this->paramChannel(channel);
 }
 
-Parameters::Parameters(IRCMessage const & msg) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(IRCMessage const & msg) : modeint(0), hopcount(0), token(0) {
     *this = this->paramMessage(msg);
 }
 
-Parameters::Parameters(IRCServer const & msg) : mode(0), hopcount(0), token(0) {
+Parameters::Parameters(IRCServer const & msg) : modeint(0), hopcount(0), token(0) {
     *this = this->paramIRCServer(msg);
 }
 
@@ -46,10 +46,13 @@ Parameters & Parameters::paramClient(Client const & client)
 Parameters & Parameters::paramUser(User const & user)
 {
     this->prevNickname = user.getPrevName();
-    this->name = user.getName();
+    this->nickname = user.getName();
     this->user = user.getUser();
-    this->host = user.getSocketClient()->getAddr();
-    this->server = IRCServer::name;
+    this->host = user.getHostName();
+    this->modestr = user.getMode();
+    this->real_name = user.getRealName();
+    // this->server = IRCServer::name;
+
     return *this;
 }
 
@@ -120,7 +123,8 @@ bool    Utility::ipv4(struct sockaddr *sa){
 Parameters &    Parameters::operator=(Parameters const & rhs){
     this->command = rhs.command;
     this->user = rhs.user;
-    this->mode = rhs.mode;
+    this->modeint = rhs.modeint;
+    this->modestr = rhs.modestr;
     this->real_name = rhs.real_name;
     this->nickname = rhs.nickname;
     this->prevNickname = rhs.prevNickname;

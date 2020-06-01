@@ -46,9 +46,11 @@ public:
     User &delMode(unsigned int mode);
     User &setOper(Oper &);
     std::string getUser() const;
+    std::string getHostName() const;
     std::unordered_map<std::string, Channel *> getChannels(void) const;
     Channel *   getChannel(std::string const &) const;
     virtual std::string getName() const;
+    std::string getRealName() const;
     Oper *getOper() const;
     std::string getMode() const;
     unsigned int getModeInt() const;

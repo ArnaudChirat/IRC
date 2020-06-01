@@ -61,6 +61,11 @@ std::string User::getUser() const
     return (this->_user);
 }
 
+std::string User::getRealName() const{
+    return this->_real_name;
+}
+
+
 User &User::setMode(unsigned int mode)
 {
     this->_mode = mode;
@@ -109,6 +114,11 @@ User &User::setRealName(std::string const &real_name)
     this->_real_name = real_name;
     return (*this);
 }
+
+std::string User::getHostName(void) const{
+    return this->_hostname;
+}
+
 
 User &User::setHostname(std::string const &hostname)
 {
@@ -173,3 +183,4 @@ Channel * User::getChannel(std::string const & name) const{
         return it->second;    
     return NULL;
 }
+

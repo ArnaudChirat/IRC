@@ -3,7 +3,7 @@
 #include "MessageMediator.class.hpp"
 #include "IRCServer.class.hpp"
 
-Observer::Observer(void) {}
+Observer::Observer(void) : _originOfMsg(NULL) {}
 
 Observer::~Observer(void) {}
 
@@ -18,10 +18,16 @@ void Observer::unsubscribe(SocketClient* socket){
 void Observer::notify(Client * client, std::string const & command){
     User * user = NULL;
     std::string notification;
-    if ((user = dynamic_cast<User*>(client)))
-        notification = IRCMessage(Parameters(*user), command).to_string();
+    if ((user = dynamic_cast<User*>(client))){
+        ServerClient * server = IRCServer::getServerFromUser(user->getName());
+        if (!server)
+            notification = IRCMessage(Parameters(*user).paramIRCServer(*(IRCServer::getInstance())), command).to_string();
+        else
+            notification = IRCMessage(Parameters(*user).paramServer(*server), command).to_string();
+    }
     for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-        IRCServer::_message_mediator->sendReply(notification, *it);
+        if (*it != this->_originOfMsg->getSocketClient())
+            IRCServer::_message_mediator->sendReply(notification, *it);
     }
 }
 
@@ -31,3 +37,11 @@ void Observer::notify(Client * client, std::string const & command){
 //     //     IRCServer::_message_mediator->sendReply(notification.to_string(), *it);
 //     // }
 // }
+
+ServerClient * Observer::getOriginOfMsg(void) const{
+    return this->_originOfMsg;
+}
+
+void Observer::setOriginOfMsg(ServerClient* server){
+    this->_originOfMsg = server;
+}

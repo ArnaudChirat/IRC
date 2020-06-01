@@ -12,7 +12,7 @@ std::string     ReplyManager::replyMessage(ConnectionEnum x, Parameters const & 
 
     std::unordered_map<int, std::string> connectionReply = {
         {RPL_WELCOME, "Welcome to the Internet Relay Network "+params.nickname+"!"+params.user+"@"+params.host+'\n'},
-        {RPL_YOURHOST, "Your host is "+params.server+", running version 1.0\n"},
+        {RPL_YOURHOST, "Your host is "+params.host+", running version 1.0\n"},
     };
 
     return oss.str() + ' ' + connectionReply.at(x);

@@ -78,6 +78,7 @@
         "shared_mutex": "cpp",
         "set": "cpp",
         "iomanip": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "unordered_set": "cpp"
     }
 }

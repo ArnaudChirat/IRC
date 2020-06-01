@@ -5,6 +5,7 @@
 #include "Service.class.hpp"
 #include "User.class.hpp"
 #include <set>
+#include <unordered_map>
 #include <map>
 
 class ServerClient;
@@ -32,12 +33,14 @@ public:
     bool setService(std::string const &nick, Service &client);
     bool setServerName(std::string const &name, ServerClient &server);
     bool setNewServer(IRCMessage, ServerClient &, ServerClient &);
+    bool newUserFromServer(IRCMessage const &, ServerClient const &);
+
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     std::vector<User*> getUsers();
     Client *getClientByName(std::string const &nick);
     int getSize(ClientChoice choice) const;
-    std::map<SocketClient*, Client*> getClients() const;
+    std::unordered_map<SocketClient*, Client*> getClients() const;
     // void    dispatch();
 private:
     void addClient(SocketClient *socket, Client *client, ClientChoice choice);
@@ -45,7 +48,7 @@ private:
     //map avec doublon
     typedef std::pair<ClientChoice, std::string> Key;
     std::set<Key> _names_used;
-    std::map<SocketClient*, Client*> _clients;
+    std::unordered_map<SocketClient*, Client*> _clients;
     std::multimap<std::string, Client*> _nick_clients;
     // std::list<std::unique_ptr<Client>> _clients;
 };

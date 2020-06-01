@@ -34,8 +34,8 @@ std::string IRCServer::info;
 IRCServer * IRCServer::_myself = NULL;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
-std::map<Token, ServerClient *> IRCServer::_servers_local;
-std::map<std::string, Token> IRCServer::_user_to_server;
+std::unordered_map<Token, ServerClient *> IRCServer::_servers_local;
+std::unordered_map<std::string, Token> IRCServer::_user_to_server;
 
 IRCServer::IRCServer(void)
 {
@@ -210,10 +210,13 @@ void IRCServer::sendDataUser(SocketClient *socket)
 
 ServerClient *IRCServer::getServerClient(Token token)
 {
-    auto it = IRCServer::_servers_local.find(token);
-    if (it != IRCServer::_servers_local.end())
-        return (it->second);
-    return (NULL);
+    ServerClient * server = NULL;
+    try {
+        IRCServer::_servers_local.at(token);
+    } catch(std::out_of_range & e) {
+        std::cout << e.what() << std::endl;
+    }
+    return server;
 }
 
 void IRCServer::run()
@@ -234,3 +237,17 @@ std::string     IRCServer::getPassword(void) const{
     return this->_password;
 }
 
+IRCServer * IRCServer::getInstance(void){
+    return IRCServer::_myself;
+}
+
+
+ServerClient * IRCServer::getServerFromUser(std::string const & nickname) {
+    ServerClient * server =  NULL;
+    auto it = IRCServer::_user_to_server.find(nickname);
+    if (it != IRCServer::_user_to_server.end()){
+        Token token = IRCServer::_user_to_server.at(nickname);
+        server = IRCServer::_servers_local.at(token);
+    }
+    return server;
+}

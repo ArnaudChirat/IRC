@@ -19,6 +19,15 @@ ClientManager::~ClientManager(void)
     return;
 }
 
+bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient const & server_talk) {
+    User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
+    ServerClient * server = server_talk.getServer(message.params.token);
+    server->addUser(user);
+    user->setHostname(server->getName());
+    IRCServer::addUser(*user, server->getToken());
+    return true;
+}
+
 bool ClientManager::setNewServer(IRCMessage msg, ServerClient & server, ServerClient & newServer){
     server.setServerInfo(msg.params);
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
@@ -37,7 +46,7 @@ Client *ClientManager::createAddClient(ClientChoice choice, SocketClient *socket
     return (client);
 }
 
-std::map<SocketClient *, Client *> ClientManager::getClients() const
+std::unordered_map<SocketClient *, Client *> ClientManager::getClients() const
 {
     return (this->_clients);
 }

@@ -37,11 +37,21 @@ IRCMessage::IRCMessage(void)
 }
 
 IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
+    std::vector<std::string> parameters;
     this->setCommand(command);
     if (command == "NICK"){
-        this->setParameters(param.name);
-        if(!param.prevNickname.empty()) //means he is new
+        parameters.push_back(param.nickname);
+        if(param.prevNickname.empty()){
+            parameters.push_back(std::to_string(param.hopcount));
+            parameters.push_back(param.user);
+            parameters.push_back(param.host);
+            parameters.push_back(std::to_string(param.token));
+            parameters.push_back(param.modestr);
+            this->setTrail(":" + param.real_name, IRCMessageWay::SENDING);
+        } else {
             this->setPrefix(param.prevNickname, IRCMessageWay::SENDING);
+        }
+        this->setParameters(parameters);
     }
     else if (command == "PASS"){
         // this->setPrefix(":" + ownServer.name, IRCMessageWay::SENDING);
@@ -49,7 +59,10 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
     }
     else if (command == "SERVER"){
         this->setPrefix(param.uplink, IRCMessageWay::SENDING);
-        this->setParameters(param.name + ' ' + std::to_string(param.hopcount) + ' ' +  std::to_string(param.token));
+        parameters.push_back(param.name);
+        parameters.push_back(std::to_string(param.hopcount));
+        parameters.push_back(std::to_string(param.token));
+        this->setParameters(parameters);
         this->setTrail(param.serverInfo, IRCMessageWay::SENDING);
     }
 }
@@ -163,7 +176,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
             // Attention crash si non digit
             try
             {
-                params.mode = std::stoi(_parameters[1]);
+                params.modeint = std::stoi(_parameters[1]);
             }
             catch (const std::invalid_argument &e)
             {
@@ -173,6 +186,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::NICK && _parameters.size() >= 1)
         {
+            params.prevNickname = _prefix;
             params.nickname = _parameters[0];
             if (_parameters.size() >= 6)
             {
@@ -182,7 +196,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
                     params.user = _parameters[2];
                     params.host = _parameters[3];
                     params.token = std::stoi(_parameters[4]);
-                    params.mode = std::stoi(_parameters[5]);
+                    params.modeint = std::stoi(_parameters[5]);
                     params.real_name = _trail;
                 }
                 catch (const std::invalid_argument &e)
@@ -221,21 +235,22 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::SERVER)
         {
-            if (_parameters.size() >= 3)
-                params.newServer = _parameters[0];
-            try
-            {
-                params.hopcount = std::stoi(_parameters[1]);
-                params.token = std::stoi(_parameters[2]);
+            if (_parameters.size() >= 3){
+                    params.newServer = _parameters[0];
+                try
+                {
+                    params.hopcount = std::stoi(_parameters[1]);
+                    params.token = std::stoi(_parameters[2]);
+                }
+                catch (std::invalid_argument &e)
+                {
+                    IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
+                    std::cout << e.what() << std::endl;
+                    return (false);
+                }
+                params.serverInfo = this->_trail;
+                params.uplink = this->_prefix.empty() ? _parameters[0] : this->prefix ;
             }
-            catch (std::invalid_argument &e)
-            {
-                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
-                std::cout << e.what() << std::endl;
-                return (false);
-            }
-            params.serverInfo = this->_trail;
-            params.host = this->_prefix;
         }
         else if (this->type == IRCMessageType::PRIVMSG)
         {

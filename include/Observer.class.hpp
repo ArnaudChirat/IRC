@@ -5,6 +5,7 @@
 #include <string>
 
 class SocketClient;
+class ServerClient;
 class Client;
 class Channel;
 
@@ -21,8 +22,12 @@ public:
     void    notify(Client *, std::string const &);
     void    notify(Channel *, std::string const &);
 
+    ServerClient * getOriginOfMsg(void) const;
+    void setOriginOfMsg(ServerClient*);
+
 private:
     std::unordered_set<SocketClient*>      _subscribers;
+    ServerClient * _originOfMsg;
 };
 
 #endif

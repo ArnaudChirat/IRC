@@ -3,7 +3,7 @@
 #include "Client.class.hpp"
 #include "Utility.hpp"
 #include <ostream>
-#include <map>
+#include <unordered_map>
 
 struct Parameters;
 struct ServerClientLight;
@@ -23,17 +23,19 @@ public:
     std::string getInfo(void) const;
     void addServer(Token token, ServerClient &server, unsigned int hopcount);
     void addServer(ServerClient &server);
-    void addUser(User &user);
+    void addUser(User * user);
     ServerClient *getServer(Token token) const;
-    std::map<Token, ServerClientLight> getServers() const;
+    User * getUser(std::string const &) const;
+    std::unordered_map<Token, ServerClientLight> getServers() const;
+    
 private:
     ServerClient(void);
     std::string     _uplink;
     unsigned int    _hopcount;
     unsigned int    _token;
     std::string     _info;
-    std::map<Token, ServerClientLight> _servers;
-    std::map<std::string, User*> _users;
+    std::unordered_map<Token, ServerClientLight> _servers;
+    std::unordered_map<std::string, User*> _users;
 };
 
 struct ServerClientLight

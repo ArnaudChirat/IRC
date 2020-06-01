@@ -31,31 +31,32 @@ namespace Utility
 
 struct Parameters
 {
-    std::string command;
-    std::string user;
-    unsigned int mode;
-    std::string real_name;
-    std::string prevNickname;
-    std::string nickname;
-    std::string password;
-    std::string name;
-    std::string uplink;
-    std::string host;
-    std::string quit_message;
-    std::string server;
-    std::string newServer;
-    unsigned int hopcount;
-    unsigned int token;
-    std::string serverInfo;
-    std::string comment;
-    std::string channelName;
-    std::string channelType;
-    std::string channelMembers;
-    std::string keys;
-    std::string leave_message;
-    std::string target;
-    std::string msg_target;
-    std::string text;
+    std::string command{};
+    std::string user{};
+    unsigned int modeint{};
+    std::string modestr{};
+    std::string real_name{};
+    std::string prevNickname{};
+    std::string nickname{};
+    std::string password{};
+    std::string name{};
+    std::string uplink{};
+    std::string host{};
+    std::string quit_message{};
+    std::string server{};
+    std::string newServer{};
+    unsigned int hopcount{};
+    unsigned int token{};
+    std::string serverInfo{};
+    std::string comment{};
+    std::string channelName{};
+    std::string channelType{};
+    std::string channelMembers{};
+    std::string keys{};
+    std::string leave_message{};
+    std::string target{};
+    std::string msg_target{};
+    std::string text{};
 
     Parameters(void);
     Parameters(Parameters const & instance);

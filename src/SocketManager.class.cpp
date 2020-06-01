@@ -1,5 +1,7 @@
 #include "SocketManager.class.hpp"
 #include "Socket.class.hpp"
+#include "Observer.class.hpp"
+#include "IRCServer.class.hpp"
 #include <sys/select.h>
 #include <cerrno>
 #include <cstring>
@@ -97,6 +99,11 @@ bool SocketManager::route()
             if (_hasError)
             {
                 std::cout << "Deconnexion de [" << socket_address << ":" << socket_port << "]" << std::endl;
+                SocketClient * socketClient = dynamic_cast<SocketClient*>(it->get());
+                if (socketClient){
+                    IRCServer::_observer->unsubscribe(socketClient);
+                    IRCServer::_client_manager->deleteClient(socketClient, ClientManager::ClientChoice::ALL);
+                }
                 this->_sockets.erase(it);
             }
             ++it;

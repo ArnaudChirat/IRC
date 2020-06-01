@@ -35,7 +35,7 @@ bool SocketClient::recvMessage() {
     if (ret == 0)
     {
         std::cout << "Connexion terminee" << std::endl;
-        IRCServer::_client_manager->deleteClient(this, ClientManager::ClientChoice::USER);
+        IRCServer::_client_manager->deleteClient(this, ClientManager::ClientChoice::ALL);
         return (true);
     }
     else if (ret == -1)

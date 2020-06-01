@@ -6,6 +6,7 @@
 #include "IRCMessage.class.hpp"
 #include "SocketClient.class.hpp"
 #include <map>
+#include <functional>
 
 class MessageMediator
 {

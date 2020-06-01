@@ -15,7 +15,7 @@ ServerClient &ServerClient::setName(std::string const &name)
 
 void ServerClient::setServerInfo(Parameters const &params)
 {
-    this->_uplink = !params.host.empty() ? params.host : IRCServer::name;
+    this->_uplink = params.uplink;
     this->_token = IRCServer::addServer(*this);
     this->_hopcount = params.hopcount + 1;
     this->_info = params.serverInfo;
@@ -47,6 +47,11 @@ ServerClient *ServerClient::getServer(Token token) const
     return (NULL);
 }
 
+User *  ServerClient::getUser(std::string const & nickname) const{
+    return this->_users.at(nickname);
+}
+
+
 void ServerClient::addServer(Token token, ServerClient &server, unsigned int hopcount)
 {
     ServerClientLight light_server;
@@ -56,13 +61,13 @@ void ServerClient::addServer(Token token, ServerClient &server, unsigned int hop
     this->_servers.insert(value);
 }
 
-void ServerClient::addUser(User &user)
+void ServerClient::addUser(User *user)
 {
-    std::pair<std::string, User*> value(user.getName(), &user);
+    std::pair<std::string, User*> value(user->getName(), user);
     this->_users.insert(value);
 }
 
-std::map<Token, ServerClientLight> ServerClient::getServers() const
+std::unordered_map<Token, ServerClientLight> ServerClient::getServers() const
 {
     return (this->_servers);
 }

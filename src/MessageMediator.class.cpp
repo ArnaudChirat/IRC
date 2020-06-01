@@ -37,25 +37,19 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
 {
     std::cout << RED << "Message mediator : " << RESET << std::endl;
     std::cout << message << std::endl;
-    // std::cout << (this->_commands.at(message.type)) << std::endl;
+    
+    ServerClient *server_talk = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
+    IRCServer::_observer->setOriginOfMsg(server_talk);
+    
     (this->*_commands[message.type])(message, socket);
     std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL) << std::endl;
-    // if ((message.type ::IRCMessage_TYPE_MASK) =::CONNECTION_REGISTRATION)
-    //     this->createClient(message, socket);
     return (true);
 }
 
 void MessageMediator::nickServerCommand(IRCMessage const &message, SocketClient *socket) const
 {
     ServerClient *server_talk = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
-    if (server_talk)
-    {
-        User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
-        ServerClient * server = server_talk->getServer(message.params.token);
-        server->addUser(*user);
-        // add to IRCServer user_to_server
-        IRCServer::addUser(*user, server->getToken());
-    }
+    server_talk ? IRCServer::_client_manager->newUserFromServer(message, *server_talk) : false;
 };
 
 void MessageMediator::createClient(IRCMessage const &message, SocketClient *socket) const
@@ -63,13 +57,15 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     Client *client = NULL;
     User *user = NULL;
     Service *service = NULL;
+    ServerClient * server = NULL;
     if (message.type == IRCMessage::IRCMessageType::NICK)
     {
         if (message.params.token != 0)
             this->nickServerCommand(message, socket);
-        else if (!message.getPrefix().empty())
-        {
-            //Find user via user_to_server and change name
+        else if (!message.getPrefix().empty()){
+            //Find server via user_to_server and change name
+            ServerClient * server = IRCServer::getServerFromUser(message.params.prevNickname);
+            IRCServer::_client_manager->setNick(message.params.nickname, *(server->getUser(message.params.prevNickname)));
         }
         else
         {
@@ -78,6 +74,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
                 IRCServer::addUser(*static_cast<User*>(client), 1);
+                static_cast<User*>(client)->setHostname(IRCServer::name);
             }
             else
                 IRCServer::_client_manager->setNick(message.params.nickname, *user);
@@ -93,7 +90,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
     }
     else if (message.type == IRCMessage::IRCMessageType::SERVER)
     {
-        ServerClient *server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
+        server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
         ServerClient *serverHost = static_cast<ServerClient *>(IRCServer::_client_manager->getClientByName(message.params.host));
         if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
             return;
@@ -122,7 +119,7 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
     User *user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
     std::vector<std::string> parameters;
     if (user)
-        IRCServer::_client_manager->setUser(message.params.user, message.params.mode, message.getTrail(), *user);
+        IRCServer::_client_manager->setUser(message.params.user, message.params.modeint, message.getTrail(), *user);
 }
 
 void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socket) const
@@ -205,7 +202,7 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
         msg << "nombre de serveurs (sans compter le serveur local)) : " << servers << std::endl;
         msg << "nombre de users : " << users << std::endl;
         msg << "nombre de channel : " << channels << std::endl;
-        std::map<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
+        std::unordered_map<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
         for (auto it = clients_map.begin(); it != clients_map.end(); it++)
         {
             if (dynamic_cast<User *>(it->second))
