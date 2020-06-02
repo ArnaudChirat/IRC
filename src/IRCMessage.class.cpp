@@ -47,7 +47,7 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
             parameters.push_back(param.host);
             parameters.push_back(std::to_string(param.token));
             parameters.push_back(param.modestr);
-            this->setTrail(":" + param.real_name, IRCMessageWay::SENDING);
+            this->setTrail(param.real_name, IRCMessageWay::SENDING);
         } else {
             this->setPrefix(param.prevNickname, IRCMessageWay::SENDING);
         }
@@ -196,7 +196,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
                     params.user = _parameters[2];
                     params.host = _parameters[3];
                     params.token = std::stoi(_parameters[4]);
-                    params.modeint = std::stoi(_parameters[5]);
+                    params.modestr = _parameters[5];
                     params.real_name = _trail;
                 }
                 catch (const std::invalid_argument &e)

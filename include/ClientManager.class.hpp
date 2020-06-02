@@ -32,7 +32,7 @@ public:
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
     bool setServerName(std::string const &name, ServerClient &server);
-    bool setNewServer(IRCMessage, ServerClient &, ServerClient &);
+    bool setNewServer(IRCMessage const &, ServerClient &, ServerClient &);
     bool newUserFromServer(IRCMessage const &, ServerClient const &);
 
     void deleteClient(SocketClient *client, ClientChoice choice);

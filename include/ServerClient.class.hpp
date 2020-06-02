@@ -20,6 +20,7 @@ public:
     std::string  getUplink(void) const;
     unsigned int    getHopcount(void) const;
     unsigned int getToken(void) const;
+    void setToken(Token token);
     std::string getInfo(void) const;
     void addServer(Token token, ServerClient &server, unsigned int hopcount);
     void addServer(ServerClient &server);

@@ -2,7 +2,7 @@
 #include "IRCMessage.class.hpp"
 #include "MessageMediator.class.hpp"
 #include "IRCServer.class.hpp"
-
+#include <iostream>
 Observer::Observer(void) : _originOfMsg(NULL) {}
 
 Observer::~Observer(void) {}

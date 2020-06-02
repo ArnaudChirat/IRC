@@ -31,7 +31,7 @@ Observer *IRCServer::_observer = new Observer();
 
 std::string IRCServer::name;
 std::string IRCServer::info;
-IRCServer * IRCServer::_myself = NULL;
+IRCServer *IRCServer::_myself = NULL;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
 std::unordered_map<Token, ServerClient *> IRCServer::_servers_local;
@@ -65,7 +65,7 @@ void IRCServer::config(unsigned short const port, std::string const password)
         if (ifa->ifa_addr && (ifa->ifa_addr->sa_family == AF_INET) && !(ifa->ifa_flags & (IFF_LOOPBACK)))
         {
             sa = (struct sockaddr_in *)ifa->ifa_addr;
-            addr = std::string(inet_ntoa(sa->sin_addr)) + ".." + std::string(std::to_string(port));
+            addr = std::string(inet_ntoa(sa->sin_addr)) + "." + std::string(std::to_string(port));
             break;
         }
     }
@@ -104,7 +104,8 @@ void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const 
         IRCServer::_newSocketConnections.push_back(networkSocket);
         std::cout << "server connecting to " << networkSocket->getAddr() << ":" << networkSocket->getPort() << std::endl;
     }
-    freeaddrinfo(serverinfo); // all done with the list of results -> can free it
+    // all done with the list of results -> can free it
+    freeaddrinfo(serverinfo);
 }
 
 IRCMessage IRCServer::buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname, unsigned int const token, unsigned int const mode, std::string const &realname)
@@ -142,7 +143,7 @@ void IRCServer::replyToNewConnection(SocketClient *socket)
     Parameters param(*(IRCServer::_myself));
     IRCMessage passMessage(param, "PASS");
     IRCMessage serverMessage(param, "SERVER");
-    
+
     std::vector<SocketClient *>::iterator it;
     it = std::find(IRCServer::_newSocketConnections.begin(), IRCServer::_newSocketConnections.end(), socket);
     if (it == IRCServer::_newSocketConnections.end())
@@ -155,7 +156,6 @@ void IRCServer::replyToNewConnection(SocketClient *socket)
     else
         IRCServer::_newSocketConnections.erase(it);
 }
-
 
 Token IRCServer::addServer(ServerClient &server)
 {
@@ -173,6 +173,7 @@ void IRCServer::addUser(User &user, Token token)
 {
     std::pair<std::string, Token> value(user.getName(), token);
     IRCServer::_user_to_server.insert(value);
+    IRCServer::_observer->notify(&user, "NICK");
 }
 
 void IRCServer::sendDataServer(SocketClient *socket)
@@ -210,10 +211,13 @@ void IRCServer::sendDataUser(SocketClient *socket)
 
 ServerClient *IRCServer::getServerClient(Token token)
 {
-    ServerClient * server = NULL;
-    try {
+    ServerClient *server = NULL;
+    try
+    {
         IRCServer::_servers_local.at(token);
-    } catch(std::out_of_range & e) {
+    }
+    catch (std::out_of_range &e)
+    {
         std::cout << e.what() << std::endl;
     }
     return server;
@@ -233,19 +237,22 @@ void IRCServer::stop()
 {
 }
 
-std::string     IRCServer::getPassword(void) const{
+std::string IRCServer::getPassword(void) const
+{
     return this->_password;
 }
 
-IRCServer * IRCServer::getInstance(void){
+IRCServer *IRCServer::getInstance(void)
+{
     return IRCServer::_myself;
 }
 
-
-ServerClient * IRCServer::getServerFromUser(std::string const & nickname) {
-    ServerClient * server =  NULL;
+ServerClient *IRCServer::getServerFromUser(std::string const &nickname)
+{
+    ServerClient *server = NULL;
     auto it = IRCServer::_user_to_server.find(nickname);
-    if (it != IRCServer::_user_to_server.end()){
+    if (it != IRCServer::_user_to_server.end() && it->second != 1)
+    {
         Token token = IRCServer::_user_to_server.at(nickname);
         server = IRCServer::_servers_local.at(token);
     }

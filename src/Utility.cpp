@@ -4,6 +4,7 @@
 #include "ServerClient.class.hpp"
 #include "Channel.class.hpp"
 #include <unordered_map>
+#include <iostream>
 Parameters::Parameters(void) {
 }
 

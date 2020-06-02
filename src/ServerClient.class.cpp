@@ -3,6 +3,7 @@
 #include "Utility.hpp"
 #include "IRCMessage.class.hpp"
 #include "MessageMediator.class.hpp"
+#include <iostream>
 ServerClient::ServerClient(SocketClient *socket) : Client(socket) {}
 
 ServerClient::~ServerClient(void) {}
@@ -66,6 +67,12 @@ void ServerClient::addUser(User *user)
     std::pair<std::string, User*> value(user->getName(), user);
     this->_users.insert(value);
 }
+
+void ServerClient::setToken(Token token)
+{
+    this->_token = token;
+};
+
 
 std::unordered_map<Token, ServerClientLight> ServerClient::getServers() const
 {

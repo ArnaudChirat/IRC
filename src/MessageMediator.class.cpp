@@ -73,7 +73,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (!user)
             {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
-                IRCServer::addUser(*static_cast<User*>(client), 1);
+                // IRCServer::addUser(*static_cast<User*>(client), 1);
                 static_cast<User*>(client)->setHostname(IRCServer::name);
             }
             else
@@ -102,13 +102,14 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (client)
             {
                 server = static_cast<ServerClient *>(client);
+                IRCServer::addServer(*server);
                 IRCServer::_client_manager->setNewServer(message, *server, *server);
                 IRCServer::replyToNewConnection(socket);
             }
         }
         else if (server && server->getName() != message.params.newServer)
         {
-            ServerClient *new_server = static_cast<ServerClient*>(IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer));
+            ServerClient *new_server = static_cast<ServerClient*>(IRCServer::_client_manager->createClient(ClientManager::SERVER, socket, message.params.newServer));
             new_server ? IRCServer::_client_manager->setNewServer(message, *server, *new_server) : false;
         }
     }
@@ -119,7 +120,10 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
     User *user = static_cast<User *>(IRCServer::_client_manager->getClient(socket));
     std::vector<std::string> parameters;
     if (user)
+    {
         IRCServer::_client_manager->setUser(message.params.user, message.params.modeint, message.getTrail(), *user);
+        IRCServer::addUser(*user, 1);
+    }
 }
 
 void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socket) const
