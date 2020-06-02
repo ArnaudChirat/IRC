@@ -38,7 +38,7 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     std::cout << RED << "Message mediator : " << RESET << std::endl;
     std::cout << message << std::endl;
     
-    ServerClient *server_talk = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
+    ServerClient *server_talk = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
     IRCServer::_observer->setOriginOfMsg(server_talk);
     
     (this->*_commands[message.type])(message, socket);
@@ -63,7 +63,6 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         if (message.params.token != 0)
             this->nickServerCommand(message, socket);
         else if (!message.getPrefix().empty()){
-            //Find server via user_to_server and change name
             ServerClient * server = IRCServer::getServerFromUser(message.params.prevNickname);
             IRCServer::_client_manager->setNick(message.params.nickname, *(server->getUser(message.params.prevNickname)));
         }
@@ -186,6 +185,8 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
 
 bool MessageMediator::sendReply(std::string const &msg, SocketClient *socket) const
 {
+    std::cout << GREEN << "message sent : " << RESET << std::endl;
+    std::cout << msg << std::endl;
     socket->addToQueue(msg);
     return true;
 }

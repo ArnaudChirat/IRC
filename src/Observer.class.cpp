@@ -26,7 +26,7 @@ void Observer::notify(Client * client, std::string const & command){
             notification = IRCMessage(Parameters(*user).paramServer(*server), command).to_string();
     }
     for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-        if (*it != this->_originOfMsg->getSocketClient())
+        if (this->_originOfMsg && *it != this->_originOfMsg->getSocketClient())
             IRCServer::_message_mediator->sendReply(notification, *it);
     }
 }

@@ -9,6 +9,7 @@
 #include "ServerClient.class.hpp"
 #include "Socket.class.hpp"
 #include "Observer.class.hpp"
+#include "Utility.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <netdb.h>
@@ -200,9 +201,11 @@ void IRCServer::sendDataUser(SocketClient *socket)
             if (socket != user->getSocketClient())
             {
                 ServerClient *server = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(user->getSocketClient()));
-                int hop = server ? server->getHopcount() + 1 : 1;
-                Token token = server ? server->getToken() : 1;
-                IRCMessage nick_message = IRCServer::buildNickMessage(user->getName(), hop, user->getUser(), IRCServer::name, token, user->getModeInt(), "ok");
+                IRCMessage nick_message;
+                if (server)
+                    nick_message = IRCMessage(Parameters(*user).paramServer(*server), "NICK");
+                else
+                    nick_message = IRCMessage(Parameters(*user).paramIRCServer(*IRCServer::_myself), "NICK");
                 IRCServer::_message_mediator->sendReply(nick_message.to_string(), socket);
             }
         }

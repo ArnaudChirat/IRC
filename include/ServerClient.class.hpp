@@ -16,7 +16,7 @@ public:
     ServerClient &operator=(ServerClient const &rhs) = delete;
     ~ServerClient(void);
     ServerClient &setName(std::string const &name);
-    void    setServerInfo(Parameters const & params);
+    void    setServerInfo(Parameters const & params, Token const &);
     std::string  getUplink(void) const;
     unsigned int    getHopcount(void) const;
     unsigned int getToken(void) const;

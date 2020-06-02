@@ -6,7 +6,12 @@
 #include <iostream>
 ServerClient::ServerClient(SocketClient *socket) : Client(socket) {}
 
-ServerClient::~ServerClient(void) {}
+ServerClient::~ServerClient(void) {
+    // attention delete users associés à ce server SI PAS D'AUTRES ROUTES!
+    // delete les servers associés SI PAS D'AUTRES ROUTES DISPO! faire tourner algo maj table routage avant
+    // for (auto it)
+
+}
 
 ServerClient &ServerClient::setName(std::string const &name)
 {
@@ -14,10 +19,10 @@ ServerClient &ServerClient::setName(std::string const &name)
     return *this;
 }
 
-void ServerClient::setServerInfo(Parameters const &params)
+void ServerClient::setServerInfo(Parameters const &params, Token const & token)
 {
     this->_uplink = params.uplink;
-    this->_token = IRCServer::addServer(*this);
+    this->_token = token;
     this->_hopcount = params.hopcount + 1;
     this->_info = params.serverInfo;
 }

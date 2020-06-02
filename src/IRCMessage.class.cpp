@@ -84,6 +84,7 @@ IRCMessage &IRCMessage::operator=(IRCMessage const &rhs)
     this->_command = rhs.getCommand();
     this->_parameters = rhs.getParameters();
     this->_trail = rhs.getTrail();
+    this->params = rhs.params;
     return *this;
 }
 

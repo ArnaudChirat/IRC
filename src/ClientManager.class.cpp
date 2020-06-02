@@ -30,8 +30,9 @@ bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient c
     return true;
 }
 
-bool ClientManager::setNewServer(IRCMessage const &msg, ServerClient & server, ServerClient & newServer){
-    server.setServerInfo(msg.params);
+bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, ServerClient & newServer){
+    Token ourToken = IRCServer::addServer(server);
+    newServer.setServerInfo(msg.params, ourToken);
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
     if (server.getHopcount() == 1)
         IRCServer::_observer->subscribe(server.getSocketClient());
