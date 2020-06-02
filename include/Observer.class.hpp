@@ -22,12 +22,12 @@ public:
     void    notify(Client *, std::string const &);
     void    notify(Channel *, std::string const &);
 
-    ServerClient * getOriginOfMsg(void) const;
-    void setOriginOfMsg(ServerClient*);
+    Client * getOriginOfMsg(void) const;
+    void setOriginOfMsg(Client*);
 
 private:
     std::unordered_set<SocketClient*>      _subscribers;
-    ServerClient * _originOfMsg;
+    Client * _originOfMsg;
 };
 
 #endif

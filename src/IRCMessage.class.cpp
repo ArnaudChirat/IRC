@@ -250,7 +250,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
                     return (false);
                 }
                 params.serverInfo = this->_trail;
-                params.uplink = this->_prefix.empty() ? _parameters[0] : this->prefix ;
+                params.uplink = this->_prefix.empty() ? IRCServer::name : this->prefix ;
             }
         }
         else if (this->type == IRCMessageType::PRIVMSG)
@@ -338,7 +338,8 @@ std::string IRCMessage::to_string(void) const
     std::string result;
     !(this->_prefix.empty()) ? result += ":" + this->_prefix : result;
     this->_command.empty() ? throw std::logic_error("Error : no command in automatic IRCMessage") : 0;
-    result += ' ' + this->_command;
+    !result.empty() ? result += ' ' : result;
+    result += this->_command;
     this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
     std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const &str) { result += ' ' + str; });
     !(this->_trail.empty()) ? result += " :" + this->_trail : result;

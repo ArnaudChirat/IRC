@@ -38,8 +38,8 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     std::cout << RED << "Message mediator : " << RESET << std::endl;
     std::cout << message << std::endl;
     
-    ServerClient *server_talk = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
-    IRCServer::_observer->setOriginOfMsg(server_talk);
+    Client *origin = IRCServer::_client_manager->getClient(socket);
+    IRCServer::_observer->setOriginOfMsg(origin);
     
     (this->*_commands[message.type])(message, socket);
     std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL) << std::endl;
@@ -49,7 +49,8 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
 void MessageMediator::nickServerCommand(IRCMessage const &message, SocketClient *socket) const
 {
     ServerClient *server_talk = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
-    server_talk ? IRCServer::_client_manager->newUserFromServer(message, *server_talk) : false;
+    bool valid = true;
+    valid = (server_talk ? IRCServer::_client_manager->newUserFromServer(message, *server_talk) : false);
 };
 
 void MessageMediator::createClient(IRCMessage const &message, SocketClient *socket) const

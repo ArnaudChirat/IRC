@@ -39,18 +39,17 @@ public:
     void joinIRCNetwork(void);
     static IRCServer * getInstance(void);
     static ServerClient * getServerFromUser(std::string const &);
+    static Token getTokenFromUser(std::string const &);
     static void replyToNewConnection(SocketClient *socket);
     static void sendDataServer(SocketClient *socket);
     static void sendDataUser(SocketClient *socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
     static Token addServer(ServerClient &server);
     static void addUser(User &user, Token token);
-
-
+    static void deleteServer(Token const &);
+    static void deleteUser(std::string const &);
     static ServerClient *getServerClient(Token token);
-    static IRCMessage buildPassMessage(void);
     static IRCMessage buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname ,unsigned int const token, unsigned int const mode, std::string const &realname);
-    static IRCMessage buildServerMessage(std::string const &newServer, unsigned int const &hops, unsigned int const &token, std::string const &info);
     static SocketManager *_socket_manager;
     static MessageMediator *_message_mediator;
     static ClientManager *_client_manager;

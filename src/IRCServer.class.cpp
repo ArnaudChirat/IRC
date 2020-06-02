@@ -174,7 +174,6 @@ void IRCServer::addUser(User &user, Token token)
 {
     std::pair<std::string, Token> value(user.getName(), token);
     IRCServer::_user_to_server.insert(value);
-    IRCServer::_observer->notify(&user, "NICK");
 }
 
 void IRCServer::sendDataServer(SocketClient *socket)
@@ -250,14 +249,27 @@ IRCServer *IRCServer::getInstance(void)
     return IRCServer::_myself;
 }
 
+Token  IRCServer::getTokenFromUser(std::string const & nickname){
+    auto it = IRCServer::_user_to_server.find(nickname);
+    if (it != IRCServer::_user_to_server.end())
+        return IRCServer::_user_to_server.at(nickname);
+    return 0;
+}
+
+
 ServerClient *IRCServer::getServerFromUser(std::string const &nickname)
 {
     ServerClient *server = NULL;
-    auto it = IRCServer::_user_to_server.find(nickname);
-    if (it != IRCServer::_user_to_server.end() && it->second != 1)
-    {
-        Token token = IRCServer::_user_to_server.at(nickname);
+    Token token = IRCServer::getTokenFromUser(nickname);
+    if (token && token != 1)
         server = IRCServer::_servers_local.at(token);
-    }
     return server;
+}
+
+void IRCServer::deleteServer(Token const & token){
+    IRCServer::_servers_local.erase(token);
+}
+
+void IRCServer::deleteUser(std::string const & nickname){
+    IRCServer::_user_to_server.erase(nickname);
 }

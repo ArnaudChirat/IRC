@@ -22,11 +22,11 @@ ClientManager::~ClientManager(void)
 bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient const & server_talk) {
     User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
     ServerClient * server = server_talk.getServer(message.params.token);
-    // setUser(message.params.user, message.params.modeint, message.params.real_name, *user);
-    std::cout << server_talk << std::endl;
     server->addUser(user);
     user->setHostname(server->getName());
-    // IRCServer::addUser(*user, server->getToken());
+    IRCServer::addUser(*user, server->getToken());
+    if(!setUser(message.params.user, message.params.modeint, message.params.real_name, *user))
+        return false;
     return true;
 }
 
@@ -34,7 +34,7 @@ bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, 
     Token ourToken = IRCServer::addServer(server);
     newServer.setServerInfo(msg.params, ourToken);
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
-    if (server.getHopcount() == 1)
+    if (msg.params.hopcount == 1)
         IRCServer::_observer->subscribe(server.getSocketClient());
     server.status = Client::Status::CONNECTED;
     return true;
@@ -204,10 +204,12 @@ bool ClientManager::setUser(std::string const &username, unsigned int mode, std:
     mode = (mode & (User::w | User::i));
     client.setRealName(real_name).setHostname(IRCServer::name).setMode(mode);
     client.status = Client::Status::CONNECTED;
-    Parameters param(client);
-    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, client.getSocketClient());
-    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, client.getSocketClient());
-    // IRCServer::_observer->notify(&client, "NICK");
+    if (IRCServer::getTokenFromUser(client.getName()) == 1){
+        Parameters param(client);
+        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, client.getSocketClient());
+        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, client.getSocketClient());
+    }
+    IRCServer::_observer->notify(&client, "NICK");
     return (true);
 };
 
