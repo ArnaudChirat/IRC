@@ -58,6 +58,15 @@ User *  ServerClient::getUser(std::string const & nickname) const{
     return this->_users.at(nickname);
 }
 
+std::vector<User *>  ServerClient::getUsers() const{
+    std::vector<User *> users;
+    for (auto i = _users.begin(); i != _users.end(); i++)
+    {
+        users.push_back(i->second);
+    }
+    return users;
+}
+
 
 void ServerClient::addServer(Token token, ServerClient &server, unsigned int hopcount)
 {

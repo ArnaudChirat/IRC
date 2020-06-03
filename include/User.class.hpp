@@ -69,4 +69,7 @@ private:
     std::unordered_map<std::string, Channel *> _channelsJoined;
 };
 
+std::ostream &   operator<<(std::ostream & o, User const & rhs);
+
+
 #endif

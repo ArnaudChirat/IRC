@@ -60,7 +60,7 @@ std::vector<User*> ClientManager::getUsers()
     for (auto i = _clients.begin(); i != _clients.end() ; i++)
     {
         User *user = dynamic_cast<User*>(i->second);
-        if (user)
+        if (user && user->status == User::Status::CONNECTED)
         {
             users.push_back(user);
         }
