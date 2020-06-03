@@ -109,22 +109,6 @@ void IRCServer::connectNetwork(std::string const hostNetowrk, std::string const 
     freeaddrinfo(serverinfo);
 }
 
-IRCMessage IRCServer::buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname, unsigned int const token, unsigned int const mode, std::string const &realname)
-{
-    std::vector<std::string> parameters;
-
-    parameters.push_back(nickname);
-    parameters.push_back(std::to_string(hops));
-    parameters.push_back(username);
-    parameters.push_back(hostname);
-    parameters.push_back(std::to_string(token));
-    parameters.push_back(std::to_string(mode));
-
-    IRCMessage userMessage;
-    userMessage.setCommand("NICK").setParameters(parameters).setTrail(realname, IRCMessage::IRCMessageWay::SENDING);
-    return userMessage;
-}
-
 void IRCServer::joinIRCNetwork()
 {
     Parameters param(*this);
@@ -217,7 +201,7 @@ void IRCServer::sendDataServer(SocketClient *socket)
 
 void IRCServer::sendDataUser(SocketClient *socket)
 {
-    std::vector<User *> users = IRCServer::_client_manager->getUsers();
+    std::vector<User *> users = IRCServer::getUsers();
     if (!users.empty())
     {
         for (auto user_it = users.begin(); user_it != users.end(); user_it++)

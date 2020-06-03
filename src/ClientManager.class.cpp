@@ -21,10 +21,7 @@ ClientManager::~ClientManager(void)
 
 bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient const & server_talk) {
     User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
-    std::cout << "Token du server " << message.params.token << std::endl;
     ServerClient * server = server_talk.getServer(message.params.token);
-    std::cout << "Associated server name " << server->getName() << std::endl;
-    std::cout << "new user name " << user->getName() << std::endl;
     server->addUser(user);
     user->setHostname(message.params.host);
     IRCServer::addUser(*user, server->getToken());
@@ -34,13 +31,13 @@ bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient c
 }
 
 bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, ServerClient & newServer){
-    Token ourToken = IRCServer::addServer(server);
+    Token ourToken = IRCServer::addServer(newServer);
     newServer.setServerInfo(msg.params, ourToken);
-    std::cout << "Token du server a l'enregistrement du server " << msg.params.token << std::endl;
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
     if (msg.params.hopcount == 1)
-        IRCServer::_observer->subscribe(server.getSocketClient());
-    server.status = Client::Status::CONNECTED;
+        IRCServer::_observer->subscribe(newServer.getSocketClient());
+    newServer.status = Client::Status::CONNECTED;
+    IRCServer::_observer->notify(&newServer, "SERVER");
     return true;
 }
 

@@ -251,7 +251,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
                     return (false);
                 }
                 params.serverInfo = this->_trail;
-                params.uplink = this->_prefix.empty() ? IRCServer::name : this->prefix ;
+                params.uplink = this->_prefix.empty() ? IRCServer::name : this->_prefix ;
             }
         }
         else if (this->type == IRCMessageType::PRIVMSG)

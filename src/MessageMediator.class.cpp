@@ -38,8 +38,7 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     std::cout << RED << "Message mediator : " << RESET << std::endl;
     std::cout << message << std::endl;
     
-    Client *origin = IRCServer::_client_manager->getClient(socket);
-    IRCServer::_observer->setOriginOfMsg(origin);
+    IRCServer::_observer->setOriginOfMsg(socket);
     
     (this->*_commands[message.type])(message, socket);
     std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL) << std::endl;
@@ -96,15 +95,9 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
         ServerClient *serverHost = static_cast<ServerClient *>(IRCServer::_client_manager->getClientByName(message.params.host));
         if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
-        {
-            std::cout << "ERROR : MessageMediator line 100" << std::endl;
-            exit(EXIT_SUCCESS);
-        }
+            throw std::logic_error("ERROR : MessageMediator line 100");
         if (message.params.uplink.empty() && message.params.hopcount > 1)
-        {
-            std::cout << "ERROR : MessageMediator line 105" << std::endl;
-            exit(EXIT_SUCCESS);
-        }
+            throw std::logic_error("ERROR : MessageMediator line 105");
         if ((!server && !socket->getPassword().empty()))
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);

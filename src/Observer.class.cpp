@@ -17,7 +17,9 @@ void Observer::unsubscribe(SocketClient* socket){
 
 bool Observer::notify(Client * client, std::string const & command){
     User * user = NULL;
+    ServerClient * server = NULL;
     std::string notification;
+
     if ((user = dynamic_cast<User*>(client))){
         ServerClient * server = IRCServer::getServerFromUser(user->getName());
         if (!server)
@@ -25,8 +27,12 @@ bool Observer::notify(Client * client, std::string const & command){
         else
             notification = IRCMessage(Parameters(*user).paramServer(*server), command).to_string();
     }
+    else if ((server = dynamic_cast<ServerClient*>(client))){
+        notification = IRCMessage(Parameters(*server), command).to_string();
+    }
+
     for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-        if (*it != this->_originOfMsg->getSocketClient())
+        if (*it != this->_originOfMsg)
             IRCServer::_message_mediator->sendReply(notification, *it);
     }
     return true;
@@ -39,10 +45,10 @@ bool Observer::notify(Client * client, std::string const & command){
 //     // }
 // }
 
-Client * Observer::getOriginOfMsg(void) const{
+SocketClient * Observer::getOriginOfMsg(void) const{
     return this->_originOfMsg;
 }
 
-void Observer::setOriginOfMsg(Client* client){
+void Observer::setOriginOfMsg(SocketClient* client){
     this->_originOfMsg = client;
 }
