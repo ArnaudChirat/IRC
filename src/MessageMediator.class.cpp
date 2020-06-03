@@ -65,7 +65,8 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             this->nickServerCommand(message, socket);
         else if (!message.getPrefix().empty()){
             ServerClient * server = IRCServer::getServerFromUser(message.params.prevNickname);
-            IRCServer::_client_manager->setNick(message.params.nickname, *(server->getUser(message.params.prevNickname)));
+            if (!IRCServer::_client_manager->setNick(message.params.nickname, *(server->getUser(message.params.prevNickname))))
+                return;
         }
         else
         {
@@ -76,8 +77,10 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
                 IRCServer::addUser(*static_cast<User*>(client), 1);
                 static_cast<User*>(client)->setHostname(IRCServer::name);
             }
-            else
-                IRCServer::_client_manager->setNick(message.params.nickname, *user);
+            else{
+                if (!(IRCServer::_client_manager->setNick(message.params.nickname, *user)))
+                    return;
+            }
         }
     }
     else if (message.type == IRCMessage::IRCMessageType::SERVICE)
@@ -93,9 +96,15 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
         server = static_cast<ServerClient *>(IRCServer::_client_manager->getClient(socket));
         ServerClient *serverHost = static_cast<ServerClient *>(IRCServer::_client_manager->getClientByName(message.params.host));
         if (!message.params.host.empty() && message.params.host != message.params.newServer && !serverHost)
-            return;
-        if (message.params.host.empty() && message.params.hopcount > 1)
-            return;
+        {
+            std::cout << "ERROR : MessageMediator line 100" << std::endl;
+            exit(EXIT_SUCCESS);
+        }
+        if (message.params.uplink.empty() && message.params.hopcount > 1)
+        {
+            std::cout << "ERROR : MessageMediator line 105" << std::endl;
+            exit(EXIT_SUCCESS);
+        }
         if ((!server && !socket->getPassword().empty()))
         {
             client = IRCServer::_client_manager->createAddClient(ClientManager::SERVER, socket, message.params.newServer);
@@ -120,7 +129,7 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
     std::vector<std::string> parameters;
     if (user)
     {
-        IRCServer::_client_manager->setUser(message.params.user, message.params.modeint, message.getTrail(), *user);
+        IRCServer::_client_manager->setUser(message, *user);
         IRCServer::addUser(*user, 1);
     }
 }

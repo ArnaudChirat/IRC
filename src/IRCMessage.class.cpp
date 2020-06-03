@@ -174,6 +174,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
         {
             params.user = _parameters[0];
             params.real_name = _trail;
+            params.host = IRCServer::name;
             // Attention crash si non digit
             try
             {

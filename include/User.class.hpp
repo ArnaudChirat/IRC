@@ -54,6 +54,7 @@ public:
     Oper *getOper() const;
     std::string getMode() const;
     unsigned int getModeInt() const;
+    unsigned int getModeIntFromStr(std::string const & modestr);
     void addChannel(Channel *);
     void deleteChannel(Channel *);
     void    sendMsgTo(User * target, std::string const & msg) const;

@@ -84,6 +84,37 @@ User &User::delMode(unsigned int mode)
     return (*this);
 }
 
+unsigned int User::getModeIntFromStr(std::string const & modestr){
+    unsigned int modeint = 0;
+    for (auto it = modestr.begin(); it != modestr.end(); ++it)
+    {
+        switch(*it) {
+            case 'a':
+                modeint = modeint | Mode::a;
+                break;
+            case 'i':
+                modeint = modeint | Mode::i;
+                break;
+            case 'w':
+                modeint = modeint | Mode::w;
+                break;
+            case 'r':
+                modeint = modeint | Mode::r;
+                break;
+            case 'o':
+                modeint = modeint | Mode::o;
+                break;
+            case 'O':
+                modeint = modeint | Mode::O;
+                break;
+            case 's':
+                modeint = modeint | Mode::s;
+                break;
+        }
+    }
+    return modeint;
+}
+
 std::string User::getMode() const
 {
     std::string modes;

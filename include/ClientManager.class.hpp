@@ -28,7 +28,7 @@ public:
     Client *createAddClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     Client *createClient(ClientChoice choice, SocketClient *socket_client, std::string const &name);
     bool sendMsg(User &client, std::string const &msg, std::string const &target);
-    bool setUser(std::string const &username, unsigned int mode, std::string real_name, User &client);
+    bool setUser(IRCMessage const &, User &client);
     bool setNick(std::string const &nick, User &client);
     bool setService(std::string const &nick, Service &client);
     bool setServerName(std::string const &name, ServerClient &server);

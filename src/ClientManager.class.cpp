@@ -21,11 +21,14 @@ ClientManager::~ClientManager(void)
 
 bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient const & server_talk) {
     User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
+    std::cout << "Token du server " << message.params.token << std::endl;
     ServerClient * server = server_talk.getServer(message.params.token);
+    std::cout << "Associated server name " << server->getName() << std::endl;
+    std::cout << "new user name " << user->getName() << std::endl;
     server->addUser(user);
     user->setHostname(message.params.host);
     IRCServer::addUser(*user, server->getToken());
-    if(!setUser(message.params.user, message.params.modeint, message.params.real_name, *user))
+    if(!setUser(message, *user))
         return false;
     return true;
 }
@@ -33,6 +36,7 @@ bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient c
 bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, ServerClient & newServer){
     Token ourToken = IRCServer::addServer(server);
     newServer.setServerInfo(msg.params, ourToken);
+    std::cout << "Token du server a l'enregistrement du server " << msg.params.token << std::endl;
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
     if (msg.params.hopcount == 1)
         IRCServer::_observer->subscribe(server.getSocketClient());
@@ -211,15 +215,17 @@ bool ClientManager::setService(std::string const &nick, Service &client)
     return (true);
 };
 
-bool ClientManager::setUser(std::string const &username, unsigned int mode, std::string real_name, User &client)
+bool ClientManager::setUser(IRCMessage const & message, User &client)
 {
     if (client.getName().empty())
         return (false);
-    client.setUser(username);
+    client.setUser(message.params.user);
     if (client.getUser().empty())
         return (false);
-    mode = (mode & (User::w | User::i));
-    client.setRealName(real_name).setHostname(IRCServer::name).setMode(mode);
+    unsigned int mode = (!message.params.modestr.empty() ? client.getModeIntFromStr(message.params.modestr) : message.params.modeint);
+    if (IRCServer::getTokenFromUser(client.getName()) == 1)
+        mode = (mode & (User::w | User::i));
+    client.setRealName(message.params.real_name).setHostname(message.params.host).setMode(mode);
     client.status = Client::Status::CONNECTED;
     if (IRCServer::getTokenFromUser(client.getName()) == 1){
         Parameters param(client);
