@@ -73,7 +73,7 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (!user)
             {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
-                // IRCServer::addUser(*static_cast<User*>(client), 1);
+                IRCServer::addUser(*static_cast<User*>(client), 1);
                 static_cast<User*>(client)->setHostname(IRCServer::name);
             }
             else
@@ -102,7 +102,6 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (client)
             {
                 server = static_cast<ServerClient *>(client);
-                IRCServer::addServer(*server);
                 IRCServer::_client_manager->setNewServer(message, *server, *server);
                 IRCServer::replyToNewConnection(socket);
             }

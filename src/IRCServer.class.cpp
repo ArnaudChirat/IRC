@@ -35,8 +35,8 @@ std::string IRCServer::info;
 IRCServer *IRCServer::_myself = NULL;
 std::string IRCServer::_password = std::string("default");
 std::vector<SocketClient *> IRCServer::_newSocketConnections = {};
-std::unordered_map<Token, ServerClient *> IRCServer::_servers_local;
-std::unordered_map<std::string, Token> IRCServer::_user_to_server;
+std::unordered_map<Token, ServerClient *> IRCServer::_servers_local = {};
+std::unordered_map<std::string, Token> IRCServer::_user_to_server = {};
 
 IRCServer::IRCServer(void)
 {
@@ -270,6 +270,6 @@ void IRCServer::deleteServer(Token const & token){
     IRCServer::_servers_local.erase(token);
 }
 
-void IRCServer::deleteUser(std::string const & nickname){
+void IRCServer::removeUser(std::string const & nickname){
     IRCServer::_user_to_server.erase(nickname);
 }

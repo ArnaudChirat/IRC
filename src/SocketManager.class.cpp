@@ -105,7 +105,6 @@ bool SocketManager::route()
                     // tous les noms et les pointeurs dans toutes les maps (check_name, map des token...)
                     IRCServer::_observer->unsubscribe(socketClient);
                     IRCServer::_client_manager->deleteClient(socketClient, ClientManager::ClientChoice::ALL);
-
                 }
                 this->_sockets.erase(it);
             }

@@ -1,4 +1,5 @@
 #include "SocketClient.class.hpp"
+#include "Observer.class.hpp"
 #include "IRCMessage.class.hpp"
 #include "MessageMediator.class.hpp"
 #include <iostream>
@@ -35,7 +36,8 @@ bool SocketClient::recvMessage() {
     if (ret == 0)
     {
         std::cout << "Connexion terminee" << std::endl;
-        IRCServer::_client_manager->deleteClient(this, ClientManager::ClientChoice::ALL);
+        // IRCServer::_observer->unsubscribe(this);
+        // IRCServer::_client_manager->deleteClient(this, ClientManager::ClientChoice::ALL);
         return (true);
     }
     else if (ret == -1)

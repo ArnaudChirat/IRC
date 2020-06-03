@@ -25,6 +25,7 @@ public:
     void addServer(Token token, ServerClient &server, unsigned int hopcount);
     void addServer(ServerClient &server);
     void addUser(User * user);
+    void removeUser(std::string const &);
     ServerClient *getServer(Token token) const;
     User * getUser(std::string const &) const;
     std::unordered_map<Token, ServerClientLight> getServers() const;

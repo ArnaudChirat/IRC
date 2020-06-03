@@ -15,7 +15,7 @@ void Observer::unsubscribe(SocketClient* socket){
     this->_subscribers.erase(socket);
 }
 
-void Observer::notify(Client * client, std::string const & command){
+bool Observer::notify(Client * client, std::string const & command){
     User * user = NULL;
     std::string notification;
     if ((user = dynamic_cast<User*>(client))){
@@ -29,6 +29,7 @@ void Observer::notify(Client * client, std::string const & command){
         if (*it != this->_originOfMsg->getSocketClient())
             IRCServer::_message_mediator->sendReply(notification, *it);
     }
+    return true;
 }
 
 // void Observer::notify(Channel * client, std::string const & command){

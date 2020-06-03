@@ -47,7 +47,7 @@ public:
     static Token addServer(ServerClient &server);
     static void addUser(User &user, Token token);
     static void deleteServer(Token const &);
-    static void deleteUser(std::string const &);
+    static void removeUser(std::string const &);
     static ServerClient *getServerClient(Token token);
     static IRCMessage buildNickMessage(std::string const &nickname, unsigned int const hops, std::string const &username, std::string const &hostname ,unsigned int const token, unsigned int const mode, std::string const &realname);
     static SocketManager *_socket_manager;

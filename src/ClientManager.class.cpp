@@ -23,7 +23,7 @@ bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient c
     User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
     ServerClient * server = server_talk.getServer(message.params.token);
     server->addUser(user);
-    user->setHostname(server->getName());
+    user->setHostname(message.params.host);
     IRCServer::addUser(*user, server->getToken());
     if(!setUser(message.params.user, message.params.modeint, message.params.real_name, *user))
         return false;
@@ -146,6 +146,22 @@ bool ClientManager::setServerName(std::string const &name, ServerClient &server)
     return (true);
 };
 
+void ClientManager::caseChangeNick(Client & client){
+    ServerClient * server = IRCServer::getServerFromUser(client.getPrevName());
+    User * user  = dynamic_cast<User*>(&client);
+    IRCServer::removeUser(client.getPrevName());
+    if (server){
+        server->removeUser(client.getPrevName());
+        server->addUser(user);
+        IRCServer::addUser(*user, server->getToken());
+    }
+    else
+        IRCServer::addUser(*user, 1);
+    IRCServer::_observer->notify(&client, "NICK");
+    client.setPrevName("");
+}
+
+
 bool ClientManager::setNick(std::string const &nick, User &client)
 {
     client.setPrevName(client.getName());
@@ -165,7 +181,8 @@ bool ClientManager::setNick(std::string const &nick, User &client)
         IRCServer::_reply_manager->reply(param, ReplyManager::ERR_ERRONEUSNICKNAME, client.getSocketClient());
     }
     this->_names_used.insert(Key(USER, nick));
-    // IRCServer::_observer->notify(&client, "NICK");
+    if (client.status == Client::Status::CONNECTED)
+        this->caseChangeNick(client);
     return (true);
 };
 

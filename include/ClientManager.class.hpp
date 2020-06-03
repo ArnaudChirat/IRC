@@ -34,6 +34,7 @@ public:
     bool setServerName(std::string const &name, ServerClient &server);
     bool setNewServer(IRCMessage const &, ServerClient &, ServerClient &);
     bool newUserFromServer(IRCMessage const &, ServerClient const &);
+    void caseChangeNick(Client & client);
 
     void deleteClient(SocketClient *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
