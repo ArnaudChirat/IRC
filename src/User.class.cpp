@@ -215,3 +215,11 @@ Channel * User::getChannel(std::string const & name) const{
     return NULL;
 }
 
+std::ostream &operator<<(std::ostream &o, User const &rhs)
+{
+    o << "user name : " << rhs.getName() << std::endl;
+    o << "real name : " << rhs.getRealName() << std::endl;
+    o << "host : " << rhs.getHostName() << std::endl;
+    // add channel ?
+    return o;
+}

@@ -176,6 +176,32 @@ void IRCServer::addUser(User &user, Token token)
     IRCServer::_user_to_server.insert(value);
 }
 
+std::vector<ServerClient *> IRCServer::getServers()
+{
+    std::vector<ServerClient*> servers;
+    for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
+    {
+        servers.push_back(i->second);
+    }
+    return servers;
+};
+
+
+std::vector<User *> IRCServer::getUsers()
+{
+    std::vector<User*> users;
+    std::vector<User*> users_tmp;
+    for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
+    {
+        ServerClient *server = i->second;
+        users_tmp = server->getUsers();
+        users.insert(users.end(), users_tmp.begin(), users_tmp.end());
+    }
+    users_tmp = IRCServer::_client_manager->getUsers();
+    users.insert(users.end(), users_tmp.begin(), users_tmp.end());
+    return users;
+};
+
 void IRCServer::sendDataServer(SocketClient *socket)
 {
     for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)

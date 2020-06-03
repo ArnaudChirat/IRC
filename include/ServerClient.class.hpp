@@ -28,6 +28,7 @@ public:
     void removeUser(std::string const &);
     ServerClient *getServer(Token token) const;
     User * getUser(std::string const &) const;
+    std::vector<User *> getUsers() const;
     std::unordered_map<Token, ServerClientLight> getServers() const;
     
 private:

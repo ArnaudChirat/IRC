@@ -206,29 +206,29 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
     (void)message;
     if (client && client->status == Client::Status::CONNECTED)
     {
-        int clients = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL);
-        int servers = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::SERVER);
-        int users = IRCServer::_client_manager->getSize(ClientManager::ClientChoice::USER);
+        std::vector<ServerClient*> servers = IRCServer::getServers();
+        std::vector<User*> users = IRCServer::getUsers();
+        IRCServer *local = IRCServer::getInstance();
         int channels = IRCServer::_channel_manager->getSize();
         std::ostringstream msg;
         msg << "Stats de IRC :" << std::endl;
-        msg << "nombre de clients : " << clients << std::endl;
-        msg << "nombre de serveurs (sans compter le serveur local)) : " << servers << std::endl;
-        msg << "nombre de users : " << users << std::endl;
+        msg << "nombre de users : " << users.size() << std::endl;
+        msg << "nombre de serveurs : " << servers.size() << std::endl;
         msg << "nombre de channel : " << channels << std::endl;
-        std::unordered_map<SocketClient *, Client *> clients_map = IRCServer::_client_manager->getClients();
-        for (auto it = clients_map.begin(); it != clients_map.end(); it++)
+        msg << "Serveur local :" << std::endl;
+        msg << "Nom : " << local->name << std::endl;
+        msg << "password : " << local->getPassword() << std::endl;
+        msg << "****** Autre serveurs *******" << std::endl;
+        for (auto i = servers.begin(); i != servers.end(); i++)
         {
-            if (dynamic_cast<User *>(it->second))
-            {
-                msg << "user : " << it->second->getName() << std::endl;
-            }
-            else if (dynamic_cast<ServerClient *>(it->second))
-            {
-                msg << "*******SERVER******" << std::endl;
-                msg << *static_cast<ServerClient *>(it->second) << std::endl;
-                msg << "*******************" << std::endl;
-            }
+            msg << **i << std::endl;
+            msg << "\t*\t" << std::endl;
+        }
+        msg << "****** Utilisateurs *******" << std::endl;
+        for (auto i = users.begin(); i != users.end(); i++)
+        {
+            msg << **i << std::endl;
+            msg << "\t*\t" << std::endl;
         }
         this->sendReply(msg.str(), socket);
     }
