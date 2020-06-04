@@ -20,18 +20,20 @@ ClientManager::~ClientManager(void)
     return;
 }
 
-bool ClientManager::newUserFromServer(IRCMessage const & message, ServerClient const & server_talk) {
-    User *user = static_cast<User*>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
-    ServerClient * server = server_talk.getServer(message.params.token);
+bool ClientManager::newUserFromServer(IRCMessage const &message, ServerClient const &server_talk)
+{
+    User *user = static_cast<User *>(IRCServer::_client_manager->createClient(ClientManager::USER, NULL, message.params.nickname));
+    ServerClient *server = server_talk.getServer(message.params.token);
     server->addUser(user);
     user->setHostname(message.params.host);
     IRCServer::addUser(*user, server->getToken());
-    if(!setUser(message, *user))
+    if (!setUser(message, *user))
         return false;
     return true;
 }
 
-bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, ServerClient & newServer){
+bool ClientManager::setNewServer(IRCMessage const &msg, ServerClient &server, ServerClient &newServer)
+{
     Token ourToken = IRCServer::addServer(newServer);
     newServer.setServerInfo(msg.params, ourToken);
     server.addServer(msg.params.token, newServer, msg.params.hopcount);
@@ -57,12 +59,12 @@ std::unordered_map<SocketClient *, Client *> ClientManager::getClients() const
     return (this->_clients);
 }
 
-std::vector<User*> ClientManager::getUsers()
+std::vector<User *> ClientManager::getUsers()
 {
-    std::vector<User*> users;
-    for (auto i = _clients.begin(); i != _clients.end() ; i++)
+    std::vector<User *> users;
+    for (auto i = _clients.begin(); i != _clients.end(); i++)
     {
-        User *user = dynamic_cast<User*>(i->second);
+        User *user = dynamic_cast<User *>(i->second);
         if (user && user->status == User::Status::CONNECTED)
         {
             users.push_back(user);
@@ -70,7 +72,6 @@ std::vector<User*> ClientManager::getUsers()
     }
     return (users);
 };
-
 
 void ClientManager::addClient(SocketClient *socket, Client *client, ClientChoice choice)
 {
@@ -149,11 +150,13 @@ bool ClientManager::setServerName(std::string const &name, ServerClient &server)
     return (true);
 };
 
-void ClientManager::caseChangeNick(Client & client){
-    ServerClient * server = IRCServer::getServerFromUser(client.getPrevName());
-    User * user  = dynamic_cast<User*>(&client);
+void ClientManager::caseChangeNick(Client &client)
+{
+    ServerClient *server = IRCServer::getServerFromUser(client.getPrevName());
+    User *user = dynamic_cast<User *>(&client);
     IRCServer::removeUser(client.getPrevName());
-    if (server){
+    if (server)
+    {
         server->removeUser(client.getPrevName());
         server->addUser(user);
         IRCServer::addUser(*user, server->getToken());
@@ -163,7 +166,6 @@ void ClientManager::caseChangeNick(Client & client){
     IRCServer::_observer->notify(&client, "NICK");
     client.setPrevName("");
 }
-
 
 bool ClientManager::setNick(std::string const &nick, User &client)
 {
@@ -215,7 +217,7 @@ bool ClientManager::setService(std::string const &nick, Service &client)
     return (true);
 };
 
-bool ClientManager::setUser(IRCMessage const & message, User &client)
+bool ClientManager::setUser(IRCMessage const &message, User &client)
 {
     if (client.getName().empty())
         return (false);
@@ -227,7 +229,8 @@ bool ClientManager::setUser(IRCMessage const & message, User &client)
         mode = (mode & (User::w | User::i));
     client.setRealName(message.params.real_name).setHostname(message.params.host).setMode(mode);
     client.status = Client::Status::CONNECTED;
-    if (IRCServer::getTokenFromUser(client.getName()) == 1){
+    if (IRCServer::getTokenFromUser(client.getName()) == 1)
+    {
         Parameters param(client);
         IRCServer::_reply_manager->reply(param, ReplyManager::RPL_WELCOME, client.getSocketClient());
         IRCServer::_reply_manager->reply(param, ReplyManager::RPL_YOURHOST, client.getSocketClient());
@@ -276,14 +279,26 @@ bool ClientManager::sendMsg(User &client, std::string const &msg, std::string co
     User *target_ptr = NULL;
     if (client.getName() != target && checkName(USER, target))
     {
-        target_ptr = static_cast<User *>(this->getClientByName(target));
-        if (target_ptr->status == Client::Status::CONNECTED)
-            client.sendMsgTo(target_ptr, msg);
-        else
+        Token token = IRCServer::getTokenFromUser(client.getName());
+        if (token == 1)
         {
-            Parameters param = {};
-            param.nickname = target;
-            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client.getSocketClient());
+            target_ptr = static_cast<User *>(this->getClientByName(target));
+            if (target_ptr->status == Client::Status::CONNECTED)
+                client.sendMsgTo(target_ptr, msg);
+            else
+            {
+                Parameters param = {};
+                param.nickname = target;
+                IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client.getSocketClient());
+            }
+        } else 
+        {
+            std::cout << GREEN << token << std::endl;
+            Token token_road = IRCServer::_routing_table->getRoute(token);
+            std::cout << token_road << std::endl;
+            ServerClient *server = IRCServer::getServerClient(token_road);
+            std::cout <<  *server << RESET << std::endl;
+            IRCServer::_message_mediator->sendReply(msg, server->getSocketClient());
         }
     }
     return (false);
