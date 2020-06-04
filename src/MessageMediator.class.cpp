@@ -73,8 +73,8 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (!user)
             {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
-                IRCServer::addUser(*static_cast<User*>(client), 1);
-                static_cast<User*>(client)->setHostname(IRCServer::name);
+                if (client)
+                    static_cast<User*>(client)->setHostname(IRCServer::name);
             }
             else{
                 if (!(IRCServer::_client_manager->setNick(message.params.nickname, *user)))
