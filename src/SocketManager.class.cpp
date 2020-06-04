@@ -60,6 +60,20 @@ void SocketManager::setFdSet()
     }
 }
 
+void    SocketManager::cleanCloseConnection(Socket * socket){
+    SocketClient * socketClient = dynamic_cast<SocketClient*>(socket);
+    if (socketClient){
+        // delete proprement que ce soit server ou user:
+        // tous les noms et les pointeurs dans toutes les maps (check_name, map des token...)
+        User * user = dynamic_cast<User*>(IRCServer::_client_manager->getClient(socketClient));
+        // ServerClient * server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socketClient));
+        IRCServer::_observer->notify(user, "QUIT");
+        // IRCServer::_observer->notify(server, "SQUIT");
+        IRCServer::_observer->unsubscribe(socketClient);
+        IRCServer::_client_manager->deleteClient(socketClient, ClientManager::ClientChoice::ALL);
+    }
+}
+
 bool SocketManager::route()
 {
     this->setFdSet();
@@ -99,13 +113,7 @@ bool SocketManager::route()
             if (_hasError)
             {
                 std::cout << "Deconnexion de [" << socket_address << ":" << socket_port << "]" << std::endl;
-                SocketClient * socketClient = dynamic_cast<SocketClient*>(it->get());
-                if (socketClient){
-                    // delete proprement que ce soit server ou user:
-                    // tous les noms et les pointeurs dans toutes les maps (check_name, map des token...)
-                    IRCServer::_observer->unsubscribe(socketClient);
-                    IRCServer::_client_manager->deleteClient(socketClient, ClientManager::ClientChoice::ALL);
-                }
+                this->cleanCloseConnection(it->get());         
                 this->_sockets.erase(it);
             }
             ++it;

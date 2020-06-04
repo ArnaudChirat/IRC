@@ -23,6 +23,7 @@ public:
     virtual void writeToSocket(SocketClient &) const;
     void addSocket(Socket *socket);
     void deleteSocket(Socket *socket);
+    void cleanCloseConnection(Socket * socket);
 private:
     typedef std::list<std::unique_ptr<Socket>>::iterator pos;
     std::list<std::unique_ptr<Socket>> _sockets;

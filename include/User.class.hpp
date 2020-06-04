@@ -38,6 +38,7 @@ public:
     ~User(void);
     User &handle() { return (*this); };
     User &setName(std::string const &name);
+    User &setMessage(std::string const &message);
     User &setRealName(std::string const &real_name);
     User &setHostname(std::string const &hostname);
     User &setUser(std::string const &user);
@@ -46,6 +47,7 @@ public:
     User &delMode(unsigned int mode);
     User &setOper(Oper &);
     std::string getUser() const;
+    std::string getMessage(void);
     std::string getHostName() const;
     std::unordered_map<std::string, Channel *> getChannels(void) const;
     Channel *   getChannel(std::string const &) const;
@@ -65,6 +67,7 @@ private:
     std::string _user;
     std::string _real_name;
     std::string _hostname;
+    std::string _message;
     unsigned int _mode;
 
     std::unordered_map<std::string, Channel *> _channelsJoined;

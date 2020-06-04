@@ -233,25 +233,58 @@ bool ClientManager::setUser(IRCMessage const & message, User &client)
     return (true);
 };
 
+//delete own clients
 void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
 {
     Client *client = this->getClient(socket);
+    User * user = dynamic_cast<User *>(client);
+    ServerClient * server = dynamic_cast<ServerClient *>(client);
     if (!client)
         return;
     if (choice == ClientChoice::ALL)
     {
-        if (dynamic_cast<User *>(client))
+        if (user){
             choice = ClientManager::USER;
+            IRCServer::removeUser(client->getName());
+        }
         if (dynamic_cast<Service *>(client))
             choice = ClientManager::SERVICE;
-        if (dynamic_cast<ServerClient *>(client))
+        if (server){
             choice = ClientManager::SERVER;
+            IRCServer::deleteServer(server->getToken());
+        }
     }
     std::string name = client->getName();
     Key key(choice, name);
     this->_names_used.erase(key);
     this->_clients.erase(socket);
     this->_nick_clients.erase(name);
+    delete client;
+}
+
+//delete clients with hopcount > 1
+void ClientManager::deleteClient(Client * client, ClientChoice choice)
+{
+    User * user = dynamic_cast<User *>(client);
+    ServerClient * server = dynamic_cast<ServerClient *>(client);
+    if (!client)
+        return;
+    if (choice == ClientChoice::ALL)
+    {
+        if (user){
+            choice = ClientManager::USER;
+            IRCServer::removeUser(client->getName());
+        }
+        if (dynamic_cast<Service *>(client))
+            choice = ClientManager::SERVICE;
+        if (server){
+            choice = ClientManager::SERVER;
+            IRCServer::deleteServer(server->getToken());
+        }
+    }
+    std::string name = client->getName();
+    Key key(choice, name);
+    this->_names_used.erase(key);
     delete client;
 }
 

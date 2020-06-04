@@ -128,10 +128,23 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
 }
 
 void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socket) const
-{
-    static_cast<void>(message);
-    IRCServer::_client_manager->deleteClient(socket, ClientManager::USER);
-    IRCServer::_socket_manager->deleteSocket(socket);
+{   
+    User * user = NULL;
+    if (message.params.nickname.empty()){
+        user = dynamic_cast<User*>(IRCServer::_client_manager->getClient(socket));
+        user->setMessage(message.params.quit_message);
+        IRCServer::_observer->notify(user, "QUIT");
+        IRCServer::_client_manager->deleteClient(socket, ClientManager::USER);
+        IRCServer::_socket_manager->deleteSocket(socket);
+    }
+    else {
+        ServerClient * server = IRCServer::getServerFromUser(message.params.nickname);
+        user = server->getUser(message.params.nickname);
+        user->setMessage(message.params.quit_message);
+        IRCServer::_observer->notify(user, "QUIT");
+        server->removeUser(message.params.nickname);
+        IRCServer::_client_manager->deleteClient(user, ClientManager::USER);
+    }
 }
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const

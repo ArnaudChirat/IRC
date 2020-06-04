@@ -65,6 +65,10 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         this->setParameters(parameters);
         this->setTrail(param.serverInfo, IRCMessageWay::SENDING);
     }
+    else if (command == "QUIT"){
+        this->setPrefix(param.nickname, IRCMessageWay::SENDING);
+        this->setTrail(param.quit_message, IRCMessageWay::SENDING);
+    }
 }
 
 
@@ -175,7 +179,6 @@ bool IRCMessage::isCommand(SocketClient *socket)
             params.user = _parameters[0];
             params.real_name = _trail;
             params.host = IRCServer::name;
-            // Attention crash si non digit
             try
             {
                 params.modeint = std::stoi(_parameters[1]);
@@ -232,8 +235,8 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::QUIT)
         {
-            if (_parameters.size() == 1)
-                params.quit_message = _parameters[0];
+            params.nickname = (!this->_prefix.empty() ? this->_prefix : params.nickname);
+            params.quit_message = (!this->_trail.empty() ? this->_trail : params.quit_message);
         }
         else if (this->type == IRCMessageType::SERVER)
         {
@@ -341,7 +344,7 @@ std::string IRCMessage::to_string(void) const
     this->_command.empty() ? throw std::logic_error("Error : no command in automatic IRCMessage") : 0;
     !result.empty() ? result += ' ' : result;
     result += this->_command;
-    this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
+    // this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
     std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const &str) { result += ' ' + str; });
     !(this->_trail.empty()) ? result += " :" + this->_trail : result;
     return result + '\n';

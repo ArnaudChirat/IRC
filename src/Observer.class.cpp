@@ -16,24 +16,25 @@ void Observer::unsubscribe(SocketClient* socket){
 }
 
 bool Observer::notify(Client * client, std::string const & command){
-    User * user = NULL;
-    ServerClient * server = NULL;
-    std::string notification;
+    if (client){
+        User * user = NULL;
+        ServerClient * server = NULL;
+        std::string notification;
+        if ((user = dynamic_cast<User*>(client))){
+            ServerClient * server = IRCServer::getServerFromUser(user->getName());
+            if (!server)
+                notification = IRCMessage(Parameters(*user).paramIRCServer(*(IRCServer::getInstance())), command).to_string();
+            else
+                notification = IRCMessage(Parameters(*user).paramServer(*server), command).to_string();
+        }
+        else if ((server = dynamic_cast<ServerClient*>(client))){
+            notification = IRCMessage(Parameters(*server), command).to_string();
+        }
 
-    if ((user = dynamic_cast<User*>(client))){
-        ServerClient * server = IRCServer::getServerFromUser(user->getName());
-        if (!server)
-            notification = IRCMessage(Parameters(*user).paramIRCServer(*(IRCServer::getInstance())), command).to_string();
-        else
-            notification = IRCMessage(Parameters(*user).paramServer(*server), command).to_string();
-    }
-    else if ((server = dynamic_cast<ServerClient*>(client))){
-        notification = IRCMessage(Parameters(*server), command).to_string();
-    }
-
-    for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-        if (*it != this->_originOfMsg)
-            IRCServer::_message_mediator->sendReply(notification, *it);
+        for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
+            if (*it != this->_originOfMsg)
+                IRCServer::_message_mediator->sendReply(notification, *it);
+        }
     }
     return true;
 }

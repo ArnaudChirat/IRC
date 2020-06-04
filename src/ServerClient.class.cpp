@@ -7,11 +7,8 @@
 ServerClient::ServerClient(SocketClient *socket) : Client(socket) {}
 
 ServerClient::~ServerClient(void) {
-    // delete les servers associés SI PAS D'AUTRES ROUTES DISPO! faire tourner algo maj table routage avant
     for (auto it = this->_users.begin(); it != this->_users.end(); ++it)
-        IRCServer::_client_manager->deleteClient(it->second->getSocketClient(),  ClientManager::ClientChoice::USER);
-    this->_users.clear();
-    IRCServer::deleteServer(this->_token);
+        IRCServer::_client_manager->deleteClient(it->second,  ClientManager::ClientChoice::USER);
 }
 
 ServerClient &ServerClient::setName(std::string const &name)
