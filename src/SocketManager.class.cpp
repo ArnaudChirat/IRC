@@ -66,10 +66,10 @@ void    SocketManager::cleanCloseConnection(Socket * socket){
         // delete proprement que ce soit server ou user:
         // tous les noms et les pointeurs dans toutes les maps (check_name, map des token...)
         User * user = dynamic_cast<User*>(IRCServer::_client_manager->getClient(socketClient));
-        // ServerClient * server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socketClient));
-        IRCServer::_observer->notify(user, "QUIT");
-        // IRCServer::_observer->notify(server, "SQUIT");
+        ServerClient * server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socketClient));
         IRCServer::_observer->unsubscribe(socketClient);
+        IRCServer::_observer->notify(user, "QUIT");
+        IRCServer::_observer->notify(server, "SQUIT");
         IRCServer::_client_manager->deleteClient(socketClient, ClientManager::ClientChoice::ALL);
     }
 }

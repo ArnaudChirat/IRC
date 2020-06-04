@@ -283,3 +283,17 @@ void IRCServer::deleteServer(Token const & token){
 void IRCServer::removeUser(std::string const & nickname){
     IRCServer::_user_to_server.erase(nickname);
 }
+
+void IRCServer::removeLostConnectionFromLocalServers(ServerClient * server){
+    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it){
+        it->second->removeServer(server);
+    }
+}
+
+ServerClient * IRCServer::getAnyServerByName(std::string const & name){
+    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it){
+        if (it->second->getName() == name)
+            return it->second;
+    }
+    return NULL;
+}

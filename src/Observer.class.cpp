@@ -21,7 +21,7 @@ bool Observer::notify(Client * client, std::string const & command){
         ServerClient * server = NULL;
         std::string notification;
         if ((user = dynamic_cast<User*>(client))){
-            ServerClient * server = IRCServer::getServerFromUser(user->getName());
+            server = IRCServer::getServerFromUser(user->getName());
             if (!server)
                 notification = IRCMessage(Parameters(*user).paramIRCServer(*(IRCServer::getInstance())), command).to_string();
             else

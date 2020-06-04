@@ -251,7 +251,6 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
             choice = ClientManager::SERVICE;
         if (server){
             choice = ClientManager::SERVER;
-            IRCServer::deleteServer(server->getToken());
         }
     }
     std::string name = client->getName();
@@ -279,7 +278,6 @@ void ClientManager::deleteClient(Client * client, ClientChoice choice)
             choice = ClientManager::SERVICE;
         if (server){
             choice = ClientManager::SERVER;
-            IRCServer::deleteServer(server->getToken());
         }
     }
     std::string name = client->getName();
