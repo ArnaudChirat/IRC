@@ -5,6 +5,7 @@
 #include "ServerClient.class.hpp"
 #include "Service.class.hpp"
 #include "Observer.class.hpp"
+#include "RoutingTable.class.hpp"
 #include "Utility.hpp"
 #include <algorithm>
 #include <iostream>
@@ -37,6 +38,7 @@ bool ClientManager::setNewServer(IRCMessage const & msg, ServerClient & server, 
     if (msg.params.hopcount == 1)
         IRCServer::_observer->subscribe(newServer.getSocketClient());
     newServer.status = Client::Status::CONNECTED;
+    IRCServer::_routing_table->addRoute(server, newServer);
     IRCServer::_observer->notify(&newServer, "SERVER");
     return true;
 }
@@ -180,6 +182,7 @@ bool ClientManager::setNick(std::string const &nick, User &client)
         Parameters param = {};
         param.nickname = nick;
         IRCServer::_reply_manager->reply(param, ReplyManager::ERR_ERRONEUSNICKNAME, client.getSocketClient());
+        return (false);
     }
     this->_names_used.insert(Key(USER, nick));
     if (client.status == Client::Status::CONNECTED)

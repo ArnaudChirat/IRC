@@ -12,6 +12,7 @@
 #include "Service.class.hpp"
 #include "Observer.class.hpp"
 #include "Utility.hpp"
+#include "RoutingTable.class.hpp"
 MessageMediator::MessageMediator(void)
 {
     this->_commands.insert({IRCMessage::IRCMessageType::NICK, &MessageMediator::createClient});
@@ -223,6 +224,8 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
             msg << **i << std::endl;
             msg << "\t*\t" << std::endl;
         }
+        msg << "****** Table de routage *******" << std::endl;
+        msg << *IRCServer::_routing_table << std::endl;
         this->sendReply(msg.str(), socket);
     }
 }

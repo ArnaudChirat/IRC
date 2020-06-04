@@ -9,6 +9,7 @@
 #include "ServerClient.class.hpp"
 #include "Socket.class.hpp"
 #include "Observer.class.hpp"
+#include "RoutingTable.class.hpp"
 #include "Utility.hpp"
 #include <unistd.h>
 #include <sys/types.h>
@@ -29,6 +30,7 @@ ClientManager *IRCServer::_client_manager = new ClientManager();
 ReplyManager *IRCServer::_reply_manager = new ReplyManager;
 ChannelManager *IRCServer::_channel_manager = new ChannelManager();
 Observer *IRCServer::_observer = new Observer();
+RoutingTable *IRCServer::_routing_table = new RoutingTable();
 
 std::string IRCServer::name;
 std::string IRCServer::info;
@@ -277,6 +279,7 @@ ServerClient *IRCServer::getServerFromUser(std::string const &nickname)
 }
 
 void IRCServer::deleteServer(Token const & token){
+    IRCServer::_routing_table->delRoute(token);
     IRCServer::_servers_local.erase(token);
 }
 
