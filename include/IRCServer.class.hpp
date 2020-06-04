@@ -15,7 +15,7 @@ class ReplyManager;
 class ChannelManager;
 class IRCMessage;
 class Observer;
-
+class RoutingTable;
 class IRCServer
 {
 private:
@@ -24,7 +24,6 @@ private:
     static std::vector<SocketClient *> _newSocketConnections;
     static std::unordered_map<Token, ServerClient *> _servers_local;
     static std::unordered_map<std::string, Token> _user_to_server;
-
 public:
     IRCServer(void);
     static std::string name;
@@ -58,6 +57,7 @@ public:
     static ReplyManager *_reply_manager;
     static ChannelManager *_channel_manager;
     static Observer *_observer;
+    static RoutingTable *_routing_table;
 
     std::string getPassword(void) const;
 };
