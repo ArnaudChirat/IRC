@@ -74,8 +74,8 @@ void MessageMediator::createClient(IRCMessage const &message, SocketClient *sock
             if (!user)
             {
                 client = IRCServer::_client_manager->createAddClient(ClientManager::USER, socket, message.params.nickname);
-                if (client)
-                    static_cast<User*>(client)->setHostname(IRCServer::name);
+                IRCServer::addUser(*static_cast<User*>(client), 1);
+                static_cast<User*>(client)->setHostname(IRCServer::name);
             }
             else{
                 if (!(IRCServer::_client_manager->setNick(message.params.nickname, *user)))
@@ -182,7 +182,7 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
         if (channel)
             IRCServer::_channel_manager->sendMessageChannel(*static_cast<User *>(client), *channel, message.params.text);
         else
-            IRCServer::_client_manager->sendMsg(*static_cast<User *>(client), message.params.text, message.params.target);
+            IRCServer::_client_manager->sendMsg(client, message);
     }
 }
 

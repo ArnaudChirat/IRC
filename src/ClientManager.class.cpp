@@ -274,31 +274,32 @@ int ClientManager::getSize(ClientChoice choice) const
     }
 }
 
-bool ClientManager::sendMsg(User &client, std::string const &msg, std::string const &target)
+bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
 {
     User *target_ptr = NULL;
-    if (client.getName() != target && checkName(USER, target))
+    std::string msg = message.params.text;
+    std::string target = message.params.target;
+    if (client->getName() != target && checkName(USER, target))
     {
-        Token token = IRCServer::getTokenFromUser(client.getName());
+        Token token = IRCServer::getTokenFromUser(target);
         if (token == 1)
         {
             target_ptr = static_cast<User *>(this->getClientByName(target));
             if (target_ptr->status == Client::Status::CONNECTED)
-                client.sendMsgTo(target_ptr, msg);
+            {
+                static_cast<User*>(client)->sendMsgTo(target_ptr, msg); 
+            }
             else
             {
                 Parameters param = {};
                 param.nickname = target;
-                IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client.getSocketClient());
+                IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
             }
         } else 
         {
-            std::cout << GREEN << token << std::endl;
             Token token_road = IRCServer::_routing_table->getRoute(token);
-            std::cout << token_road << std::endl;
             ServerClient *server = IRCServer::getServerClient(token_road);
-            std::cout <<  *server << RESET << std::endl;
-            IRCServer::_message_mediator->sendReply(msg, server->getSocketClient());
+            IRCServer::_message_mediator->sendReply(message.to_string(), server->getSocketClient());
         }
     }
     return (false);

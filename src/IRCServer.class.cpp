@@ -228,7 +228,7 @@ ServerClient *IRCServer::getServerClient(Token token)
     ServerClient *server = NULL;
     try
     {
-        IRCServer::_servers_local.at(token);
+        server = IRCServer::_servers_local.at(token);
     }
     catch (std::out_of_range &e)
     {
