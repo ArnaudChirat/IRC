@@ -287,7 +287,7 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
             target_ptr = static_cast<User *>(this->getClientByName(target));
             if (target_ptr->status == Client::Status::CONNECTED)
             {
-                static_cast<User*>(client)->sendMsgTo(target_ptr, msg); 
+                static_cast<User *>(client)->sendMsgTo(target_ptr, msg);
             }
             else
             {
@@ -295,7 +295,8 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
                 param.nickname = target;
                 IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
             }
-        } else 
+        }
+        else
         {
             Token token_road = IRCServer::_routing_table->getRoute(token);
             ServerClient *server = IRCServer::getServerClient(token_road);
