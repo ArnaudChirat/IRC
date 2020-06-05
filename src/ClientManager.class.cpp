@@ -277,17 +277,27 @@ int ClientManager::getSize(ClientChoice choice) const
 bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
 {
     User *target_ptr = NULL;
+    User *source = NULL;
     std::string msg = message.params.text;
     std::string target = message.params.target;
+    std::string message_send = message.to_string();
     if (client->getName() != target && checkName(USER, target))
     {
         Token token = IRCServer::getTokenFromUser(target);
+        if ((source = dynamic_cast<User*>(client)))
+        {
+            Parameters parameters(*source);
+            parameters.paramIRCServer(*(IRCServer::getInstance()));
+            parameters.text = msg;
+            parameters.target = target;
+            message_send = IRCMessage(parameters, "PRIVMSG").to_string();
+        }
         if (token == 1)
         {
             target_ptr = static_cast<User *>(this->getClientByName(target));
             if (target_ptr->status == Client::Status::CONNECTED)
             {
-                static_cast<User*>(client)->sendMsgTo(target_ptr, msg); 
+                IRCServer::_message_mediator->sendReply(message_send, target_ptr->getSocketClient());
             }
             else
             {
@@ -299,7 +309,7 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
         {
             Token token_road = IRCServer::_routing_table->getRoute(token);
             ServerClient *server = IRCServer::getServerClient(token_road);
-            IRCServer::_message_mediator->sendReply(message.to_string(), server->getSocketClient());
+            IRCServer::_message_mediator->sendReply(message_send, server->getSocketClient());
         }
     }
     return (false);
