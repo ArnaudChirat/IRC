@@ -65,6 +65,13 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         this->setParameters(parameters);
         this->setTrail(param.serverInfo, IRCMessageWay::SENDING);
     }
+    else if (command == "PRIVMSG")
+    {
+        this->setPrefix(param.user + "!~" + param.user + "@" + param.host, IRCMessageWay::SENDING);
+        parameters.push_back(param.target);
+        this->setParameters(parameters);
+        this->setTrail(param.text, IRCMessageWay::SENDING);
+    }
 }
 
 
