@@ -305,7 +305,8 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
                 param.nickname = target;
                 IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
             }
-        } else 
+        }
+        else
         {
             Token token_road = IRCServer::_routing_table->getRoute(token);
             ServerClient *server = IRCServer::getServerClient(token_road);
