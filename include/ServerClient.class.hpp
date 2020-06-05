@@ -24,6 +24,7 @@ public:
     std::string getInfo(void) const;
     void addServer(Token token, ServerClient &server, unsigned int hopcount);
     void addServer(ServerClient &server);
+    void removeServer(ServerClient * server);
     void addUser(User * user);
     void removeUser(std::string const &);
     ServerClient *getServer(Token token) const;

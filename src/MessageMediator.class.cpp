@@ -26,6 +26,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::IRCMessageType::PRIVMSG, &MessageMediator::privmsgCommand});
     this->_commands.insert({IRCMessage::IRCMessageType::LUSERS, &MessageMediator::lusersCommand});
     this->_commands.insert({IRCMessage::IRCMessageType::SERVER, &MessageMediator::createClient});
+    this->_commands.insert({IRCMessage::IRCMessageType::SQUIT, &MessageMediator::squitCommand});
     return;
 }
 
@@ -40,8 +41,8 @@ bool MessageMediator::handleMessage(IRCMessage const &message, SocketClient *soc
     std::cout << message << std::endl;
     
     IRCServer::_observer->setOriginOfMsg(socket);
-    
     (this->*_commands[message.type])(message, socket);
+    IRCServer::_observer->setOriginOfMsg(NULL);
     std::cout << "size of Client manager fter command : " << IRCServer::_client_manager->getSize(ClientManager::ClientChoice::ALL) << std::endl;
     return (true);
 }
@@ -129,10 +130,23 @@ void MessageMediator::userCommand(IRCMessage const &message, SocketClient *socke
 }
 
 void MessageMediator::quitCommand(IRCMessage const &message, SocketClient *socket) const
-{
-    static_cast<void>(message);
-    IRCServer::_client_manager->deleteClient(socket, ClientManager::USER);
-    IRCServer::_socket_manager->deleteSocket(socket);
+{   
+    User * user = NULL;
+    if (message.params.nickname.empty()){
+        user = dynamic_cast<User*>(IRCServer::_client_manager->getClient(socket));
+        user->setMessage(message.params.quit_message);
+        IRCServer::_observer->notify(user, "QUIT");
+        IRCServer::_client_manager->deleteClient(socket, ClientManager::USER);
+        IRCServer::_socket_manager->deleteSocket(socket);
+    }
+    else {
+        ServerClient * server = IRCServer::getServerFromUser(message.params.nickname);
+        user = server->getUser(message.params.nickname);
+        user->setMessage(message.params.quit_message);
+        IRCServer::_observer->notify(user, "QUIT");
+        server->removeUser(message.params.nickname);
+        IRCServer::_client_manager->deleteClient(user, ClientManager::USER);
+    }
 }
 
 void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socket) const
@@ -171,6 +185,21 @@ void MessageMediator::partCommand(IRCMessage const &message, SocketClient *socke
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client && client->status == Client::Status::CONNECTED)
         IRCServer::_channel_manager->handlePartChannel(message, dynamic_cast<User *>(client));
+}
+
+void MessageMediator::squitCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    (void)socket;
+    if (dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket))){ // si le message nous vient d'un server
+        ServerClient * server = IRCServer::getAnyServerByName(message.params.name);
+        if (server) {
+            IRCServer::_observer->notify(server, "SQUIT");
+            IRCServer::_client_manager->deleteClient(server, ClientManager::ClientChoice::SERVER);
+        }
+    }
+    else {
+        throw std::logic_error("Squit message not coming from server : FORBIDDEN!");
+    }
 }
 
 void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *socket) const

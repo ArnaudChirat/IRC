@@ -37,6 +37,7 @@ public:
     void caseChangeNick(Client & client);
 
     void deleteClient(SocketClient *client, ClientChoice choice);
+    void deleteClient(Client *client, ClientChoice choice);
     Client *getClient(SocketClient *socket_client);
     std::vector<User*> getUsers();
     Client *getClientByName(std::string const &nick);

@@ -162,6 +162,16 @@ std::string User::getName() const
     return (this->_name);
 }
 
+std::string  User::getMessage(void){
+    return this->_message;
+}
+
+User &  User::setMessage(std::string const &message){
+    this->_message = message;
+    return *this;
+}
+
+
 std::unordered_map<std::string, Channel*>  User::getChannels(void) const{
     return this->_channelsJoined;
 }

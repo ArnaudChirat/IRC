@@ -1,5 +1,6 @@
 #include "IRCServer.class.hpp"
 #include "ServerClient.class.hpp"
+#include "Observer.class.hpp"
 #include "Utility.hpp"
 #include "IRCMessage.class.hpp"
 #include "MessageMediator.class.hpp"
@@ -7,12 +8,20 @@
 ServerClient::ServerClient(SocketClient *socket) : Client(socket) {}
 
 ServerClient::~ServerClient(void) {
-    // delete les servers associés SI PAS D'AUTRES ROUTES DISPO! faire tourner algo maj table routage avant
-    for (auto it = this->_users.begin(); it != this->_users.end(); ++it)
-        IRCServer::_client_manager->deleteClient(it->second->getSocketClient(),  ClientManager::ClientChoice::USER);
-    this->_users.clear();
+    for (auto it = this->_users.begin(); it != this->_users.end(); ++it){
+        IRCServer::_client_manager->deleteClient(it->second,  ClientManager::ClientChoice::USER);
+    }
     IRCServer::deleteServer(this->_token);
+    IRCServer::removeLostConnectionFromLocalServers(this);
 }
+
+void    ServerClient::removeServer(ServerClient * server){
+    for (auto it = this->_servers.begin(); it != this->_servers.end(); ++it){
+        if (it->second.server_client->getName() == server->getName())
+            this->_servers.erase(it);
+    }
+}
+
 
 ServerClient &ServerClient::setName(std::string const &name)
 {

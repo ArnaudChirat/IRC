@@ -30,6 +30,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"PRIVMSG", IRCMessageType::PRIVMSG},
     {"LUSERS", IRCMessageType::LUSERS},
     {"SERVER", IRCMessageType::SERVER},
+    {"SQUIT", IRCMessageType::SQUIT},
 };
 
 IRCMessage::IRCMessage(void)
@@ -71,6 +72,15 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         parameters.push_back(param.target);
         this->setParameters(parameters);
         this->setTrail(param.text, IRCMessageWay::SENDING);
+    }
+    else if (command == "QUIT"){
+        this->setPrefix(param.nickname, IRCMessageWay::SENDING);
+        this->setTrail(param.quit_message, IRCMessageWay::SENDING);
+    }
+    else if (command == "SQUIT"){
+        parameters.push_back(param.name);
+        this->setParameters(parameters);
+        this->setTrail("Link dead", IRCMessageWay::SENDING);
     }
 }
 
@@ -182,7 +192,6 @@ bool IRCMessage::isCommand(SocketClient *socket)
             params.user = _parameters[0];
             params.real_name = _trail;
             params.host = IRCServer::name;
-            // Attention crash si non digit
             try
             {
                 params.modeint = std::stoi(_parameters[1]);
@@ -239,27 +248,29 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::QUIT)
         {
-            if (_parameters.size() == 1)
-                params.quit_message = _parameters[0];
+            params.nickname = (!this->_prefix.empty() ? this->_prefix : params.nickname);
+            params.quit_message = (!this->_trail.empty() ? this->_trail : params.quit_message);
         }
-        else if (this->type == IRCMessageType::SERVER)
+        else if (this->type == IRCMessageType::SERVER && _parameters.size() >= 3)
         {
-            if (_parameters.size() >= 3){
-                    params.newServer = _parameters[0];
-                try
-                {
-                    params.hopcount = std::stoi(_parameters[1]);
-                    params.token = std::stoi(_parameters[2]);
-                }
-                catch (std::invalid_argument &e)
-                {
-                    IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
-                    std::cout << e.what() << std::endl;
-                    return (false);
-                }
-                params.serverInfo = this->_trail;
-                params.uplink = this->_prefix.empty() ? IRCServer::name : this->_prefix ;
+            params.newServer = _parameters[0];
+            try
+            {
+                params.hopcount = std::stoi(_parameters[1]);
+                params.token = std::stoi(_parameters[2]);
             }
+            catch (std::invalid_argument &e)
+            {
+                IRCServer::_reply_manager->reply(Parameters(*this), ReplyManager::ERR_MALFORMEDPARAMS, socket);
+                std::cout << e.what() << std::endl;
+                return (false);
+            }
+            params.serverInfo = this->_trail;
+            params.uplink = this->_prefix.empty() ? IRCServer::name : this->_prefix ;
+        }
+        else if (this->type == IRCMessageType::SQUIT && !_parameters.empty()) {
+            params.name = _parameters[0];
+            params.quit_message = this->_trail;
         }
         else if (this->type == IRCMessageType::PRIVMSG)
         {
@@ -348,7 +359,7 @@ std::string IRCMessage::to_string(void) const
     this->_command.empty() ? throw std::logic_error("Error : no command in automatic IRCMessage") : 0;
     !result.empty() ? result += ' ' : result;
     result += this->_command;
-    this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
+    // this->_parameters.empty() ? throw std::logic_error("Error : no parameters in automatic IRCMessage") : 0;
     std::for_each(this->_parameters.begin(), this->_parameters.end(), [&result](std::string const &str) { result += ' ' + str; });
     !(this->_trail.empty()) ? result += " :" + this->_trail : result;
     return result + '\n';

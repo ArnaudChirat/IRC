@@ -48,9 +48,12 @@ public:
     static void addUser(User &user, Token token);
     static void deleteServer(Token const &);
     static std::vector<ServerClient *> getServers();
+    static void removeLostConnectionFromLocalServers(ServerClient * server);
     static std::vector<User *> getUsers();
     static void removeUser(std::string const &);
     static ServerClient *getServerClient(Token token);
+    static ServerClient * getAnyServerByName(std::string const & name);
+
     static SocketManager *_socket_manager;
     static MessageMediator *_message_mediator;
     static ClientManager *_client_manager;
