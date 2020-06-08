@@ -112,6 +112,16 @@ Channel * ChannelManager::getChannel(std::string const & name) const{
     return NULL;
 }
 
+std::vector<Channel*> ChannelManager::getChannels() const
+{
+    std::vector<Channel*> channels;
+    for (auto i = _channels.begin(); i != _channels.end(); i++)
+    {
+        channels.push_back(i->second);
+    }
+    return channels;
+}
+
 bool    ChannelManager::_verify(std::string name) const {
     char c = name.at(0);
     if (c == '#' | c == '&' | c == '+' | c == '!')

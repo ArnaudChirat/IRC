@@ -38,6 +38,7 @@ public:
     void    handleJoinChannel(IRCMessage const &, User *);
     void    handlePartChannel(IRCMessage const &, User *);
     Channel * getChannel(std::string const &) const;
+    std::vector<Channel*> getChannels() const;
     void    sendMessageChannel(User const & user, Channel const & channel, std::string const & msg);
 
 

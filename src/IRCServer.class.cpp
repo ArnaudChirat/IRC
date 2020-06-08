@@ -23,7 +23,7 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <net/if.h>
-
+#include <iterator>
 SocketManager *IRCServer::_socket_manager = new SocketManager();
 MessageMediator *IRCServer::_message_mediator = new MessageMediator();
 ClientManager *IRCServer::_client_manager = new ClientManager();
@@ -139,6 +139,7 @@ void IRCServer::replyToNewConnection(SocketClient *socket)
         IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         IRCServer::sendDataServer(socket);
         IRCServer::sendDataUser(socket);
+        IRCServer::sendDataChannel(socket);
     }
     else
         IRCServer::_newSocketConnections.erase(it);
@@ -164,7 +165,7 @@ void IRCServer::addUser(User &user, Token token)
 
 std::vector<ServerClient *> IRCServer::getServers()
 {
-    std::vector<ServerClient*> servers;
+    std::vector<ServerClient *> servers;
     for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
     {
         servers.push_back(i->second);
@@ -172,11 +173,10 @@ std::vector<ServerClient *> IRCServer::getServers()
     return servers;
 };
 
-
 std::vector<User *> IRCServer::getUsers()
 {
-    std::vector<User*> users;
-    std::vector<User*> users_tmp;
+    std::vector<User *> users;
+    std::vector<User *> users_tmp;
     for (auto i = IRCServer::_servers_local.begin(); i != IRCServer::_servers_local.end(); i++)
     {
         ServerClient *server = i->second;
@@ -199,6 +199,33 @@ void IRCServer::sendDataServer(SocketClient *socket)
             IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         }
     }
+}
+
+void IRCServer::sendDataChannel(SocketClient *socket)
+{
+    std::vector<User *> users = IRCServer::getUsers();
+    std::string channels_name;
+    (void)socket;
+    for (auto i = users.begin(); i != users.end(); i++)
+    {
+        std::unordered_map<std::string, Channel *> channels = (*i)->getChannels();
+        channels_name.clear();
+        bool first = true;
+        std::for_each(channels.begin(), channels.end(), [&channels_name, &first](std::pair<const std::string, Channel *> &i) {
+            if (!first)
+                channels_name += ",";
+            channels_name += i.first;
+            first = false;
+        });
+        if (!channels_name.empty())
+        {
+            Parameters params(**i);
+            params.channelName = channels_name;
+            IRCMessage join_message(params, "JOIN");
+            IRCServer::_message_mediator->sendReply(join_message.to_string(), socket);
+        }
+    }
+
 }
 
 void IRCServer::sendDataUser(SocketClient *socket)
@@ -261,13 +288,13 @@ IRCServer *IRCServer::getInstance(void)
     return IRCServer::_myself;
 }
 
-Token  IRCServer::getTokenFromUser(std::string const & nickname){
+Token IRCServer::getTokenFromUser(std::string const &nickname)
+{
     auto it = IRCServer::_user_to_server.find(nickname);
     if (it != IRCServer::_user_to_server.end())
         return IRCServer::_user_to_server.at(nickname);
     return 0;
 }
-
 
 ServerClient *IRCServer::getServerFromUser(std::string const &nickname)
 {
@@ -278,23 +305,29 @@ ServerClient *IRCServer::getServerFromUser(std::string const &nickname)
     return server;
 }
 
-void IRCServer::deleteServer(Token const & token){
+void IRCServer::deleteServer(Token const &token)
+{
     IRCServer::_routing_table->delRoute(token);
     IRCServer::_servers_local.erase(token);
 }
 
-void IRCServer::removeUser(std::string const & nickname){
+void IRCServer::removeUser(std::string const &nickname)
+{
     IRCServer::_user_to_server.erase(nickname);
 }
 
-void IRCServer::removeLostConnectionFromLocalServers(ServerClient * server){
-    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it){
+void IRCServer::removeLostConnectionFromLocalServers(ServerClient *server)
+{
+    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it)
+    {
         it->second->removeServer(server);
     }
 }
 
-ServerClient * IRCServer::getAnyServerByName(std::string const & name){
-    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it){
+ServerClient *IRCServer::getAnyServerByName(std::string const &name)
+{
+    for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it)
+    {
         if (it->second->getName() == name)
             return it->second;
     }

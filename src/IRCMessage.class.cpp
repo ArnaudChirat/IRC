@@ -82,6 +82,12 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         this->setParameters(parameters);
         this->setTrail("Link dead", IRCMessageWay::SENDING);
     }
+    else if (command == "JOIN")
+    {
+        this->setPrefix(param.nickname, IRCMessageWay::SENDING);
+        parameters.push_back(param.channelName);
+        this->setParameters(parameters);
+    }
 }
 
 

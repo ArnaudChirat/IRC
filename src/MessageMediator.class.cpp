@@ -153,7 +153,15 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
 {
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client && client->status == Client::Status::CONNECTED)
-        IRCServer::_channel_manager->handleJoinChannel(message, dynamic_cast<User *>(client));
+    {
+        if (dynamic_cast<User*>(client))
+            IRCServer::_channel_manager->handleJoinChannel(message, static_cast<User *>(client));
+        else
+        {
+            
+        }
+        
+    }
 }
 
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
