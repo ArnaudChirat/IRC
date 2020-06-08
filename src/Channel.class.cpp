@@ -36,15 +36,19 @@ std::string     Channel::getMembersString(char separator) const {
     return str;
 }
 
-void Channel::sendMessageToAll(User const &user, std::string const &msg) const
+void Channel::sendMessageToAll(User &user, IRCMessage const &msg) const
 {
-    std::string sendingmsg;
-    std::string prefix = ":" + user.getName() + "!~" + user.getUser() + "@" + user.getSocketClient()->getAddr();
-    sendingmsg = prefix + " PRIVMSG " + this->_name + " :" + msg + "\n";
+
+    // std::string sendingmsg;
+    // std::string prefix = ":" + user.getName() + "!~" + user.getUser() + "@" + user.getSocketClient()->getAddr();
+    // sendingmsg = prefix + " PRIVMSG " + this->_name + " :" + msg + "\n";
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
     {
         if (it->first != user.getName())
-            IRCServer::_message_mediator->sendReply(sendingmsg, it->second->getSocketClient());
+        {
+            IRCServer::_client_manager->sendMsg(&user, msg);
+            // IRCServer::_message_mediator->sendReply(sendingmsg, it->second->getSocketClient());
+        }
     }
 }
 

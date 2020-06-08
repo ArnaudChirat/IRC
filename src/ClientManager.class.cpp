@@ -1,4 +1,5 @@
 #include "ClientManager.class.hpp"
+#include "ChannelManager.class.hpp"
 #include "ReplyManager.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
@@ -315,7 +316,7 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
     std::string msg = message.params.text;
     std::string target = message.params.target;
     std::string message_send = message.to_string();
-    if (client->getName() != target && checkName(USER, target))
+    if (client->getName() != target && (checkName(USER, target) || IRCServer::_channel_manager->getChannel(target)))
     {
         Token token = IRCServer::getTokenFromUser(target);
         if ((source = dynamic_cast<User*>(client)))

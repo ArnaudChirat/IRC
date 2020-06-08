@@ -231,7 +231,7 @@ void MessageMediator::privmsgCommand(IRCMessage const &message, SocketClient *so
     {
         Channel *channel = IRCServer::_channel_manager->getChannel(message.params.target);
         if (channel)
-            IRCServer::_channel_manager->sendMessageChannel(*static_cast<User *>(client), *channel, message.params.text);
+            IRCServer::_channel_manager->sendMessageChannel(*static_cast<User *>(client), *channel, message);
         else
             IRCServer::_client_manager->sendMsg(client, message);
     }

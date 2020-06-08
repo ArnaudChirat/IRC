@@ -27,7 +27,7 @@ public:
     void deleteMember(User *);
     std::unordered_map<std::string, User *> getMembers(void) const;
     std::string getMembersString(char) const;
-    void sendMessageToAll(User const &, std::string const &) const;
+    void sendMessageToAll(User &, IRCMessage const &) const;
 
     template <typename T>
     void sendParamToAll(Parameters const &, T const &) const;
