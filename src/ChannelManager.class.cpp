@@ -11,7 +11,7 @@ ChannelManager::ChannelManager(void) {}
 ChannelManager::~ChannelManager(void) {}
 
 
-void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user, ConnectionType type) {
+void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
     if (msg.params.channelName == "0")
         _leaveAllChann(user);
     else {
@@ -128,16 +128,6 @@ Channel * ChannelManager::getChannel(std::string const & name) const{
     if (it != this->_channels.end())
         return it->second;    
     return NULL;
-}
-
-std::vector<Channel*> ChannelManager::getChannels() const
-{
-    std::vector<Channel*> channels;
-    for (auto i = _channels.begin(); i != _channels.end(); i++)
-    {
-        channels.push_back(i->second);
-    }
-    return channels;
 }
 
 bool    ChannelManager::_verify(std::string name) const {

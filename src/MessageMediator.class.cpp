@@ -157,22 +157,7 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
     if (client && client->status == Client::Status::CONNECTED)
     {
         if (dynamic_cast<User*>(client))
-            IRCServer::_channel_manager->handleJoinChannel(message, static_cast<User *>(client), ChannelManager::ConnectionType::USER);
-        else
-        {
-            User *user = IRCServer::getUser(message.getPrefix());
-            if (user)
-                IRCServer::_channel_manager->handleJoinChannel(message, user, ChannelManager::ConnectionType::SERVER);
-        }
-        
-    }
-}
-
-void MessageMediator::njoinCommand(IRCMessage const &message, SocketClient *socket) const
-{
-    ServerClient *server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
-    if (server){
-        IRCServer::_channel_manager->handleNJoin(message);
+            IRCServer::_channel_manager->handleJoinChannel(message, static_cast<User *>(client));
     }
 }
 
