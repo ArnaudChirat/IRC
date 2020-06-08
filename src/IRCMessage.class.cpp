@@ -56,7 +56,7 @@ IRCMessage::IRCMessage(Parameters const &param, std::string const &command)
         }
         else
         {
-            this->setPrefix(param.prevNickname, IRCMessageWay::SENDING);
+            this->setPrefix(param.prevNickname+'!'+param.user+'@'+param.host, IRCMessageWay::SENDING);
         }
         this->setParameters(parameters);
     }
@@ -226,7 +226,8 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::NICK && _parameters.size() >= 1)
         {
-            params.prevNickname = _prefix;
+            std::vector<std::string> pfix = Utility::splitParam(_prefix, "!");
+            params.prevNickname = (!pfix.empty() ? pfix[0] : params.prevNickname);
             params.nickname = _parameters[0];
             if (_parameters.size() >= 6)
             {
