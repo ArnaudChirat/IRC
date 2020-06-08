@@ -245,8 +245,8 @@ bool ClientManager::setUser(IRCMessage const &message, User &client)
 void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
 {
     Client *client = this->getClient(socket);
-    User * user = dynamic_cast<User *>(client);
-    ServerClient * server = dynamic_cast<ServerClient *>(client);
+    User *user = dynamic_cast<User *>(client);
+    ServerClient *server = dynamic_cast<ServerClient *>(client);
     if (!client)
         return;
     if (choice == ClientChoice::ALL)
@@ -271,10 +271,10 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
 }
 
 //delete clients with hopcount > 1
-void ClientManager::deleteClient(Client * client, ClientChoice choice)
+void ClientManager::deleteClient(Client *client, ClientChoice choice)
 {
-    User * user = dynamic_cast<User *>(client);
-    ServerClient * server = dynamic_cast<ServerClient *>(client);
+    User *user = dynamic_cast<User *>(client);
+    ServerClient *server = dynamic_cast<ServerClient *>(client);
     if (!client)
         return;
     if (choice == ClientChoice::ALL)
@@ -298,6 +298,7 @@ void ClientManager::deleteClient(Client * client, ClientChoice choice)
 
 int ClientManager::getSize(ClientChoice choice) const
 {
+
     unsigned long total_size = this->_names_used.size();
     std::set<Key> list;
     if (choice == ClientChoice::ALL)
@@ -309,43 +310,56 @@ int ClientManager::getSize(ClientChoice choice) const
     }
 }
 
-bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
+bool ClientManager::sendMsg2(Client *client, IRCMessage const &msg, std::string const &target)
 {
+    std::string message_send = msg.to_string();
     User *target_ptr = NULL;
     User *source = NULL;
-    std::string msg = message.params.text;
-    std::string target = message.params.target;
-    std::string message_send = message.to_string();
-    if (client->getName() != target && (checkName(USER, target) || IRCServer::_channel_manager->getChannel(target)))
+    Token token = IRCServer::getTokenFromUser(target);
+    if ((source = dynamic_cast<User *>(client)))
     {
-        Token token = IRCServer::getTokenFromUser(target);
-        if ((source = dynamic_cast<User*>(client)))
+        Parameters parameters(*source);
+        parameters.paramIRCServer(*(IRCServer::getInstance()));
+        parameters.text = msg.params.text;
+        parameters.target = msg.params.target;
+        message_send = IRCMessage(parameters, "PRIVMSG").to_string();
+    }
+    if (token == 1)
+    {
+        target_ptr = static_cast<User *>(this->getClientByName(target));
+        if (target_ptr->status == Client::Status::CONNECTED)
         {
-            Parameters parameters(*source);
-            parameters.paramIRCServer(*(IRCServer::getInstance()));
-            parameters.text = msg;
-            parameters.target = target;
-            message_send = IRCMessage(parameters, "PRIVMSG").to_string();
-        }
-        if (token == 1)
-        {
-            target_ptr = static_cast<User *>(this->getClientByName(target));
-            if (target_ptr->status == Client::Status::CONNECTED)
-            {
-                IRCServer::_message_mediator->sendReply(message_send, target_ptr->getSocketClient());
-            }
-            else
-            {
-                Parameters param = {};
-                param.nickname = target;
-                IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
-            }
+            IRCServer::_message_mediator->sendReply(message_send, target_ptr->getSocketClient());
         }
         else
         {
-            Token token_road = IRCServer::_routing_table->getRoute(token);
-            ServerClient *server = IRCServer::getServerClient(token_road);
-            IRCServer::_message_mediator->sendReply(message_send, server->getSocketClient());
+            Parameters param = {};
+            param.nickname = target;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
+            return (false);
+        }
+    }
+    else
+    {
+        Token token_road = IRCServer::_routing_table->getRoute(token);
+        ServerClient *server = IRCServer::getServerClient(token_road);
+        IRCServer::_message_mediator->sendReply(message_send, server->getSocketClient());
+    }
+    return (true);
+}
+
+bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
+{
+    if (client->getName() != message.params.target)
+    {
+        if (checkName(USER, message.params.target))
+            return (sendMsg2(client, message, message.params.target));
+        else
+        {
+            Parameters param = {};
+            param.nickname = message.params.target;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
+            return (false);
         }
     }
     return (false);

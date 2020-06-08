@@ -46,7 +46,7 @@ void Channel::sendMessageToAll(User &user, IRCMessage const &msg) const
     {
         if (it->first != user.getName())
         {
-            IRCServer::_client_manager->sendMsg(&user, msg);
+            IRCServer::_client_manager->sendMsg2(&user, msg, it->second->getName());
             // IRCServer::_message_mediator->sendReply(sendingmsg, it->second->getSocketClient());
         }
     }
