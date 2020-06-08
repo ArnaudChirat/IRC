@@ -14,7 +14,7 @@ class ChannelManager
 
 public:
 
-    enum ChannelMode
+    enum class ChannelMode
     {
         ANONYMOUS = 0x01,
         INVITE_ONLY,
@@ -32,12 +32,19 @@ public:
         INVITATION_MAS3,
     };
 
+    enum class ConnectionType {
+        SERVER = 0x01,
+        USER,
+    };
+
     ChannelManager(void);
     ~ChannelManager(void);
     size_t  getSize(void) const;
     void    handleJoinChannel(IRCMessage const &, User *);
+    void handleNJoin(IRCMessage const &);
     void    handlePartChannel(IRCMessage const &, User *);
     Channel * getChannel(std::string const &) const;
+    std::unordered_map<std::string, Channel*> getChannels(void) const;
     void    sendMessageChannel(User const & user, Channel const & channel, std::string const & msg);
 
 
@@ -52,7 +59,7 @@ private:
     bool    _verify(std::string) const;
     Channel *    _createChannel(std::string const &);
     void    _addChannel(std::string const &, Channel *);
-    void    _createAddChannel(std::string, User *);
+    void    _createAddChannel(std::string, User *, ConnectionType);
     void    _newMember(User *, Channel *);
     void    _welcomeMessage(User * client, Channel * channel) const;
     void    _leaveAllChann(User * user) const;

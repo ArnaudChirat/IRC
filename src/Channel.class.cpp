@@ -24,10 +24,11 @@ void    Channel::deleteMember(User * user){
     this->_members.erase(user->getName());
 }
 
-std::string     Channel::getMembersString(void) const {
+std::string     Channel::getMembersString(char separator) const {
     std::string  str;
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
-        str += it->first + ' ';
+        str += it->first + separator;
+    !str.empty() ? str.pop_back() : (void)0;
     return str;
 }
 

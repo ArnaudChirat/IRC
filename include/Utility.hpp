@@ -52,6 +52,7 @@ struct Parameters
     std::string channelName{};
     std::string channelType{};
     std::string channelMembers{};
+    std::string channelMembersComma{};
     std::string keys{};
     std::string leave_message{};
     std::string target{};

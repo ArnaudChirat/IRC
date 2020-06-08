@@ -27,6 +27,7 @@ MessageMediator::MessageMediator(void)
     this->_commands.insert({IRCMessage::IRCMessageType::LUSERS, &MessageMediator::lusersCommand});
     this->_commands.insert({IRCMessage::IRCMessageType::SERVER, &MessageMediator::createClient});
     this->_commands.insert({IRCMessage::IRCMessageType::SQUIT, &MessageMediator::squitCommand});
+    this->_commands.insert({IRCMessage::IRCMessageType::NJOIN, &MessageMediator::njoinCommand});
     return;
 }
 
@@ -154,6 +155,14 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client && client->status == Client::Status::CONNECTED)
         IRCServer::_channel_manager->handleJoinChannel(message, dynamic_cast<User *>(client));
+}
+
+void MessageMediator::njoinCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    ServerClient *server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
+    if (server){
+        IRCServer::_channel_manager->handleNJoin(message);
+    }
 }
 
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const

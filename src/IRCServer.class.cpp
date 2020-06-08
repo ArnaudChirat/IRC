@@ -201,6 +201,16 @@ void IRCServer::sendDataServer(SocketClient *socket)
     }
 }
 
+void IRCServer::sendDataChannel(SocketClient * socket){
+    std::unordered_map<std::string, Channel*> channels = IRCServer::_channel_manager->getChannels();
+    for (auto it = channels.begin(); it != channels.end(); ++it){
+        Parameters params(*(it->second));
+        IRCMessage channelMessage(params, "NJOIN");
+        IRCServer::_message_mediator->sendReply(channelMessage.to_string(), socket);
+    }
+
+}
+
 void IRCServer::sendDataUser(SocketClient *socket)
 {
     std::vector<User *> users = IRCServer::getUsers();
@@ -301,4 +311,13 @@ ServerClient * IRCServer::getAnyServerByName(std::string const & name){
             return it->second;
     }
     return NULL;
+}
+
+User *  IRCServer::getUser(std::string const & name) {
+    std::vector<User*> users = IRCServer::getUsers();
+    for (auto it = users.begin(); it != users.end(); ++it){
+        if ((*it)->getName() == name)
+            return *it;
+    }
+    return NULL;    
 }

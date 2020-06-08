@@ -25,7 +25,7 @@ public:
     void    addMember(User *);
     void    deleteMember(User *);
     std::unordered_map<std::string, User*>     getMembers(void) const;
-    std::string     getMembersString(void) const;
+    std::string     getMembersString(char) const;
     void    sendMessageToAll(User const &, std::string const &) const;
 
     

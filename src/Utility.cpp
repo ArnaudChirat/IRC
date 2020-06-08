@@ -70,7 +70,8 @@ Parameters & Parameters::paramServer(ServerClient const & server)
 Parameters & Parameters::paramChannel(Channel const & channel)
 {
     this->channelName = channel.getName();
-    this->channelMembers = channel.getMembersString();
+    this->channelMembers = channel.getMembersString(' ');
+    this->channelMembersComma = channel.getMembersString(',');
     this->channelType = "=";
     this->server = IRCServer::name;
     return *this;
@@ -143,6 +144,7 @@ Parameters &    Parameters::operator=(Parameters const & rhs){
     this->channelName = rhs.channelName;
     this->channelType = rhs.channelType;
     this->channelMembers = rhs.channelMembers;
+    this->channelMembersComma = rhs.channelMembers;
     this->keys = rhs.keys;
     this->leave_message = rhs.leave_message;
     this->target = rhs.target;
