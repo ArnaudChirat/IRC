@@ -39,6 +39,8 @@ private:
 
 std::ostream &operator<<(std::ostream &o, Channel const &rhs);
 
+std::ostream &      operator<<(std::ostream & o, Channel const & rhs);
+
 template <typename T>
 void Channel::sendParamToAll(Parameters const &param, T const &replyEnum) const
 {

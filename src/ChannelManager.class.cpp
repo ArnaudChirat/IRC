@@ -21,7 +21,7 @@ void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user, C
         keys = Utility::splitParam(msg.params.keys, ", ");
         // verify keys?
         for (auto itName = names.begin(); itName != names.end(); ++itName)
-            _createAddChannel(*itName, user, type);
+            _createAddChannel(*itName, user, ChannelManager::ConnectionType::USER);
     }
 }
 
@@ -155,4 +155,12 @@ void    ChannelManager::sendMessageChannel(User const & user, Channel const & ch
     }
     else
         channel.sendMessageToAll(user, msg);
+}
+
+std::vector<Channel*>  ChannelManager::getChannels(void) const{
+    std::vector<Channel*> result;
+    std::for_each(this->_channels.begin(), this->_channels.end(), [&result](std::pair<std::string, Channel*> x){
+        result.push_back(x.second);
+    });
+    return result;
 }

@@ -25,7 +25,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"QUIT", IRCMessageType::QUIT},
     {"SERVICE", IRCMessageType::SERVICE},
     {"JOIN", IRCMessageType::JOIN},
-    {"NJOIN", IRCMessageType::JOIN},
+    {"NJOIN", IRCMessageType::NJOIN},
     {"OPER", IRCMessageType::OPER},
     {"PART", IRCMessageType::PART},
     {"PRIVMSG", IRCMessageType::PRIVMSG},

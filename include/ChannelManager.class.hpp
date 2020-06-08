@@ -40,12 +40,11 @@ public:
     ChannelManager(void);
     ~ChannelManager(void);
     size_t  getSize(void) const;
-    void    handleJoinChannel(IRCMessage const &, User *, ConnectionType type);
+    void    handleJoinChannel(IRCMessage const &, User *);
     void handleNJoin(IRCMessage const &);
     void    handlePartChannel(IRCMessage const &, User *);
     Channel * getChannel(std::string const &) const;
-    std::vector<Channel*> getChannels() const;
-
+    std::vector<Channel*> getChannels(void) const;
     void    sendMessageChannel(User const & user, Channel const & channel, std::string const & msg);
 
 

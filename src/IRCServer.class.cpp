@@ -201,30 +201,14 @@ void IRCServer::sendDataServer(SocketClient *socket)
     }
 }
 
-void IRCServer::sendDataChannel(SocketClient *socket)
-{
-    std::vector<User *> users = IRCServer::getUsers();
-    std::string channels_name;
-    (void)socket;
-    for (auto i = users.begin(); i != users.end(); i++)
-    {
-        std::unordered_map<std::string, Channel *> channels = (*i)->getChannels();
-        channels_name.clear();
-        bool first = true;
-        std::for_each(channels.begin(), channels.end(), [&channels_name, &first](std::pair<const std::string, Channel *> &i) {
-            if (!first)
-                channels_name += ",";
-            channels_name += i.first;
-            first = false;
-        });
-        if (!channels_name.empty())
-        {
-            Parameters params(**i);
-            params.channelName = channels_name;
-            IRCMessage join_message(params, "JOIN");
-            IRCServer::_message_mediator->sendReply(join_message.to_string(), socket);
-        }
+void IRCServer::sendDataChannel(SocketClient * socket){
+    std::vector<Channel*> channels = IRCServer::_channel_manager->getChannels();
+    for (auto it = channels.begin(); it != channels.end(); ++it){
+        Parameters params(**it);
+        IRCMessage channelMessage(params, "NJOIN");
+        IRCServer::_message_mediator->sendReply(channelMessage.to_string(), socket);
     }
+
 }
 
 void IRCServer::sendDataUser(SocketClient *socket)

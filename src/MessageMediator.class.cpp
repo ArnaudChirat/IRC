@@ -176,6 +176,14 @@ void MessageMediator::njoinCommand(IRCMessage const &message, SocketClient *sock
     }
 }
 
+void MessageMediator::njoinCommand(IRCMessage const &message, SocketClient *socket) const
+{
+    ServerClient *server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
+    if (server){
+        IRCServer::_channel_manager->handleNJoin(message);
+    }
+}
+
 void MessageMediator::passCommand(IRCMessage const &message, SocketClient *socket) const
 {
     Client *client = IRCServer::_client_manager->getClient(socket);
@@ -281,7 +289,7 @@ void MessageMediator::lusersCommand(IRCMessage const &message, SocketClient *soc
             msg << "\t*\t" << std::endl;
         }
         msg << "****** Table de routage *******" << std::endl;
-        msg << *IRCServer::_routing_table << std::endl;
+        msg << *IRCServer::_routing_table << std::endl << std::endl;
         this->sendReply(msg.str(), socket);
     }
 }

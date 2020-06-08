@@ -52,6 +52,7 @@ public:
     static std::vector<ServerClient *> getServers();
     static void removeLostConnectionFromLocalServers(ServerClient *server);
     static std::vector<User *> getUsers();
+    static User * getUser(std::string const &);
     static void removeUser(std::string const &);
     static ServerClient *getServerClient(Token token);
     static ServerClient *getAnyServerByName(std::string const &name);
