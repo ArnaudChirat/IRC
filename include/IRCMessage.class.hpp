@@ -79,6 +79,7 @@ public:
         SQUIT,
         CHANNEL_OPERATION = 0x100,
         JOIN,
+        NJOIN,
         PART,
         CHANNEL_MODE,
         TOPIC,

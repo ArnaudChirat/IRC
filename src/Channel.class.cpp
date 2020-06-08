@@ -24,10 +24,11 @@ void    Channel::deleteMember(User * user){
     this->_members.erase(user->getName());
 }
 
-std::string     Channel::getMembersString(void) const {
+std::string     Channel::getMembersString(char separator) const {
     std::string  str;
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
-        str += it->first + ' ';
+        str += it->first + separator;
+    !str.empty() ? str.pop_back() : (void)0;
     return str;
 }
 
@@ -39,4 +40,10 @@ void    Channel::sendMessageToAll(User const & user, std::string const & msg) co
         if (it->first != user.getName())
             IRCServer::_message_mediator->sendReply(sendingmsg, it->second->getSocketClient());
     }
+}
+
+std::ostream &      operator<<(std::ostream & o, Channel const & rhs){
+    o << "Channel name : " << rhs.getName() << std::endl;
+    o << "Members : " << rhs.getMembersString(',') << std::endl;
+    return o;
 }

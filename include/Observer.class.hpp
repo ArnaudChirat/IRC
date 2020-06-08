@@ -19,8 +19,8 @@ public:
 
     void    subscribe(SocketClient*);
     void    unsubscribe(SocketClient*);
-    bool    notify(Client *, std::string const &);
-    bool    notify(Channel *, std::string const &);
+    bool    notify(Client *, std::string const &) const;
+    bool    notify(Channel *, std::string const &) const;
 
     SocketClient * getOriginOfMsg(void) const;
     void setOriginOfMsg(SocketClient*);

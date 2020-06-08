@@ -21,9 +21,20 @@ void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
         keys = Utility::splitParam(msg.params.keys, ", ");
         // verify keys?
         for (auto itName = names.begin(); itName != names.end(); ++itName)
-            _createAddChannel(*itName, user);
+            _createAddChannel(*itName, user, ChannelManager::ConnectionType::USER);
     }
 }
+
+void ChannelManager::handleNJoin(IRCMessage const & message){
+    std::vector<std::string>  usersNames;
+    User * user = NULL;
+    usersNames = Utility::splitParam(message.params.channelMembersComma, ",");
+    for (auto it = usersNames.begin(); it != usersNames.end(); ++it){
+        user = IRCServer::getUser(*it);
+        _createAddChannel(message.params.channelName, user, ChannelManager::ConnectionType::SERVER);
+    }
+}
+
 
 void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
     std::vector<std::string>  names;
@@ -52,23 +63,30 @@ void    ChannelManager::_welcomeMessage(User * user, Channel * channel) const{
     IRCServer::_reply_manager->reply(param, ReplyManager::RPL_ENDOFNAMES, user->getSocketClient());
 }
 
-void    ChannelManager::_createAddChannel(std::string name, User * user) {
+void    ChannelManager::_createAddChannel(std::string name, User * user, ChannelManager::ConnectionType x) {
     if (!_verify(name)){
-        Parameters param(*user);
-        param.channelName = name;
-        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
+        if (x == ChannelManager::ConnectionType::USER){
+            Parameters param(*user);
+            param.channelName = name;
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
+        }
+        else
+            throw std::logic_error("Bad channel name coming from server.");
+        
         return;
     }
     Channel * channel = this->getChannel(name);
     if (!channel) {
         Channel * channel = this->_createChannel(name);
         this->_newMember(user, channel);
-        this->_welcomeMessage(user, channel);
+        if (x == ChannelManager::ConnectionType::USER)
+            this->_welcomeMessage(user, channel);
     }
     else {
         if (!user->getChannel(name)){
             this->_newMember(user, channel);
-            this->_welcomeMessage(user, channel);
+            if (x == ChannelManager::ConnectionType::USER)
+                this->_welcomeMessage(user, channel);
         }
     }
 }
@@ -127,4 +145,12 @@ void    ChannelManager::sendMessageChannel(User const & user, Channel const & ch
     }
     else
         channel.sendMessageToAll(user, msg);
+}
+
+std::vector<Channel*>  ChannelManager::getChannels(void) const{
+    std::vector<Channel*> result;
+    std::for_each(this->_channels.begin(), this->_channels.end(), [&result](std::pair<std::string, Channel*> x){
+        result.push_back(x.second);
+    });
+    return result;
 }

@@ -25,6 +25,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"QUIT", IRCMessageType::QUIT},
     {"SERVICE", IRCMessageType::SERVICE},
     {"JOIN", IRCMessageType::JOIN},
+    {"NJOIN", IRCMessageType::NJOIN},
     {"OPER", IRCMessageType::OPER},
     {"PART", IRCMessageType::PART},
     {"PRIVMSG", IRCMessageType::PRIVMSG},
@@ -81,6 +82,12 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         parameters.push_back(param.name);
         this->setParameters(parameters);
         this->setTrail("Link dead", IRCMessageWay::SENDING);
+    }
+    else if (command == "NJOIN"){
+        this->setPrefix(param.server, IRCMessageWay::SENDING);
+        parameters.push_back(param.channelName);
+        this->setParameters(parameters);
+        this->setTrail(param.channelMembersComma, IRCMessageWay::SENDING);
     }
 }
 
@@ -235,6 +242,11 @@ bool IRCMessage::isCommand(SocketClient *socket)
         {
             params.channelName = _parameters[0];
             params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
+        }
+        else if (this->type == IRCMessageType::NJOIN && _parameters.size() == 1 && !this->_trail.empty())
+        {
+            params.channelName = _parameters[0];
+            params.channelMembersComma = this->_trail;
         }
         else if (this->type == IRCMessageType::LUSERS)
         {

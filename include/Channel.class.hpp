@@ -25,7 +25,7 @@ public:
     void    addMember(User *);
     void    deleteMember(User *);
     std::unordered_map<std::string, User*>     getMembers(void) const;
-    std::string     getMembersString(void) const;
+    std::string     getMembersString(char) const;
     void    sendMessageToAll(User const &, std::string const &) const;
 
     
@@ -39,11 +39,15 @@ private:
 };
 
 
+std::ostream &      operator<<(std::ostream & o, Channel const & rhs);
+
 template <typename T>
 void     Channel::sendParamToAll(Parameters const & param, T const & replyEnum) const
 {
-    for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
-        IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+    for (auto it = this->_members.begin(); it != this->_members.end(); ++it){
+        if (IRCServer::getTokenFromUser(it->second->getName()) == 1)
+            IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+    }
 }
 
 

@@ -139,6 +139,7 @@ void IRCServer::replyToNewConnection(SocketClient *socket)
         IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         IRCServer::sendDataServer(socket);
         IRCServer::sendDataUser(socket);
+        IRCServer::sendDataChannel(socket);
     }
     else
         IRCServer::_newSocketConnections.erase(it);
@@ -199,6 +200,16 @@ void IRCServer::sendDataServer(SocketClient *socket)
             IRCServer::_message_mediator->sendReply(serverMessage.to_string(), socket);
         }
     }
+}
+
+void IRCServer::sendDataChannel(SocketClient * socket){
+    std::vector<Channel*> channels = IRCServer::_channel_manager->getChannels();
+    for (auto it = channels.begin(); it != channels.end(); ++it){
+        Parameters params(**it);
+        IRCMessage channelMessage(params, "NJOIN");
+        IRCServer::_message_mediator->sendReply(channelMessage.to_string(), socket);
+    }
+
 }
 
 void IRCServer::sendDataUser(SocketClient *socket)
@@ -301,4 +312,13 @@ ServerClient * IRCServer::getAnyServerByName(std::string const & name){
             return it->second;
     }
     return NULL;
+}
+
+User *  IRCServer::getUser(std::string const & name) {
+    std::vector<User*> users = IRCServer::getUsers();
+    for (auto it = users.begin(); it != users.end(); ++it){
+        if ((*it)->getName() == name)
+            return *it;
+    }
+    return NULL;    
 }

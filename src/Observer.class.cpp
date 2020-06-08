@@ -15,7 +15,7 @@ void Observer::unsubscribe(SocketClient* socket){
     this->_subscribers.erase(socket);
 }
 
-bool Observer::notify(Client * client, std::string const & command){
+bool Observer::notify(Client * client, std::string const & command) const {
     if (client){
         User * user = NULL;
         ServerClient * server = NULL;
@@ -39,11 +39,11 @@ bool Observer::notify(Client * client, std::string const & command){
     return true;
 }
 
-// void Observer::notify(Channel * client, std::string const & command){
-//     // IRCMessage notification(channel, command); // build IRC Message from client with command
-//     // for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-//     //     IRCServer::_message_mediator->sendReply(notification.to_string(), *it);
-//     // }
+// bool Observer::notify(Channel * client, std::string const & command) const {
+//     IRCMessage notification(channel, command); // build IRC Message from client with command
+//     for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
+//         IRCServer::_message_mediator->sendReply(notification.to_string(), *it);
+//     }
 // }
 
 SocketClient * Observer::getOriginOfMsg(void) const{
