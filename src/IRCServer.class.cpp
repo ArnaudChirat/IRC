@@ -225,7 +225,6 @@ void IRCServer::sendDataChannel(SocketClient *socket)
             IRCServer::_message_mediator->sendReply(join_message.to_string(), socket);
         }
     }
-
 }
 
 void IRCServer::sendDataUser(SocketClient *socket)
@@ -322,6 +321,17 @@ void IRCServer::removeLostConnectionFromLocalServers(ServerClient *server)
     {
         it->second->removeServer(server);
     }
+}
+
+User *IRCServer::getUser(std::string const &name)
+{
+    std::vector<User *> users = IRCServer::getUsers();
+    for (auto it = users.begin(); it != users.end(); ++it)
+    {
+        if ((*it)->getName() == name)
+            return *it;
+    }
+    return NULL;
 }
 
 ServerClient *IRCServer::getAnyServerByName(std::string const &name)

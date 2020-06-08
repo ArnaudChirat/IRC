@@ -24,6 +24,7 @@ private:
     static std::vector<SocketClient *> _newSocketConnections;
     static std::unordered_map<Token, ServerClient *> _servers_local;
     static std::unordered_map<std::string, Token> _user_to_server;
+
 public:
     IRCServer(void);
     static std::string name;
@@ -49,12 +50,13 @@ public:
     static void addUser(User &user, Token token);
     static void deleteServer(Token const &);
     static std::vector<ServerClient *> getServers();
-    static void removeLostConnectionFromLocalServers(ServerClient * server);
+    static void removeLostConnectionFromLocalServers(ServerClient *server);
     static std::vector<User *> getUsers();
     static std::vector<Channel *> getChannels();
     static void removeUser(std::string const &);
     static ServerClient *getServerClient(Token token);
-    static ServerClient * getAnyServerByName(std::string const & name);
+    static ServerClient *getAnyServerByName(std::string const &name);
+    static User *getUser(std::string const &name);
 
     static SocketManager *_socket_manager;
     static MessageMediator *_message_mediator;

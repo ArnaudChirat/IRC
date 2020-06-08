@@ -158,7 +158,9 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
             IRCServer::_channel_manager->handleJoinChannel(message, static_cast<User *>(client));
         else
         {
-            
+            User *user = IRCServer::getUser(message.getPrefix());
+            if (user)
+                IRCServer::_channel_manager->handleJoinChannel(message, user);
         }
         
     }
