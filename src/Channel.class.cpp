@@ -51,9 +51,8 @@ void Channel::sendMessageToAll(User const &user, std::string const &msg) const
 
 std::ostream &operator<<(std::ostream &o, Channel const &rhs)
 {
-
     o << "channel name : " << rhs.getName() << std::endl;
     o << "Members :" << std::endl;
     o << rhs.getMembersString(',') << std::endl;
-    return (o);
+    return o;
 }

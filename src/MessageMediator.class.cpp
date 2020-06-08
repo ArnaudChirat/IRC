@@ -7,6 +7,7 @@
 #include "Client.class.hpp"
 #include "SocketManager.class.hpp"
 #include "ChannelManager.class.hpp"
+#include "Channel.class.hpp"
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "Service.class.hpp"

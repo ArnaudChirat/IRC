@@ -43,7 +43,10 @@ template <typename T>
 void Channel::sendParamToAll(Parameters const &param, T const &replyEnum) const
 {
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
-        IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+    {
+        if (IRCServer::getTokenFromUser(it->second->getName()) == 1)
+            IRCServer::_reply_manager->reply(param, replyEnum, it->second->getSocketClient());
+    }
 };
 
 
