@@ -156,8 +156,16 @@ void MessageMediator::joinCommand(IRCMessage const &message, SocketClient *socke
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client && client->status == Client::Status::CONNECTED)
     {
-        if (dynamic_cast<User*>(client))
-            IRCServer::_channel_manager->handleJoinChannel(message, static_cast<User *>(client));
+        User * user = dynamic_cast<User*>(client);
+        if (user)
+            IRCServer::_channel_manager->handleJoinChannel(message, user, ChannelManager::ConnectionType::USER);
+        else if (dynamic_cast<ServerClient*>(client)){
+            user = IRCServer::getUser(message.params.nickname);
+            if (user)
+                IRCServer::_channel_manager->handleJoinChannel(message, user, ChannelManager::ConnectionType::SERVER);
+            else
+                throw std::logic_error("Error : no user. MessageMediator L 167");
+        }   
     }
 }
 
@@ -165,7 +173,7 @@ void MessageMediator::njoinCommand(IRCMessage const &message, SocketClient *sock
 {
     ServerClient *server = dynamic_cast<ServerClient*>(IRCServer::_client_manager->getClient(socket));
     if (server){
-        IRCServer::_channel_manager->handleNJoin(message);
+        IRCServer::_channel_manager->handleNJoin(message, ChannelManager::ConnectionType::SERVER);
     }
 }
 

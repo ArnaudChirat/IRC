@@ -40,8 +40,8 @@ public:
     ChannelManager(void);
     ~ChannelManager(void);
     size_t  getSize(void) const;
-    void    handleJoinChannel(IRCMessage const &, User *);
-    void handleNJoin(IRCMessage const &);
+    void    handleJoinChannel(IRCMessage const &, User *, ConnectionType);
+    void handleNJoin(IRCMessage const &, ConnectionType);
     void    handlePartChannel(IRCMessage const &, User *);
     Channel * getChannel(std::string const &) const;
     std::vector<Channel*> getChannels(void) const;
@@ -59,9 +59,9 @@ private:
     bool    _verify(std::string) const;
     Channel *    _createChannel(std::string const &);
     void    _addChannel(std::string const &, Channel *);
-    void    _createAddChannel(std::string, User *, ConnectionType);
+    Channel *    _createAddChannel(std::string, User *, ConnectionType);
     void    _newMember(User *, Channel *);
-    void    _welcomeMessage(User * client, Channel * channel) const;
+    void    _welcomeMessage(User * client, Channel * channel, ConnectionType) const;
     void    _leaveAllChann(User * user) const;
     void    _leaveOneChann(User * user, Channel * channel) const;
 

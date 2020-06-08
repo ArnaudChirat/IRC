@@ -15,6 +15,13 @@ void Observer::unsubscribe(SocketClient* socket){
     this->_subscribers.erase(socket);
 }
 
+void    Observer::sendNotification(std::string const & notification) const{
+    for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
+        if (*it != this->_originOfMsg)
+            IRCServer::_message_mediator->sendReply(notification, *it);
+    }
+}
+
 bool Observer::notify(Client * client, std::string const & command) const {
     if (client){
         User * user = NULL;
@@ -30,21 +37,24 @@ bool Observer::notify(Client * client, std::string const & command) const {
         else if ((server = dynamic_cast<ServerClient*>(client))){
             notification = IRCMessage(Parameters(*server), command).to_string();
         }
+        this->sendNotification(notification);
 
-        for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-            if (*it != this->_originOfMsg)
-                IRCServer::_message_mediator->sendReply(notification, *it);
-        }
     }
     return true;
 }
 
-// bool Observer::notify(Channel * client, std::string const & command) const {
-//     IRCMessage notification(channel, command); // build IRC Message from client with command
-//     for (auto it = this->_subscribers.begin(); it != this->_subscribers.end(); ++it){
-//         IRCServer::_message_mediator->sendReply(notification.to_string(), *it);
-//     }
-// }
+bool Observer::notify(Channel * channel, User * user, std::string const & command) const {
+    if (channel){
+        if (user){
+            std::string notification = IRCMessage(Parameters(*user).paramChannel(*channel), command).to_string();
+            this->sendNotification(notification);
+        }
+    }
+    else {
+        throw std::logic_error("Massive error in observer notify from Channel");
+    }
+    return true;
+}
 
 SocketClient * Observer::getOriginOfMsg(void) const{
     return this->_originOfMsg;

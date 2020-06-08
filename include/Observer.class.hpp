@@ -8,6 +8,7 @@ class SocketClient;
 class ServerClient;
 class Client;
 class Channel;
+class User;
 
 class Observer
 {
@@ -19,8 +20,9 @@ public:
 
     void    subscribe(SocketClient*);
     void    unsubscribe(SocketClient*);
+    void    sendNotification(std::string const & notification) const;
     bool    notify(Client *, std::string const &) const;
-    bool    notify(Channel *, std::string const &) const;
+    bool    notify(Channel *, User *, std::string const &) const;
 
     SocketClient * getOriginOfMsg(void) const;
     void setOriginOfMsg(SocketClient*);

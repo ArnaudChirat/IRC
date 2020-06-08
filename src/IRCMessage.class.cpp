@@ -255,6 +255,7 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::JOIN && _parameters.size() >= 1)
         {
+            params.nickname =  (!this->_prefix.empty() ? this->_prefix : params.nickname);
             params.channelName = _parameters[0];
             params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
         }

@@ -2,6 +2,7 @@
 #include "User.class.hpp"
 #include "IRCServer.class.hpp"
 #include "Utility.hpp"
+#include "Observer.class.hpp"
 #include "Channel.class.hpp"
 #include <iostream>
 #include <algorithm>
@@ -11,7 +12,8 @@ ChannelManager::ChannelManager(void) {}
 ChannelManager::~ChannelManager(void) {}
 
 
-void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
+void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user, ConnectionType x) {
+    Channel * channel = NULL;
     if (msg.params.channelName == "0")
         _leaveAllChann(user);
     else {
@@ -20,18 +22,20 @@ void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user) {
         names = Utility::splitParam(msg.params.channelName, ", ");
         keys = Utility::splitParam(msg.params.keys, ", ");
         // verify keys?
-        for (auto itName = names.begin(); itName != names.end(); ++itName)
-            _createAddChannel(*itName, user, ChannelManager::ConnectionType::USER);
+        for (auto itName = names.begin(); itName != names.end(); ++itName){
+            channel = _createAddChannel(*itName, user, x);
+            channel ? IRCServer::_observer->notify(channel, user, "JOIN") : false;
+        }
     }
 }
 
-void ChannelManager::handleNJoin(IRCMessage const & message){
+void ChannelManager::handleNJoin(IRCMessage const & message, ConnectionType x){
     std::vector<std::string>  usersNames;
     User * user = NULL;
     usersNames = Utility::splitParam(message.params.channelMembersComma, ",");
     for (auto it = usersNames.begin(); it != usersNames.end(); ++it){
         user = IRCServer::getUser(*it);
-        _createAddChannel(message.params.channelName, user, ChannelManager::ConnectionType::SERVER);
+        _createAddChannel(message.params.channelName, user, x);
     }
 }
 
@@ -56,39 +60,36 @@ void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
     }
 }
 
-void    ChannelManager::_welcomeMessage(User * user, Channel * channel) const{
+void    ChannelManager::_welcomeMessage(User * user, Channel * channel, ChannelManager::ConnectionType x) const{
     Parameters param = Parameters(*user).paramChannel(*channel);
     channel->sendParamToAll(param, ReplyManager::RPL_WELCOMECHAN);
-    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
-    IRCServer::_reply_manager->reply(param, ReplyManager::RPL_ENDOFNAMES, user->getSocketClient());
+    if (x == ConnectionType::USER){
+        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_NAMREPLY, user->getSocketClient());
+        IRCServer::_reply_manager->reply(param, ReplyManager::RPL_ENDOFNAMES, user->getSocketClient());
+    }
 }
 
-void    ChannelManager::_createAddChannel(std::string name, User * user, ChannelManager::ConnectionType x) {
+Channel *    ChannelManager::_createAddChannel(std::string name, User * user, ChannelManager::ConnectionType x) {
+    Channel * channel = NULL;
     if (!_verify(name)){
-        if (x == ChannelManager::ConnectionType::USER){
-            Parameters param(*user);
-            param.channelName = name;
-            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
-        }
-        else
-            throw std::logic_error("Bad channel name coming from server.");
-        
-        return;
+        Parameters param(*user);
+        param.channelName = name;
+        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
+        return channel;
     }
-    Channel * channel = this->getChannel(name);
+    channel = this->getChannel(name);
     if (!channel) {
-        Channel * channel = this->_createChannel(name);
+        channel = this->_createChannel(name);
         this->_newMember(user, channel);
-        if (x == ChannelManager::ConnectionType::USER)
-            this->_welcomeMessage(user, channel);
+        this->_welcomeMessage(user, channel, x);
     }
     else {
         if (!user->getChannel(name)){
             this->_newMember(user, channel);
-            if (x == ChannelManager::ConnectionType::USER)
-                this->_welcomeMessage(user, channel);
+            this->_welcomeMessage(user, channel, x);
         }
     }
+    return channel;
 }
 
 Channel *    ChannelManager::_createChannel(std::string const & name) {
