@@ -211,11 +211,13 @@ void IRCServer::sendDataUser(SocketClient *socket)
             User *user = (*user_it);
             if (socket != user->getSocketClient())
             {
-                ServerClient *server = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(user->getSocketClient()));
+                Token token = IRCServer::getTokenFromUser(user->getName());
                 IRCMessage nick_message;
-                if (server)
+                if (token > 1){
+                    ServerClient *server = IRCServer::getServerClient(token);
                     nick_message = IRCMessage(Parameters(*user).paramServer(*server), "NICK");
-                else
+                }
+                else if (token == 1)
                     nick_message = IRCMessage(Parameters(*user).paramIRCServer(*IRCServer::_myself), "NICK");
                 IRCServer::_message_mediator->sendReply(nick_message.to_string(), socket);
             }

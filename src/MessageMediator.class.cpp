@@ -194,6 +194,7 @@ void MessageMediator::squitCommand(IRCMessage const &message, SocketClient *sock
         ServerClient * server = IRCServer::getAnyServerByName(message.params.name);
         if (server) {
             IRCServer::_observer->notify(server, "SQUIT");
+            std::cout << server->getName() << std::endl;
             IRCServer::_client_manager->deleteClient(server, ClientManager::ClientChoice::SERVER);
         }
     }
