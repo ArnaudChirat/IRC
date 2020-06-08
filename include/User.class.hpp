@@ -50,17 +50,17 @@ public:
     std::string getMessage(void);
     std::string getHostName() const;
     std::unordered_map<std::string, Channel *> getChannels(void) const;
-    Channel *   getChannel(std::string const &) const;
+    Channel *getChannel(std::string const &) const;
     virtual std::string getName() const;
     std::string getRealName() const;
     Oper *getOper() const;
     std::string getMode() const;
     unsigned int getModeInt() const;
-    unsigned int getModeIntFromStr(std::string const & modestr);
+    unsigned int getModeIntFromStr(std::string const &modestr);
     void addChannel(Channel *);
     void deleteChannel(Channel *);
-    void    sendMsgTo(User * target, std::string const & msg) const;
-     
+    void sendMsgTo(User *target, std::string const &msg) const;
+
 private:
     User(void);
     Oper *_oper;
@@ -73,7 +73,6 @@ private:
     std::unordered_map<std::string, Channel *> _channelsJoined;
 };
 
-std::ostream &   operator<<(std::ostream & o, User const & rhs);
-
+std::ostream &operator<<(std::ostream &o, User const &rhs);
 
 #endif

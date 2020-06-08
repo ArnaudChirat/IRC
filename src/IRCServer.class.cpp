@@ -237,11 +237,13 @@ void IRCServer::sendDataUser(SocketClient *socket)
             User *user = (*user_it);
             if (socket != user->getSocketClient())
             {
-                ServerClient *server = dynamic_cast<ServerClient *>(IRCServer::_client_manager->getClient(user->getSocketClient()));
+                Token token = IRCServer::getTokenFromUser(user->getName());
                 IRCMessage nick_message;
-                if (server)
+                if (token > 1){
+                    ServerClient *server = IRCServer::getServerClient(token);
                     nick_message = IRCMessage(Parameters(*user).paramServer(*server), "NICK");
-                else
+                }
+                else if (token == 1)
                     nick_message = IRCMessage(Parameters(*user).paramIRCServer(*IRCServer::_myself), "NICK");
                 IRCServer::_message_mediator->sendReply(nick_message.to_string(), socket);
             }
@@ -323,17 +325,6 @@ void IRCServer::removeLostConnectionFromLocalServers(ServerClient *server)
     }
 }
 
-User *IRCServer::getUser(std::string const &name)
-{
-    std::vector<User *> users = IRCServer::getUsers();
-    for (auto it = users.begin(); it != users.end(); ++it)
-    {
-        if ((*it)->getName() == name)
-            return *it;
-    }
-    return NULL;
-}
-
 ServerClient *IRCServer::getAnyServerByName(std::string const &name)
 {
     for (auto it = IRCServer::_servers_local.begin(); it != IRCServer::_servers_local.end(); ++it)
@@ -342,4 +333,13 @@ ServerClient *IRCServer::getAnyServerByName(std::string const &name)
             return it->second;
     }
     return NULL;
+}
+
+User *  IRCServer::getUser(std::string const & name) {
+    std::vector<User*> users = IRCServer::getUsers();
+    for (auto it = users.begin(); it != users.end(); ++it){
+        if ((*it)->getName() == name)
+            return *it;
+    }
+    return NULL;    
 }

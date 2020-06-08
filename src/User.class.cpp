@@ -61,10 +61,10 @@ std::string User::getUser() const
     return (this->_user);
 }
 
-std::string User::getRealName() const{
+std::string User::getRealName() const
+{
     return this->_real_name;
 }
-
 
 User &User::setMode(unsigned int mode)
 {
@@ -84,32 +84,34 @@ User &User::delMode(unsigned int mode)
     return (*this);
 }
 
-unsigned int User::getModeIntFromStr(std::string const & modestr){
+unsigned int User::getModeIntFromStr(std::string const &modestr)
+{
     unsigned int modeint = 0;
     for (auto it = modestr.begin(); it != modestr.end(); ++it)
     {
-        switch(*it) {
-            case 'a':
-                modeint = modeint | Mode::a;
-                break;
-            case 'i':
-                modeint = modeint | Mode::i;
-                break;
-            case 'w':
-                modeint = modeint | Mode::w;
-                break;
-            case 'r':
-                modeint = modeint | Mode::r;
-                break;
-            case 'o':
-                modeint = modeint | Mode::o;
-                break;
-            case 'O':
-                modeint = modeint | Mode::O;
-                break;
-            case 's':
-                modeint = modeint | Mode::s;
-                break;
+        switch (*it)
+        {
+        case 'a':
+            modeint = modeint | Mode::a;
+            break;
+        case 'i':
+            modeint = modeint | Mode::i;
+            break;
+        case 'w':
+            modeint = modeint | Mode::w;
+            break;
+        case 'r':
+            modeint = modeint | Mode::r;
+            break;
+        case 'o':
+            modeint = modeint | Mode::o;
+            break;
+        case 'O':
+            modeint = modeint | Mode::O;
+            break;
+        case 's':
+            modeint = modeint | Mode::s;
+            break;
         }
     }
     return modeint;
@@ -146,10 +148,10 @@ User &User::setRealName(std::string const &real_name)
     return (*this);
 }
 
-std::string User::getHostName(void) const{
+std::string User::getHostName(void) const
+{
     return this->_hostname;
 }
-
 
 User &User::setHostname(std::string const &hostname)
 {
@@ -162,32 +164,36 @@ std::string User::getName() const
     return (this->_name);
 }
 
-std::string  User::getMessage(void){
+std::string User::getMessage(void)
+{
     return this->_message;
 }
 
-User &  User::setMessage(std::string const &message){
+User &User::setMessage(std::string const &message)
+{
     this->_message = message;
     return *this;
 }
 
-
-std::unordered_map<std::string, Channel*>  User::getChannels(void) const{
+std::unordered_map<std::string, Channel *> User::getChannels(void) const
+{
     return this->_channelsJoined;
 }
 
-
-void User::addChannel(Channel * channel){
+void User::addChannel(Channel *channel)
+{
     this->_channelsJoined.insert({channel->getName(), channel});
 }
 
-void User::deleteChannel(Channel * channel){
+void User::deleteChannel(Channel *channel)
+{
     this->_channelsJoined.erase(channel->getName());
 }
 
-void    User::sendMsgTo(User * target, std::string const & msg) const{
+void User::sendMsgTo(User *target, std::string const &msg) const
+{
     std::string sendingmsg;
-    std::string prefix = ":" + this->_name + "!~" + this->_user+"@"+this->getSocketClient()->getAddr();
+    std::string prefix = ":" + this->_name + "!~" + this->_user + "@" + this->getSocketClient()->getAddr();
     sendingmsg = prefix + " PRIVMSG " + target->getName() + " :" + msg + "\n";
     IRCServer::_message_mediator->sendReply(sendingmsg, target->getSocketClient());
 }
@@ -213,15 +219,16 @@ Oper::~Oper(void)
     return;
 }
 
-
 void Oper::testOper()
 {
     std::cout << "ça marche ma gueule" << std::endl;
 }
-Channel * User::getChannel(std::string const & name) const{
+
+Channel *User::getChannel(std::string const &name) const
+{
     auto it = this->_channelsJoined.find(name);
     if (it != this->_channelsJoined.end())
-        return it->second;    
+        return it->second;
     return NULL;
 }
 

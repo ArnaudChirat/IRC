@@ -44,7 +44,7 @@ public:
     static void replyToNewConnection(SocketClient *socket);
     static void sendDataServer(SocketClient *socket);
     static void sendDataUser(SocketClient *socket);
-    static void sendDataChannel(SocketClient *socket);
+    static void sendDataChannel(SocketClient * socket);
     static void replyToNewConnection(unsigned int const &hops, SocketClient *socket, Token token);
     static Token addServer(ServerClient &server);
     static void addUser(User &user, Token token);
@@ -52,7 +52,6 @@ public:
     static std::vector<ServerClient *> getServers();
     static void removeLostConnectionFromLocalServers(ServerClient *server);
     static std::vector<User *> getUsers();
-    static std::vector<Channel *> getChannels();
     static void removeUser(std::string const &);
     static ServerClient *getServerClient(Token token);
     static ServerClient *getAnyServerByName(std::string const &name);

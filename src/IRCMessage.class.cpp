@@ -25,6 +25,7 @@ const std::unordered_map<std::string, IRCMessage::IRCMessageType> IRCMessage::IR
     {"QUIT", IRCMessageType::QUIT},
     {"SERVICE", IRCMessageType::SERVICE},
     {"JOIN", IRCMessageType::JOIN},
+    {"NJOIN", IRCMessageType::JOIN},
     {"OPER", IRCMessageType::OPER},
     {"PART", IRCMessageType::PART},
     {"PRIVMSG", IRCMessageType::PRIVMSG},
@@ -37,28 +38,35 @@ IRCMessage::IRCMessage(void)
 {
 }
 
-IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
+IRCMessage::IRCMessage(Parameters const &param, std::string const &command)
+{
     std::vector<std::string> parameters;
     this->setCommand(command);
-    if (command == "NICK"){
+    if (command == "NICK")
+    {
         parameters.push_back(param.nickname);
-        if(param.prevNickname.empty()){
+        if (param.prevNickname.empty())
+        {
             parameters.push_back(std::to_string(param.hopcount));
             parameters.push_back(param.user);
             parameters.push_back(param.host);
             parameters.push_back(std::to_string(param.token));
             parameters.push_back(param.modestr);
             this->setTrail(param.real_name, IRCMessageWay::SENDING);
-        } else {
+        }
+        else
+        {
             this->setPrefix(param.prevNickname, IRCMessageWay::SENDING);
         }
         this->setParameters(parameters);
     }
-    else if (command == "PASS"){
+    else if (command == "PASS")
+    {
         // this->setPrefix(":" + ownServer.name, IRCMessageWay::SENDING);
         this->setParameters(param.password);
     }
-    else if (command == "SERVER"){
+    else if (command == "SERVER")
+    {
         this->setPrefix(param.uplink, IRCMessageWay::SENDING);
         parameters.push_back(param.name);
         parameters.push_back(std::to_string(param.hopcount));
@@ -73,11 +81,13 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         this->setParameters(parameters);
         this->setTrail(param.text, IRCMessageWay::SENDING);
     }
-    else if (command == "QUIT"){
+    else if (command == "QUIT")
+    {
         this->setPrefix(param.nickname, IRCMessageWay::SENDING);
         this->setTrail(param.quit_message, IRCMessageWay::SENDING);
     }
-    else if (command == "SQUIT"){
+    else if (command == "SQUIT")
+    {
         parameters.push_back(param.name);
         this->setParameters(parameters);
         this->setTrail("Link dead", IRCMessageWay::SENDING);
@@ -88,8 +98,14 @@ IRCMessage::IRCMessage(Parameters const & param, std::string const & command){
         parameters.push_back(param.channelName);
         this->setParameters(parameters);
     }
+    else if (command == "NJOIN")
+    {
+        this->setPrefix(param.server, IRCMessageWay::SENDING);
+        parameters.push_back(param.channelName);
+        this->setParameters(parameters);
+        this->setTrail(param.channelMembersComma, IRCMessageWay::SENDING);
+    }
 }
-
 
 IRCMessage::IRCMessage(std::string &message, SocketClient *socket) : _is_valid(Category::UNKNOWN), _socket(socket)
 {
@@ -242,6 +258,11 @@ bool IRCMessage::isCommand(SocketClient *socket)
             params.channelName = _parameters[0];
             params.keys = (_parameters.size() >= 2 ? _parameters[0] : params.keys);
         }
+        else if (this->type == IRCMessageType::NJOIN && _parameters.size() == 1 && !this->_trail.empty())
+        {
+            params.channelName = _parameters[0];
+            params.channelMembersComma = this->_trail;
+        }
         else if (this->type == IRCMessageType::LUSERS)
         {
             if (!_parameters.empty())
@@ -272,9 +293,10 @@ bool IRCMessage::isCommand(SocketClient *socket)
                 return (false);
             }
             params.serverInfo = this->_trail;
-            params.uplink = this->_prefix.empty() ? IRCServer::name : this->_prefix ;
+            params.uplink = this->_prefix.empty() ? IRCServer::name : this->_prefix;
         }
-        else if (this->type == IRCMessageType::SQUIT && !_parameters.empty()) {
+        else if (this->type == IRCMessageType::SQUIT && !_parameters.empty())
+        {
             params.name = _parameters[0];
             params.quit_message = this->_trail;
         }
