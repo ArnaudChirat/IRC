@@ -50,7 +50,7 @@ public:
     void    handlePartChannel(IRCMessage const &, Client *);
     Channel * getChannel(std::string const &) const;
     std::vector<Channel*> getChannels(void) const;
-    void    sendMessageChannel(User const & user, Channel const & channel, std::string const & msg);
+    void    sendMessageChannel(Client *, Channel const & channel, IRCMessage const &msg);
     void    _leaveAllChann(User * user, ChannelManager::CommandType) const;
 
 
