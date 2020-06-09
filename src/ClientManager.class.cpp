@@ -3,6 +3,7 @@
 #include "IRCServer.class.hpp"
 #include "User.class.hpp"
 #include "ServerClient.class.hpp"
+#include "ChannelManager.class.hpp"
 #include "Service.class.hpp"
 #include "Observer.class.hpp"
 #include "RoutingTable.class.hpp"
@@ -249,15 +250,16 @@ void ClientManager::deleteClient(SocketClient *socket, ClientChoice choice)
         return;
     if (choice == ClientChoice::ALL)
     {
-        if (user){
+        if (user)
             choice = ClientManager::USER;
-            IRCServer::removeUser(client->getName());
-        }
         if (dynamic_cast<Service *>(client))
             choice = ClientManager::SERVICE;
-        if (server){
+        if (server)
             choice = ClientManager::SERVER;
-        }
+    }
+    if (choice == ClientChoice::USER){
+        IRCServer::_channel_manager->_leaveAllChann(user, ChannelManager::CommandType::QUIT);
+        IRCServer::removeUser(client->getName());
     }
     std::string name = client->getName();
     Key key(choice, name);
@@ -276,15 +278,16 @@ void ClientManager::deleteClient(Client * client, ClientChoice choice)
         return;
     if (choice == ClientChoice::ALL)
     {
-        if (user){
+        if (user)
             choice = ClientManager::USER;
-            IRCServer::removeUser(client->getName());
-        }
         if (dynamic_cast<Service *>(client))
             choice = ClientManager::SERVICE;
-        if (server){
+        if (server)
             choice = ClientManager::SERVER;
-        }
+    }
+    if (choice == ClientChoice::USER){
+        IRCServer::_channel_manager->_leaveAllChann(user, ChannelManager::CommandType::QUIT);
+        IRCServer::removeUser(client->getName());
     }
     std::string name = client->getName();
     Key key(choice, name);

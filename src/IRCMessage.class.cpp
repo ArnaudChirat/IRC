@@ -98,6 +98,13 @@ IRCMessage::IRCMessage(Parameters const &param, std::string const &command)
         parameters.push_back(param.channelName);
         this->setParameters(parameters);
     }
+    else if (command == "PART")
+    {
+        this->setPrefix(param.nickname + "!~" + param.user + "@" + param.host, IRCMessageWay::SENDING);
+        parameters.push_back(param.channelName);
+        this->setParameters(parameters);
+        this->setTrail(param.leave_message, IRCMessageWay::SENDING);
+    }
     else if (command == "NJOIN")
     {
         this->setPrefix(param.server, IRCMessageWay::SENDING);
@@ -272,6 +279,8 @@ bool IRCMessage::isCommand(SocketClient *socket)
         }
         else if (this->type == IRCMessageType::PART && _parameters.size() >= 1)
         {
+            std::vector<std::string> pfix = Utility::splitParam(_prefix, "!");
+            params.nickname = (!pfix.empty() ? pfix[0] : params.prevNickname);
             params.channelName = _parameters[0];
             params.leave_message = (_parameters.size() >= 2 ? _parameters[0] : params.leave_message);
         }

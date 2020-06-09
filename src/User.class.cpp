@@ -237,6 +237,10 @@ std::ostream &operator<<(std::ostream &o, User const &rhs)
     o << "user name : " << rhs.getName() << std::endl;
     o << "real name : " << rhs.getRealName() << std::endl;
     o << "host : " << rhs.getHostName() << std::endl;
+    o << "channels : ";
+    std::unordered_map<std::string, Channel *> channels = rhs.getChannels();
+    for_each(channels.begin(), channels.end(), [&o](std::pair<std::string, Channel*> x){o << x.first << ' ';});
+    o << std::endl;
     // add channel ?
     return o;
 }

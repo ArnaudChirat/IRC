@@ -205,7 +205,7 @@ void MessageMediator::partCommand(IRCMessage const &message, SocketClient *socke
 {
     Client *client = IRCServer::_client_manager->getClient(socket);
     if (client && client->status == Client::Status::CONNECTED)
-        IRCServer::_channel_manager->handlePartChannel(message, dynamic_cast<User *>(client));
+        IRCServer::_channel_manager->handlePartChannel(message, client);
 }
 
 void MessageMediator::squitCommand(IRCMessage const &message, SocketClient *socket) const

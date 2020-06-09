@@ -37,15 +37,21 @@ public:
         USER,
     };
 
+    enum class CommandType {
+        JOIN = 0x01,
+        QUIT,
+    };
+
     ChannelManager(void);
     ~ChannelManager(void);
     size_t  getSize(void) const;
     void    handleJoinChannel(IRCMessage const &, User *, ConnectionType);
     void handleNJoin(IRCMessage const &, ConnectionType);
-    void    handlePartChannel(IRCMessage const &, User *);
+    void    handlePartChannel(IRCMessage const &, Client *);
     Channel * getChannel(std::string const &) const;
     std::vector<Channel*> getChannels(void) const;
     void    sendMessageChannel(User const & user, Channel const & channel, std::string const & msg);
+    void    _leaveAllChann(User * user, ChannelManager::CommandType) const;
 
 
 
@@ -62,7 +68,6 @@ private:
     Channel *    _createAddChannel(std::string, User *, ConnectionType);
     void    _newMember(User *, Channel *);
     void    _welcomeMessage(User * client, Channel * channel, ConnectionType) const;
-    void    _leaveAllChann(User * user) const;
     void    _leaveOneChann(User * user, Channel * channel) const;
 
 };

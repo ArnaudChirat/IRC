@@ -15,7 +15,7 @@ ChannelManager::~ChannelManager(void) {}
 void    ChannelManager::handleJoinChannel(IRCMessage const & msg, User * user, ConnectionType x) {
     Channel * channel = NULL;
     if (msg.params.channelName == "0")
-        _leaveAllChann(user);
+        _leaveAllChann(user, ChannelManager::CommandType::JOIN);
     else {
         std::vector<std::string>  names;
         std::vector<std::string>  keys;
@@ -40,23 +40,26 @@ void ChannelManager::handleNJoin(IRCMessage const & message, ConnectionType x){
 }
 
 
-void    ChannelManager::handlePartChannel(IRCMessage const & msg, User * user) {
+void    ChannelManager::handlePartChannel(IRCMessage const & msg, Client * client) {
     std::vector<std::string>  names;
     std::string     partMessage;
     Channel * channel;
+    User * user = dynamic_cast<User*>(client);
 
     names = Utility::splitParam(msg.params.channelName, ", ");
     partMessage = msg.params.leave_message;
     for (auto it = names.begin(); it != names.end(); ++it){
-        if (!(channel = this->getChannel(*it))){
+        if (!(channel = this->getChannel(*it)) && user){
             Parameters param(*user);
             param.channelName = *it;
             IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHCHANNEL, user->getSocketClient());
         }
-        else if (!(channel = user->getChannel(*it)))
+        else if (user && !(channel = user->getChannel(*it)))
             IRCServer::_reply_manager->reply(Parameters(*user).paramChannel(*channel), ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
-        else
-            this->_leaveOneChann(user, channel);      
+        else if (!user)
+            user = IRCServer::getUser(msg.params.nickname);
+        this->_leaveOneChann(user, channel);
+        IRCServer::_observer->notify(channel, user, "PART");
     }
 }
 
@@ -102,10 +105,14 @@ void    ChannelManager::_addChannel(std::string const & name, Channel * channel)
     this->_channels.insert({name, channel});
 }
 
-void    ChannelManager::_leaveAllChann(User * user) const {
+void    ChannelManager::_leaveAllChann(User * user, ChannelManager::CommandType x) const {
     std::unordered_map<std::string, Channel*>   channs = user->getChannels();
-    for (auto it = channs.begin(); it != channs.end(); ++it)
+    for (auto it = channs.begin(); it != channs.end(); ++it){
         _leaveOneChann(user, it->second);
+        if (x == ChannelManager::CommandType::JOIN)
+            IRCServer::_observer->notify(it->second, user, "PART");
+    }
+
 }
 
 void    ChannelManager::_leaveOneChann(User * user, Channel * channel) const {
