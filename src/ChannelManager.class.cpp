@@ -4,6 +4,7 @@
 #include "Utility.hpp"
 #include "Observer.class.hpp"
 #include "Channel.class.hpp"
+#include "RoutingTable.class.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -166,15 +167,36 @@ bool ChannelManager::_verify(std::string name) const
     return false;
 }
 
-void ChannelManager::sendMessageChannel(User &user, Channel const &channel, IRCMessage const &msg)
+void ChannelManager::sendMessageChannel(Client *client, Channel const &channel, IRCMessage const &msg)
 {
-    if (!user.getChannel(channel.getName()))
+    User *user = dynamic_cast<User *>(client);
+    if (user)
     {
-        Parameters param = Parameters(user).paramChannel(channel);
-        IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user.getSocketClient());
+        if (!user->getChannel(channel.getName()))
+        {
+            Parameters param = Parameters(*user).paramChannel(channel);
+            IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOTONCHANNEL, user->getSocketClient());
+        }
+        else
+            channel.sendMessageToAll(*user, msg);
     }
     else
-        channel.sendMessageToAll(user, msg);
+    {
+        ServerClient *server = static_cast<ServerClient *>(client);
+        auto users = channel.getMembers();
+        for (auto i = users.begin(); i != users.end(); i++)
+        {
+            Token token = IRCServer::getTokenFromUser(i->second->getName());
+            if (token == 1)
+                IRCServer::_client_manager->sendMsg2(client, msg, i->first);
+            else
+            {
+                Token road = IRCServer::_routing_table->getRoute(token);
+                if (road != server->getToken())
+                    IRCServer::_client_manager->sendMsg2(client, msg, i->first);
+            }
+        }
+    }
 }
 
 std::vector<Channel*>  ChannelManager::getChannels(void) const{

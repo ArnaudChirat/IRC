@@ -9,6 +9,7 @@
 #include "Observer.class.hpp"
 #include "RoutingTable.class.hpp"
 #include "Utility.hpp"
+#include "Channel.class.hpp"
 #include <algorithm>
 #include <iostream>
 #include <algorithm>
@@ -361,6 +362,7 @@ bool ClientManager::sendMsg(Client *client, IRCMessage const &message)
             IRCServer::_reply_manager->reply(param, ReplyManager::ERR_NOSUCHNICK, client->getSocketClient());
             return (false);
         }
+        return (true);
     }
     return (false);
 };

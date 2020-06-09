@@ -1,7 +1,8 @@
 #include "User.class.hpp"
 #include "Channel.class.hpp"
 #include "MessageMediator.class.hpp"
-
+#include "RoutingTable.class.hpp"
+#include <unordered_set>
 Channel::Channel(void) {}
 
 Channel::Channel(std::string const &name) : _name(name) {}
@@ -38,16 +39,23 @@ std::string     Channel::getMembersString(char separator) const {
 
 void Channel::sendMessageToAll(User &user, IRCMessage const &msg) const
 {
-
-    // std::string sendingmsg;
-    // std::string prefix = ":" + user.getName() + "!~" + user.getUser() + "@" + user.getSocketClient()->getAddr();
-    // sendingmsg = prefix + " PRIVMSG " + this->_name + " :" + msg + "\n";
+    std::unordered_set<Token> used_token;
     for (auto it = this->_members.begin(); it != this->_members.end(); ++it)
     {
+        Token token = IRCServer::getTokenFromUser(it->first);
         if (it->first != user.getName())
         {
-            IRCServer::_client_manager->sendMsg2(&user, msg, it->second->getName());
-            // IRCServer::_message_mediator->sendReply(sendingmsg, it->second->getSocketClient());
+            if (token == 1)
+                IRCServer::_client_manager->sendMsg2(&user, msg, it->second->getName());
+            else
+            {
+                Token road = IRCServer::_routing_table->getRoute(token);
+                if (used_token.find(road) == used_token.end())
+                {
+                    IRCServer::_client_manager->sendMsg2(&user, msg, it->second->getName());
+                    used_token.insert(road);
+                }
+            }
         }
     }
 }

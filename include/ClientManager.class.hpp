@@ -43,7 +43,7 @@ public:
     Client *getClientByName(std::string const &nick);
     int getSize(ClientChoice choice) const;
     std::unordered_map<SocketClient *, Client *> getClients() const;
-    bool ClientManager::sendMsg2(Client *client, IRCMessage const &msg, std::string const &target);
+    bool sendMsg2(Client *client, IRCMessage const &msg, std::string const &target);
     // void    dispatch();
 private:
     void addClient(SocketClient *socket, Client *client, ClientChoice choice);
